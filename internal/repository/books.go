@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"library-api/internal/apperrors"
 	"library-api/internal/model"
 )
 
@@ -10,7 +11,7 @@ type BookRepository struct {
 	books  []*model.Book
 }
 
-var bookRepository BookRepository = BookRepository{
+var bookRepository = BookRepository{
 	nextID: 3,
 	books: []*model.Book{
 		{
@@ -21,7 +22,7 @@ var bookRepository BookRepository = BookRepository{
 			Available: true,
 		},
 		{
-			ID:        1,
+			ID:        2,
 			Title:     "Kallocain",
 			Author:    "Karin Boye",
 			Year:      uint16(1937),
@@ -42,7 +43,6 @@ type CreateBookRequest struct {
 }
 
 func CreateBook(ctx context.Context, req CreateBookRequest) {
-
 	book := model.Book{
 		ID:        bookRepository.nextID,
 		Title:     *req.Title,
@@ -55,4 +55,25 @@ func CreateBook(ctx context.Context, req CreateBookRequest) {
 
 	bookRepository.books = append(bookRepository.books, &book)
 	// return &book
+}
+
+func DeleteBookByID(ctx context.Context, id int) error {
+	var index = -1
+
+	for i := range bookRepository.books {
+		if bookRepository.books[i].ID == id {
+			index = i
+			break
+		}
+	}
+
+	if index == -1 {
+		return apperrors.ErrNotFound
+	}
+
+	bookRepository.books = append(
+		bookRepository.books[:index], bookRepository.books[index+1:]...,
+	)
+
+	return nil
 }

@@ -2,14 +2,11 @@ package handler
 
 import (
 	"encoding/json"
+	"library-api/internal/apperrors"
 	"library-api/internal/repository"
 	"library-api/internal/service"
 	"net/http"
 )
-
-type createBookError struct {
-	ErrorMessage string `json:"errorMessage"`
-}
 
 func CreateBook(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -23,7 +20,7 @@ func CreateBook(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		w.WriteHeader(400)
-		json.NewEncoder(w).Encode(createBookError{ErrorMessage: err.Error()})
+		json.NewEncoder(w).Encode(apperrors.BaseError{Error: err.Error()})
 		return
 	}
 
