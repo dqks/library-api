@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"library-api/internal/apperrors"
 	"library-api/internal/handler"
 	"net/http"
 )
@@ -18,7 +19,7 @@ func main() {
 	err := http.ListenAndServe(":8080", mux)
 
 	if err != nil {
-		fmt.Println("Произошла непредвиденная о")
+		fmt.Println(apperrors.ErrUnexpected.Error())
 		return
 	}
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"library-api/internal/apperrors"
 	"library-api/internal/model"
+	"sync"
 )
 
 type BookRepository struct {
@@ -17,7 +18,7 @@ var bookRepository = BookRepository{
 		{
 			ID:        1,
 			Title:     "1984",
-			Author:    "Geroge Orwell",
+			Author:    "George Orwell",
 			Year:      uint16(1956),
 			Available: true,
 		},
@@ -31,7 +32,11 @@ var bookRepository = BookRepository{
 	},
 }
 
+var mutex sync.Mutex
+
 func GetBooks(ctx context.Context) []*model.Book {
+	mutex.Lock()
+	defer mutex.Unlock()
 	return bookRepository.books
 }
 
@@ -42,7 +47,10 @@ type CreateBookRequest struct {
 	Available *bool   `json:"available"`
 }
 
-func CreateBook(ctx context.Context, req CreateBookRequest) {
+func CreateBook(ctx context.Context, req CreateBookRequest) *model.Book {
+	mutex.Lock()
+	defer mutex.Unlock()
+
 	book := model.Book{
 		ID:        bookRepository.nextID,
 		Title:     *req.Title,
@@ -54,10 +62,13 @@ func CreateBook(ctx context.Context, req CreateBookRequest) {
 	bookRepository.nextID++
 
 	bookRepository.books = append(bookRepository.books, &book)
-	// return &book
+
+	return &book
 }
 
 func DeleteBookByID(ctx context.Context, id int) error {
+	mutex.Lock()
+	defer mutex.Unlock()
 	var index = -1
 
 	for i := range bookRepository.books {
@@ -79,6 +90,8 @@ func DeleteBookByID(ctx context.Context, id int) error {
 }
 
 func GetBookByID(ctx context.Context, id int) (*model.Book, error) {
+	mutex.Lock()
+	defer mutex.Unlock()
 	var index = -1
 
 	for i := range bookRepository.books {
@@ -103,6 +116,9 @@ type EditBookRequest struct {
 }
 
 func EditBookByID(ctx context.Context, id int, req EditBookRequest) (*model.Book, error) {
+	mutex.Lock()
+	defer mutex.Unlock()
+
 	var index = -1
 
 	for i := range bookRepository.books {
