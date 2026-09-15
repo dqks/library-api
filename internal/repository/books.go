@@ -34,9 +34,26 @@ var bookRepository = BookRepository{
 
 var mutex sync.Mutex
 
-func GetBooks(ctx context.Context) []*model.Book {
+type GetBooksQueryParams struct {
+	Available bool
+}
+
+func GetBooks(ctx context.Context, params GetBooksQueryParams) []*model.Book {
 	mutex.Lock()
 	defer mutex.Unlock()
+
+	if params.Available {
+		availableBooks := make([]*model.Book, 0, len(bookRepository.books))
+		index := 0
+		for i := range bookRepository.books {
+			if bookRepository.books[i].Available {
+				availableBooks = append(availableBooks, bookRepository.books[i])
+				index++
+			}
+		}
+		return availableBooks
+	}
+
 	return bookRepository.books
 }
 

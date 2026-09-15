@@ -11,7 +11,6 @@ import (
 
 func CreateBook(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	w.Header().Add("Content-Type", "application-json")
 
 	var req repository.CreateBookRequest
 	decoder := json.NewDecoder(r.Body)

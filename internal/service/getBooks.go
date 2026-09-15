@@ -6,6 +6,6 @@ import (
 	"library-api/internal/repository"
 )
 
-func GetBooks(ctx context.Context) []*model.Book {
-	return repository.GetBooks(ctx)
+func GetBooks(ctx context.Context, params repository.GetBooksQueryParams) []*model.Book {
+	return repository.GetBooks(ctx, params)
 }
