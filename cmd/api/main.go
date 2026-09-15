@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"library-api/internal/handler"
 	"net/http"
 )
@@ -14,5 +15,10 @@ func main() {
 	mux.HandleFunc("PATCH /books/{id}", handler.EditBookByID)
 	mux.HandleFunc("DELETE /books/{id}", handler.DeleteBookByID)
 
-	http.ListenAndServe(":8080", mux)
+	err := http.ListenAndServe(":8080", mux)
+
+	if err != nil {
+		fmt.Println("Произошла непредвиденная о")
+		return
+	}
 }
