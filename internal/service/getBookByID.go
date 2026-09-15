@@ -1,7 +1,11 @@
 package service
 
-import "net/http"
+import (
+	"context"
+	"library-api/internal/model"
+	"library-api/internal/repository"
+)
 
-func GetBookByID(http.ResponseWriter, *http.Request) {
-
+func GetBookByID(ctx context.Context, id int) (*model.Book, error) {
+	return repository.GetBookByID(ctx, id)
 }

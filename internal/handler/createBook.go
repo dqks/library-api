@@ -10,13 +10,18 @@ import (
 
 func CreateBook(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+	w.Header().Add("Content-Type", "application-json")
 
 	var req repository.CreateBookRequest
-	json.NewDecoder(r.Body).Decode(&req)
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
+
+	if err := decoder.Decode(&req); err != nil {
+		w.WriteHeader(400)
+		json.NewEncoder(w).Encode(apperrors.BaseError{Error: err.Error()})
+	}
 
 	err := service.CreateBook(ctx, req)
-
-	w.Header().Add("Content-Type", "application-json")
 
 	if err != nil {
 		w.WriteHeader(400)

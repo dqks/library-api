@@ -1,7 +1,32 @@
 package handler
 
-import "net/http"
+import (
+	"encoding/json"
+	"library-api/internal/apperrors"
+	"library-api/internal/service"
+	"net/http"
+	"strconv"
+)
 
-func GetBookByID(http.ResponseWriter, *http.Request) {
+func GetBookByID(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	id, err := strconv.Atoi(r.PathValue("id"))
+	w.Header().Add("Content-Type", "application-json")
 
+	if err != nil {
+		w.WriteHeader(404)
+		json.NewEncoder(w).Encode(apperrors.BaseError{Error: apperrors.ErrNotFound.Error()})
+		return
+	}
+
+	book, err := service.GetBookByID(ctx, id)
+
+	if err != nil {
+		w.WriteHeader(404)
+		json.NewEncoder(w).Encode(apperrors.BaseError{Error: err.Error()})
+		return
+	}
+
+	w.WriteHeader(200)
+	json.NewEncoder(w).Encode(book.ToDTO())
 }

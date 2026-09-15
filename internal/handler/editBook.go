@@ -1,7 +1,48 @@
 package handler
 
-import "net/http"
+import (
+	"encoding/json"
+	"errors"
+	"library-api/internal/apperrors"
+	"library-api/internal/repository"
+	"library-api/internal/service"
+	"net/http"
+	"strconv"
+)
 
-func EditBookByID(http.ResponseWriter, *http.Request) {
+func EditBookByID(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	id, err := strconv.Atoi(r.PathValue("id"))
+	w.Header().Add("Content-Type", "application-json")
 
+	if err != nil {
+		w.WriteHeader(404)
+		json.NewEncoder(w).Encode(apperrors.BaseError{Error: apperrors.ErrNotFound.Error()})
+		return
+	}
+
+	var body repository.EditBookRequest
+
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
+
+	if err = decoder.Decode(&body); err != nil {
+		w.WriteHeader(400)
+		json.NewEncoder(w).Encode(apperrors.BaseError{Error: err.Error()})
+		return
+	}
+
+	newBook, err := service.EditBookByID(ctx, id, body)
+
+	if err != nil {
+		if errors.Is(err, apperrors.ErrNotFound) {
+			w.WriteHeader(404)
+		} else if errors.Is(err, apperrors.ErrRequiredFields) {
+			w.WriteHeader(400)
+		}
+		json.NewEncoder(w).Encode(apperrors.BaseError{Error: err.Error()})
+		return
+	}
+
+	json.NewEncoder(w).Encode(newBook.ToDTO())
 }

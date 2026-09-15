@@ -77,3 +77,60 @@ func DeleteBookByID(ctx context.Context, id int) error {
 
 	return nil
 }
+
+func GetBookByID(ctx context.Context, id int) (*model.Book, error) {
+	var index = -1
+
+	for i := range bookRepository.books {
+		if bookRepository.books[i].ID == id {
+			index = i
+			break
+		}
+	}
+
+	if index == -1 {
+		return nil, apperrors.ErrNotFound
+	}
+
+	return bookRepository.books[index], nil
+}
+
+type EditBookRequest struct {
+	Title     *string `json:"title"`
+	Author    *string `json:"author"`
+	Year      *uint16 `json:"year"`
+	Available *bool   `json:"available"`
+}
+
+func EditBookByID(ctx context.Context, id int, req EditBookRequest) (*model.Book, error) {
+	var index = -1
+
+	for i := range bookRepository.books {
+		if bookRepository.books[i].ID == id {
+			index = i
+			break
+		}
+	}
+
+	if index == -1 {
+		return nil, apperrors.ErrNotFound
+	}
+
+	if req.Author != nil {
+		bookRepository.books[index].Author = *req.Author
+	}
+
+	if req.Available != nil {
+		bookRepository.books[index].Available = *req.Available
+	}
+
+	if req.Title != nil {
+		bookRepository.books[index].Title = *req.Title
+	}
+
+	if req.Year != nil {
+		bookRepository.books[index].Year = *req.Year
+	}
+
+	return bookRepository.books[index], nil
+}
