@@ -20,7 +20,7 @@ func CreateBook(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(400)
 		encoder := json.NewEncoder(w)
 		if err := encoder.Encode(apperrors.BaseError{Error: err.Error()}); err != nil {
-			fmt.Println(apperrors.ErrUnexpected.Error())
+			fmt.Println(apperrors.ErrInternal.Error())
 		}
 		return
 	}
@@ -31,7 +31,7 @@ func CreateBook(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(400)
 		encoder := json.NewEncoder(w)
 		if err := encoder.Encode(apperrors.BaseError{Error: err.Error()}); err != nil {
-			fmt.Println(apperrors.ErrUnexpected.Error())
+			fmt.Println(apperrors.ErrInternal.Error())
 		}
 		return
 	}

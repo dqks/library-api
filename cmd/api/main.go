@@ -1,10 +1,15 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"library-api/internal/apperrors"
 	"library-api/internal/handler"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 )
 
 func main() {
@@ -16,10 +21,29 @@ func main() {
 	mux.HandleFunc("PATCH /books/{id}", handler.EditBookByID)
 	mux.HandleFunc("DELETE /books/{id}", handler.DeleteBookByID)
 
-	err := http.ListenAndServe(":8080", mux)
-
-	if err != nil {
-		fmt.Println(apperrors.ErrUnexpected.Error())
-		return
+	server := &http.Server{
+		Addr:    ":8080",
+		Handler: mux,
 	}
+
+	shutDownSignal := make(chan os.Signal, 1)
+	signal.Notify(shutDownSignal, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		fmt.Println("Сервер запущен на порту 8080")
+		if server.ListenAndServe(); server != nil {
+			fmt.Println(apperrors.ErrInternal.Error())
+			return
+		}
+	}()
+
+	<-shutDownSignal
+	fmt.Println("Сигнал закрытия сервера получен, выполняется закрытие")
+	shutDownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	if err := server.Shutdown(shutDownCtx); err != nil {
+		fmt.Println("Произошла ошибка во время закрытия сервера")
+	}
+
+	fmt.Println("Сервер закрыт")
 }

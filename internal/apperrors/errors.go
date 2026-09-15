@@ -4,7 +4,7 @@ import "errors"
 
 var (
 	ErrRequiredFields = errors.New("отсутствуют обязательные поля")
-	ErrUnexpected     = errors.New("произошла непредвиденная ошибка")
+	ErrInternal       = errors.New("произошла внутренняя ошибка")
 	ErrNotFound       = errors.New("не найдено")
 )
 
