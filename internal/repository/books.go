@@ -42,19 +42,31 @@ func GetBooks(ctx context.Context, params GetBooksQueryParams) []*model.Book {
 	mutex.Lock()
 	defer mutex.Unlock()
 
-	if params.Available {
-		availableBooks := make([]*model.Book, 0, len(bookRepository.books))
-		index := 0
-		for i := range bookRepository.books {
-			if bookRepository.books[i].Available {
-				availableBooks = append(availableBooks, bookRepository.books[i])
-				index++
+	select {
+	case books := <-func() chan []*model.Book {
+		resultChan := make(chan []*model.Book)
+		go func() {
+			if params.Available {
+				availableBooks := make([]*model.Book, 0, len(bookRepository.books))
+				index := 0
+				for i := range bookRepository.books {
+					if bookRepository.books[i].Available {
+						availableBooks = append(availableBooks, bookRepository.books[i])
+						index++
+					}
+				}
+				resultChan <- availableBooks
+				return
 			}
-		}
-		return availableBooks
+			resultChan <- bookRepository.books
+		}()
+		return resultChan
+	}():
+		return books
+	case <-ctx.Done():
+		return nil
 	}
 
-	return bookRepository.books
 }
 
 type CreateBookRequest struct {

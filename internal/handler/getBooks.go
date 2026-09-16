@@ -32,6 +32,12 @@ func GetBooks(w http.ResponseWriter, r *http.Request) {
 	}
 
 	books := service.GetBooks(context, repository.GetBooksQueryParams{Available: availParam})
+
+	if books == nil {
+		w.WriteHeader(500)
+		encoder.Encode(apperrors.BaseError{Error: apperrors.ErrInternal.Error()})
+	}
+
 	err := encoder.Encode(model.BookDomainListToDTO(books))
 	if err != nil {
 		fmt.Println(err.Error())
