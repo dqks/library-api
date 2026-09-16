@@ -4,6 +4,7 @@ import (
 	"context"
 	"library-api/internal/apperrors"
 	"library-api/internal/model"
+	"library-api/internal/requests"
 	"sync"
 )
 
@@ -34,11 +35,7 @@ var bookRepository = BookRepository{
 
 var mutex sync.Mutex
 
-type GetBooksQueryParams struct {
-	Available bool
-}
-
-func GetBooks(ctx context.Context, params GetBooksQueryParams) []*model.Book {
+func GetBooks(ctx context.Context, params requests.GetBooksQueryParams) []*model.Book {
 	mutex.Lock()
 	defer mutex.Unlock()
 
@@ -57,14 +54,7 @@ func GetBooks(ctx context.Context, params GetBooksQueryParams) []*model.Book {
 	return bookRepository.books
 }
 
-type CreateBookRequest struct {
-	Title     *string `json:"title"`
-	Author    *string `json:"author"`
-	Year      *uint16 `json:"year"`
-	Available *bool   `json:"available"`
-}
-
-func CreateBook(ctx context.Context, req CreateBookRequest) *model.Book {
+func CreateBook(ctx context.Context, req requests.CreateBookRequest) *model.Book {
 	mutex.Lock()
 	defer mutex.Unlock()
 
@@ -125,14 +115,7 @@ func GetBookByID(ctx context.Context, id int) (*model.Book, error) {
 	return bookRepository.books[index], nil
 }
 
-type EditBookRequest struct {
-	Title     *string `json:"title"`
-	Author    *string `json:"author"`
-	Year      *uint16 `json:"year"`
-	Available *bool   `json:"available"`
-}
-
-func EditBookByID(ctx context.Context, id int, req EditBookRequest) (*model.Book, error) {
+func EditBookByID(ctx context.Context, id int, req requests.EditBookRequest) (*model.Book, error) {
 	mutex.Lock()
 	defer mutex.Unlock()
 

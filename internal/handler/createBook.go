@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"library-api/internal/apperrors"
-	"library-api/internal/repository"
+	"library-api/internal/requests"
 	"library-api/internal/service"
 	"net/http"
 )
@@ -12,7 +12,7 @@ import (
 func CreateBook(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	var req repository.CreateBookRequest
+	var req requests.CreateBookRequest
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
 

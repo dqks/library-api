@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"library-api/internal/apperrors"
-	"library-api/internal/repository"
+	"library-api/internal/requests"
 	"library-api/internal/service"
 	"net/http"
 	"strconv"
@@ -21,7 +21,7 @@ func EditBookByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var body repository.EditBookRequest
+	var body requests.EditBookRequest
 
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
