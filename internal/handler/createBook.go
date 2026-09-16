@@ -41,7 +41,7 @@ func CreateBook(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-type", "application/json")
 	w.WriteHeader(201)
 	encoder := json.NewEncoder(w)
-	if err := encoder.Encode(book); err != nil {
+	if err := encoder.Encode(book.ToDTO()); err != nil {
 		fmt.Println(apperrors.ErrInternal.Error())
 	}
 }
