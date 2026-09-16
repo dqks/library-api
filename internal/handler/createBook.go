@@ -17,6 +17,7 @@ func CreateBook(w http.ResponseWriter, r *http.Request) {
 	decoder.DisallowUnknownFields()
 
 	if err := decoder.Decode(&req); err != nil {
+		w.Header().Add("Content-type", "application-json")
 		w.WriteHeader(400)
 		encoder := json.NewEncoder(w)
 		if err := encoder.Encode(apperrors.BaseError{Error: err.Error()}); err != nil {
@@ -28,6 +29,7 @@ func CreateBook(w http.ResponseWriter, r *http.Request) {
 	err := service.CreateBook(ctx, req)
 
 	if err != nil {
+		w.Header().Add("Content-type", "application-json")
 		w.WriteHeader(400)
 		encoder := json.NewEncoder(w)
 		if err := encoder.Encode(apperrors.BaseError{Error: err.Error()}); err != nil {

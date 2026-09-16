@@ -2,7 +2,6 @@ package handler
 
 import (
 	"encoding/json"
-	"errors"
 	"library-api/internal/apperrors"
 	"library-api/internal/service"
 	"net/http"
@@ -14,6 +13,7 @@ func DeleteBookByID(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(r.PathValue("id"))
 
 	if err != nil {
+		w.Header().Add("Content-type", "application-json")
 		w.WriteHeader(404)
 		json.NewEncoder(w).Encode(
 			apperrors.BaseError{Error: apperrors.ErrNotFound.Error()},
@@ -23,10 +23,11 @@ func DeleteBookByID(w http.ResponseWriter, r *http.Request) {
 
 	err = service.DeleteBookByID(ctx, id)
 
-	if errors.Is(err, apperrors.ErrNotFound) {
+	if err != nil {
+		w.Header().Add("Content-type", "application-json")
 		w.WriteHeader(404)
 		json.NewEncoder(w).Encode(
-			apperrors.BaseError{Error: apperrors.ErrNotFound.Error()},
+			apperrors.BaseError{Error: err.Error()},
 		)
 		return
 	}
