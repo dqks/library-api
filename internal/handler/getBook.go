@@ -11,11 +11,11 @@ import (
 func GetBookByID(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	id, err := strconv.Atoi(r.PathValue("id"))
-	w.Header().Add("Content-Type", "application-json")
+	w.Header().Add("Content-Type", "application/json")
 
 	if err != nil {
-		w.WriteHeader(404)
-		json.NewEncoder(w).Encode(apperrors.BaseError{Error: apperrors.ErrNotFound.Error()})
+		w.WriteHeader(400)
+		json.NewEncoder(w).Encode(apperrors.BaseError{Error: apperrors.ErrIncorrectPathValue.Error()})
 		return
 	}
 

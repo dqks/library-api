@@ -36,6 +36,7 @@ func GetBooks(w http.ResponseWriter, r *http.Request) {
 	if books == nil {
 		w.WriteHeader(500)
 		encoder.Encode(apperrors.BaseError{Error: apperrors.ErrInternal.Error()})
+		return
 	}
 
 	err := encoder.Encode(model.BookDomainListToDTO(books))

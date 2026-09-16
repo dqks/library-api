@@ -30,7 +30,7 @@ func main() {
 	signal.Notify(shutDownSignal, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		fmt.Println("Сервер запущен на порту 8080")
-		if server.ListenAndServe(); server != nil {
+		if err := server.ListenAndServe(); err != nil {
 			fmt.Println(apperrors.ErrInternal.Error())
 			return
 		}

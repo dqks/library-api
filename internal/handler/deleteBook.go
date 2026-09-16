@@ -13,10 +13,10 @@ func DeleteBookByID(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(r.PathValue("id"))
 
 	if err != nil {
-		w.Header().Add("Content-type", "application-json")
-		w.WriteHeader(404)
+		w.Header().Add("Content-type", "application/json")
+		w.WriteHeader(400)
 		json.NewEncoder(w).Encode(
-			apperrors.BaseError{Error: apperrors.ErrNotFound.Error()},
+			apperrors.BaseError{Error: apperrors.ErrIncorrectPathValue.Error()},
 		)
 		return
 	}
@@ -24,7 +24,7 @@ func DeleteBookByID(w http.ResponseWriter, r *http.Request) {
 	err = service.DeleteBookByID(ctx, id)
 
 	if err != nil {
-		w.Header().Add("Content-type", "application-json")
+		w.Header().Add("Content-type", "application/json")
 		w.WriteHeader(404)
 		json.NewEncoder(w).Encode(
 			apperrors.BaseError{Error: err.Error()},
