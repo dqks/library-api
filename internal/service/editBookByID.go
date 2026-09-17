@@ -2,11 +2,8 @@ package service
 
 import (
 	"context"
-	"library-api/internal/apperrors"
 	"library-api/internal/model"
 	"library-api/internal/repository"
-	"strings"
-	"time"
 )
 
 type EditBookRequest struct {
@@ -17,16 +14,8 @@ type EditBookRequest struct {
 }
 
 func EditBookByID(ctx context.Context, id int, req EditBookRequest) (model.Book, error) {
-	if req.Author == nil && req.Available == nil && req.Title == nil && req.Year == nil {
-		return model.Book{}, apperrors.ErrRequiredFields
-	}
-
-	if (req.Author != nil && len(strings.TrimSpace(*req.Author)) == 0) || (req.Title != nil && len(strings.TrimSpace(*req.Title)) == 0) {
-		return model.Book{}, apperrors.ErrInvalidValues
-	}
-
-	if *req.Year > uint16(time.Now().Year()) {
-		return model.Book{}, apperrors.ErrInvalidValues
+	if err := model.ValidateBookFields(req.Title, req.Author, req.Year, req.Available); err != nil {
+		return model.Book{}, err
 	}
 
 	return repository.EditBookByID(ctx, id, repository.EditBookPayload{

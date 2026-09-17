@@ -66,7 +66,11 @@ func GetBooks(ctx context.Context, params GetBooksPayload) []model.Book {
 		}
 	}
 
-	return bookRepository.books
+	// Чтобы не возвращать тот же самый backing array
+	// и подавить concurrency проблему
+	books := make([]model.Book, 0, len(bookRepository.books))
+	books = append(books, bookRepository.books...)
+	return books
 }
 
 type CreateBookPayload struct {
@@ -79,20 +83,24 @@ type CreateBookPayload struct {
 func CreateBook(ctx context.Context, payload CreateBookPayload) model.Book {
 	mutex.Lock()
 	defer mutex.Unlock()
+	select {
+	case <-ctx.Done():
+		return model.Book{}
+	default:
+		book := model.Book{
+			ID:        bookRepository.nextID,
+			Title:     *payload.Title,
+			Author:    *payload.Author,
+			Year:      *payload.Year,
+			Available: *payload.Available,
+		}
 
-	book := model.Book{
-		ID:        bookRepository.nextID,
-		Title:     *payload.Title,
-		Author:    *payload.Author,
-		Year:      *payload.Year,
-		Available: *payload.Available,
+		bookRepository.nextID++
+
+		bookRepository.books = append(bookRepository.books, book)
+
+		return book
 	}
-
-	bookRepository.nextID++
-
-	bookRepository.books = append(bookRepository.books, book)
-
-	return book
 }
 
 func DeleteBookByID(ctx context.Context, id int) error {

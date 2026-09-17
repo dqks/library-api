@@ -1,5 +1,11 @@
 package model
 
+import (
+	"library-api/internal/apperrors"
+	"strings"
+	"time"
+)
+
 type Book struct {
 	ID        int
 	Title     string
@@ -35,4 +41,19 @@ func BookDomainListToDTO(books []Book) []*BookDTO {
 	}
 
 	return booksDTO
+}
+
+func ValidateBookFields(title *string, author *string, year *uint16, available *bool) error {
+	if author == nil && available == nil && title == nil && year == nil {
+		return apperrors.ErrRequiredFields
+	}
+
+	if (author != nil && len(strings.TrimSpace(*author)) == 0) || (title != nil && len(strings.TrimSpace(*title)) == 0) {
+		return apperrors.ErrInvalidValues
+	}
+
+	if year != nil && *year > uint16(time.Now().Year()) {
+		return apperrors.ErrInvalidValues
+	}
+	return nil
 }

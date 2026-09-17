@@ -31,6 +31,7 @@ func main() {
 		fmt.Println("Сервер запущен на порту 8080")
 		if err := server.ListenAndServe(); err != nil {
 			fmt.Println(err.Error())
+			os.Exit(1)
 			return
 		}
 	}()
