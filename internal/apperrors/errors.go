@@ -8,7 +8,6 @@ var (
 	ErrNotFound           = errors.New("не найдено")
 	ErrIncorrectPathValue = errors.New("неверное значение в пути")
 	ErrInvalidValues      = errors.New("невалидные данные")
-	ErrContext            = errors.New("отмена запроса")
 )
 
 type BaseError struct {

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"library-api/internal/handler"
 	"net/http"
@@ -30,7 +31,11 @@ func main() {
 	go func() {
 		fmt.Println("Сервер запущен на порту 8080")
 		if err := server.ListenAndServe(); err != nil {
-			fmt.Println(err.Error())
+			if errors.Is(err, http.ErrServerClosed) {
+				fmt.Println("Сервер закрылся штатно")
+			} else {
+				fmt.Println(err.Error())
+			}
 			return
 		}
 	}()

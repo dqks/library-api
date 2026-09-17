@@ -14,7 +14,7 @@ func GetBookByID(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	select {
 	case <-ctx.Done():
-		fmt.Println(apperrors.ErrContext)
+		fmt.Println(ctx.Err())
 	default:
 		id, err := strconv.Atoi(r.PathValue("id"))
 		w.Header().Add("Content-Type", "application/json")

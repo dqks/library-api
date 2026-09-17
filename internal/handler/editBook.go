@@ -14,7 +14,7 @@ func EditBookByID(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	select {
 	case <-ctx.Done():
-		fmt.Println(apperrors.ErrContext.Error())
+		fmt.Println(ctx.Err().Error())
 	default:
 		id, err := strconv.Atoi(r.PathValue("id"))
 		w.Header().Add("Content-Type", "application/json")

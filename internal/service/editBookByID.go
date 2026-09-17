@@ -17,7 +17,7 @@ type EditBookRequest struct {
 func EditBookByID(ctx context.Context, id int, req EditBookRequest) (model.Book, error) {
 	select {
 	case <-ctx.Done():
-		return model.Book{}, apperrors.ErrContext
+		return model.Book{}, ctx.Err()
 	default:
 		if req.Author == nil && req.Available == nil && req.Title == nil && req.Year == nil {
 			return model.Book{}, apperrors.ErrRequiredFields

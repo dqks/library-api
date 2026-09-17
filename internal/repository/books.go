@@ -43,7 +43,7 @@ func GetBooks(ctx context.Context, params GetBooksPayload) ([]model.Book, error)
 	defer mutex.Unlock()
 	select {
 	case <-ctx.Done():
-		return nil, apperrors.ErrContext
+		return nil, ctx.Err()
 	default:
 		if params.Available != nil {
 			availableBooks := make([]model.Book, 0, len(bookRepository.books))
@@ -77,7 +77,7 @@ func CreateBook(ctx context.Context, payload CreateBookPayload) (model.Book, err
 	defer mutex.Unlock()
 	select {
 	case <-ctx.Done():
-		return model.Book{}, apperrors.ErrContext
+		return model.Book{}, ctx.Err()
 	default:
 		book := model.Book{
 			ID:        bookRepository.nextID,
@@ -100,7 +100,7 @@ func DeleteBookByID(ctx context.Context, id int) error {
 	defer mutex.Unlock()
 	select {
 	case <-ctx.Done():
-		return apperrors.ErrContext
+		return ctx.Err()
 	default:
 		var index = -1
 
@@ -128,7 +128,7 @@ func GetBookByID(ctx context.Context, id int) (model.Book, error) {
 	defer mutex.Unlock()
 	select {
 	case <-ctx.Done():
-		return model.Book{}, nil
+		return model.Book{}, ctx.Err()
 	default:
 		var index = -1
 
@@ -159,7 +159,7 @@ func EditBookByID(ctx context.Context, id int, p EditBookPayload) (model.Book, e
 	defer mutex.Unlock()
 	select {
 	case <-ctx.Done():
-		return model.Book{}, apperrors.ErrContext
+		return model.Book{}, ctx.Err()
 	default:
 		var index = -1
 

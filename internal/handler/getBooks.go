@@ -14,7 +14,7 @@ func GetBooks(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	select {
 	case <-ctx.Done():
-		fmt.Println(apperrors.ErrContext)
+		fmt.Println(ctx.Err())
 	default:
 		w.Header().Set("Content-Type", "application/json")
 		availParam := false
