@@ -132,7 +132,7 @@ type EditBookPayload struct {
 	Available *bool   `json:"available"`
 }
 
-func EditBookByID(ctx context.Context, id int, payload EditBookPayload) (*model.Book, error) {
+func EditBookByID(ctx context.Context, id int, p EditBookPayload) (*model.Book, error) {
 	mutex.Lock()
 	defer mutex.Unlock()
 
@@ -149,20 +149,20 @@ func EditBookByID(ctx context.Context, id int, payload EditBookPayload) (*model.
 		return nil, apperrors.ErrNotFound
 	}
 
-	if req.Author != nil {
-		bookRepository.books[index].Author = *req.Author
+	if p.Author != nil {
+		bookRepository.books[index].Author = *p.Author
 	}
 
-	if req.Available != nil {
-		bookRepository.books[index].Available = *req.Available
+	if p.Available != nil {
+		bookRepository.books[index].Available = *p.Available
 	}
 
-	if req.Title != nil {
-		bookRepository.books[index].Title = *req.Title
+	if p.Title != nil {
+		bookRepository.books[index].Title = *p.Title
 	}
 
-	if req.Year != nil {
-		bookRepository.books[index].Year = *req.Year
+	if p.Year != nil {
+		bookRepository.books[index].Year = *p.Year
 	}
 
 	return bookRepository.books[index], nil
