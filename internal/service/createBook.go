@@ -19,16 +19,25 @@ func CreateBook(ctx context.Context, req CreateBookRequest) (model.Book, error) 
 	case <-ctx.Done():
 		return model.Book{}, apperrors.ErrContext
 	default:
-		if err := model.ValidateBookFields(req.Title, req.Author, req.Year, req.Available); err != nil {
+		if req.Author == nil || req.Available == nil || req.Title == nil || req.Year == nil {
+			return model.Book{}, apperrors.ErrRequiredFields
+		}
+
+		if err := model.ValidateBookFields(req.Title, req.Author, req.Year); err != nil {
 			return model.Book{}, err
 		}
 
-		book := repository.CreateBook(ctx, repository.CreateBookPayload{
+		book, err := repository.CreateBook(ctx, repository.CreateBookPayload{
 			Title:     req.Title,
 			Author:    req.Author,
 			Year:      req.Year,
 			Available: req.Available,
 		})
+
+		if err != nil {
+			return model.Book{}, err
+		}
+
 		return book, nil
 	}
 }

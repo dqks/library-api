@@ -38,39 +38,31 @@ type GetBooksPayload struct {
 	Available *bool
 }
 
-func GetBooks(ctx context.Context, params GetBooksPayload) []model.Book {
+func GetBooks(ctx context.Context, params GetBooksPayload) ([]model.Book, error) {
 	mutex.Lock()
 	defer mutex.Unlock()
-
-	if params.Available != nil {
-		if *params.Available == true {
+	select {
+	case <-ctx.Done():
+		return nil, apperrors.ErrContext
+	default:
+		if params.Available != nil {
 			availableBooks := make([]model.Book, 0, len(bookRepository.books))
 			index := 0
 			for i := range bookRepository.books {
-				if bookRepository.books[i].Available {
+				if bookRepository.books[i].Available == *params.Available {
 					availableBooks = append(availableBooks, bookRepository.books[i])
 					index++
 				}
 			}
-			return availableBooks
-		} else if *params.Available == false {
-			availableBooks := make([]model.Book, 0, len(bookRepository.books))
-			index := 0
-			for i := range bookRepository.books {
-				if !bookRepository.books[i].Available {
-					availableBooks = append(availableBooks, bookRepository.books[i])
-					index++
-				}
-			}
-			return availableBooks
+			return availableBooks, nil
 		}
-	}
 
-	// Чтобы не возвращать тот же самый backing array
-	// и подавить concurrency проблему
-	books := make([]model.Book, 0, len(bookRepository.books))
-	books = append(books, bookRepository.books...)
-	return books
+		// Чтобы не возвращать тот же самый backing array
+		// и подавить concurrency проблему
+		books := make([]model.Book, 0, len(bookRepository.books))
+		books = append(books, bookRepository.books...)
+		return books, nil
+	}
 }
 
 type CreateBookPayload struct {
@@ -80,12 +72,12 @@ type CreateBookPayload struct {
 	Available *bool
 }
 
-func CreateBook(ctx context.Context, payload CreateBookPayload) model.Book {
+func CreateBook(ctx context.Context, payload CreateBookPayload) (model.Book, error) {
 	mutex.Lock()
 	defer mutex.Unlock()
 	select {
 	case <-ctx.Done():
-		return model.Book{}
+		return model.Book{}, apperrors.ErrContext
 	default:
 		book := model.Book{
 			ID:        bookRepository.nextID,
@@ -99,50 +91,60 @@ func CreateBook(ctx context.Context, payload CreateBookPayload) model.Book {
 
 		bookRepository.books = append(bookRepository.books, book)
 
-		return book
+		return book, nil
 	}
 }
 
 func DeleteBookByID(ctx context.Context, id int) error {
 	mutex.Lock()
 	defer mutex.Unlock()
-	var index = -1
+	select {
+	case <-ctx.Done():
+		return apperrors.ErrContext
+	default:
+		var index = -1
 
-	for i := range bookRepository.books {
-		if bookRepository.books[i].ID == id {
-			index = i
-			break
+		for i := range bookRepository.books {
+			if bookRepository.books[i].ID == id {
+				index = i
+				break
+			}
 		}
+
+		if index == -1 {
+			return apperrors.ErrNotFound
+		}
+
+		bookRepository.books = append(
+			bookRepository.books[:index], bookRepository.books[index+1:]...,
+		)
+
+		return nil
 	}
-
-	if index == -1 {
-		return apperrors.ErrNotFound
-	}
-
-	bookRepository.books = append(
-		bookRepository.books[:index], bookRepository.books[index+1:]...,
-	)
-
-	return nil
 }
 
 func GetBookByID(ctx context.Context, id int) (model.Book, error) {
 	mutex.Lock()
 	defer mutex.Unlock()
-	var index = -1
+	select {
+	case <-ctx.Done():
+		return model.Book{}, nil
+	default:
+		var index = -1
 
-	for i := range bookRepository.books {
-		if bookRepository.books[i].ID == id {
-			index = i
-			break
+		for i := range bookRepository.books {
+			if bookRepository.books[i].ID == id {
+				index = i
+				break
+			}
 		}
-	}
 
-	if index == -1 {
-		return model.Book{}, apperrors.ErrNotFound
-	}
+		if index == -1 {
+			return model.Book{}, apperrors.ErrNotFound
+		}
 
-	return bookRepository.books[index], nil
+		return bookRepository.books[index], nil
+	}
 }
 
 type EditBookPayload struct {
@@ -155,35 +157,39 @@ type EditBookPayload struct {
 func EditBookByID(ctx context.Context, id int, p EditBookPayload) (model.Book, error) {
 	mutex.Lock()
 	defer mutex.Unlock()
+	select {
+	case <-ctx.Done():
+		return model.Book{}, apperrors.ErrContext
+	default:
+		var index = -1
 
-	var index = -1
-
-	for i := range bookRepository.books {
-		if bookRepository.books[i].ID == id {
-			index = i
-			break
+		for i := range bookRepository.books {
+			if bookRepository.books[i].ID == id {
+				index = i
+				break
+			}
 		}
-	}
 
-	if index == -1 {
-		return model.Book{}, apperrors.ErrNotFound
-	}
+		if index == -1 {
+			return model.Book{}, apperrors.ErrNotFound
+		}
 
-	if p.Author != nil {
-		bookRepository.books[index].Author = *p.Author
-	}
+		if p.Author != nil {
+			bookRepository.books[index].Author = *p.Author
+		}
 
-	if p.Available != nil {
-		bookRepository.books[index].Available = *p.Available
-	}
+		if p.Available != nil {
+			bookRepository.books[index].Available = *p.Available
+		}
 
-	if p.Title != nil {
-		bookRepository.books[index].Title = *p.Title
-	}
+		if p.Title != nil {
+			bookRepository.books[index].Title = *p.Title
+		}
 
-	if p.Year != nil {
-		bookRepository.books[index].Year = *p.Year
-	}
+		if p.Year != nil {
+			bookRepository.books[index].Year = *p.Year
+		}
 
-	return bookRepository.books[index], nil
+		return bookRepository.books[index], nil
+	}
 }
