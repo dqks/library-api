@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"library-api/internal/apperrors"
 	"library-api/internal/model"
-	"library-api/internal/requests"
 	"library-api/internal/service"
 	"net/http"
 	"strconv"
@@ -31,7 +30,7 @@ func GetBooks(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	books := service.GetBooks(context, requests.GetBooksQueryParams{Available: availParam})
+	books := service.GetBooks(context, service.GetBooksQueryParams{Available: availParam})
 
 	if books == nil {
 		w.WriteHeader(500)

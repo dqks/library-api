@@ -4,7 +4,6 @@ import (
 	"context"
 	"library-api/internal/apperrors"
 	"library-api/internal/model"
-	"library-api/internal/requests"
 	"sync"
 )
 
@@ -35,7 +34,11 @@ var bookRepository = BookRepository{
 
 var mutex sync.Mutex
 
-func GetBooks(ctx context.Context, params requests.GetBooksQueryParams) []*model.Book {
+type GetBooksPayload struct {
+	Available bool
+}
+
+func GetBooks(ctx context.Context, params GetBooksPayload) []*model.Book {
 	mutex.Lock()
 	defer mutex.Unlock()
 
@@ -54,16 +57,23 @@ func GetBooks(ctx context.Context, params requests.GetBooksQueryParams) []*model
 	return bookRepository.books
 }
 
-func CreateBook(ctx context.Context, req requests.CreateBookRequest) *model.Book {
+type CreateBookPayload struct {
+	Title     *string `json:"title"`
+	Author    *string `json:"author"`
+	Year      *uint16 `json:"year"`
+	Available *bool   `json:"available"`
+}
+
+func CreateBook(ctx context.Context, payload CreateBookPayload) *model.Book {
 	mutex.Lock()
 	defer mutex.Unlock()
 
 	book := model.Book{
 		ID:        bookRepository.nextID,
-		Title:     *req.Title,
-		Author:    *req.Author,
-		Year:      *req.Year,
-		Available: *req.Available,
+		Title:     *payload.Title,
+		Author:    *payload.Author,
+		Year:      *payload.Year,
+		Available: *payload.Available,
 	}
 
 	bookRepository.nextID++
@@ -115,7 +125,14 @@ func GetBookByID(ctx context.Context, id int) (*model.Book, error) {
 	return bookRepository.books[index], nil
 }
 
-func EditBookByID(ctx context.Context, id int, req requests.EditBookRequest) (*model.Book, error) {
+type EditBookPayload struct {
+	Title     *string `json:"title"`
+	Author    *string `json:"author"`
+	Year      *uint16 `json:"year"`
+	Available *bool   `json:"available"`
+}
+
+func EditBookByID(ctx context.Context, id int, payload EditBookPayload) (*model.Book, error) {
 	mutex.Lock()
 	defer mutex.Unlock()
 

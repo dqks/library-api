@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"library-api/internal/apperrors"
-	"library-api/internal/requests"
 	"library-api/internal/service"
 	"net/http"
 	"strconv"
@@ -21,7 +20,7 @@ func EditBookByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var body requests.EditBookRequest
+	var body service.EditBookRequest
 
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
@@ -37,7 +36,7 @@ func EditBookByID(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if errors.Is(err, apperrors.ErrNotFound) {
 			w.WriteHeader(404)
-		} else if errors.Is(err, apperrors.ErrRequiredFields) {
+		} else if errors.Is(err, apperrors.ErrRequiredFields) || errors.Is(err, apperrors.ErrInvalidValues) {
 			w.WriteHeader(400)
 		}
 		json.NewEncoder(w).Encode(apperrors.BaseError{Error: err.Error()})

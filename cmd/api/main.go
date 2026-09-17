@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"library-api/internal/apperrors"
 	"library-api/internal/handler"
 	"net/http"
 	"os"
@@ -31,7 +30,7 @@ func main() {
 	go func() {
 		fmt.Println("Сервер запущен на порту 8080")
 		if err := server.ListenAndServe(); err != nil {
-			fmt.Println(apperrors.ErrInternal.Error())
+			fmt.Println(err.Error())
 			return
 		}
 	}()
@@ -44,6 +43,4 @@ func main() {
 	if err := server.Shutdown(shutDownCtx); err != nil {
 		fmt.Println("Произошла ошибка во время закрытия сервера")
 	}
-
-	fmt.Println("Сервер закрыт")
 }
