@@ -7,7 +7,7 @@ import (
 )
 
 type GetBooksQueryParams struct {
-	Available bool
+	Available *bool
 }
 
 func GetBooks(ctx context.Context, params GetBooksQueryParams) []*model.Book {

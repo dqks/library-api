@@ -15,6 +15,7 @@ func GetBooks(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	availParam := false
 	encoder := json.NewEncoder(w)
+	var books []*model.Book
 
 	if availQuery := r.URL.Query().Get("available"); availQuery != "" {
 		var err error
@@ -28,9 +29,10 @@ func GetBooks(w http.ResponseWriter, r *http.Request) {
 			}
 			return
 		}
+		books = service.GetBooks(context, service.GetBooksQueryParams{Available: &availParam})
+	} else {
+		books = service.GetBooks(context, service.GetBooksQueryParams{Available: nil})
 	}
-
-	books := service.GetBooks(context, service.GetBooksQueryParams{Available: availParam})
 
 	if books == nil {
 		w.WriteHeader(500)

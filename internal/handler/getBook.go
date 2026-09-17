@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"errors"
 	"library-api/internal/apperrors"
 	"library-api/internal/service"
 	"net/http"
@@ -22,7 +23,11 @@ func GetBookByID(w http.ResponseWriter, r *http.Request) {
 	book, err := service.GetBookByID(ctx, id)
 
 	if err != nil {
-		w.WriteHeader(404)
+		if errors.Is(err, apperrors.ErrNotFound) {
+			w.WriteHeader(404)
+		} else {
+			w.WriteHeader(500)
+		}
 		json.NewEncoder(w).Encode(apperrors.BaseError{Error: err.Error()})
 		return
 	}

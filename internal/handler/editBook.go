@@ -27,7 +27,7 @@ func EditBookByID(w http.ResponseWriter, r *http.Request) {
 
 	if err = decoder.Decode(&body); err != nil {
 		w.WriteHeader(400)
-		json.NewEncoder(w).Encode(apperrors.BaseError{Error: apperrors.ErrInternal.Error()})
+		json.NewEncoder(w).Encode(apperrors.BaseError{Error: err.Error()})
 		return
 	}
 

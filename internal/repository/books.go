@@ -35,33 +35,45 @@ var bookRepository = BookRepository{
 var mutex sync.Mutex
 
 type GetBooksPayload struct {
-	Available bool
+	Available *bool
 }
 
 func GetBooks(ctx context.Context, params GetBooksPayload) []*model.Book {
 	mutex.Lock()
 	defer mutex.Unlock()
 
-	if params.Available {
-		availableBooks := make([]*model.Book, 0, len(bookRepository.books))
-		index := 0
-		for i := range bookRepository.books {
-			if bookRepository.books[i].Available {
-				availableBooks = append(availableBooks, bookRepository.books[i])
-				index++
+	if params.Available != nil {
+		if *params.Available == true {
+			availableBooks := make([]*model.Book, 0, len(bookRepository.books))
+			index := 0
+			for i := range bookRepository.books {
+				if bookRepository.books[i].Available {
+					availableBooks = append(availableBooks, bookRepository.books[i])
+					index++
+				}
 			}
+			return availableBooks
+		} else if *params.Available == false {
+			availableBooks := make([]*model.Book, 0, len(bookRepository.books))
+			index := 0
+			for i := range bookRepository.books {
+				if !bookRepository.books[i].Available {
+					availableBooks = append(availableBooks, bookRepository.books[i])
+					index++
+				}
+			}
+			return availableBooks
 		}
-		return availableBooks
 	}
 
 	return bookRepository.books
 }
 
 type CreateBookPayload struct {
-	Title     *string `json:"title"`
-	Author    *string `json:"author"`
-	Year      *uint16 `json:"year"`
-	Available *bool   `json:"available"`
+	Title     *string
+	Author    *string
+	Year      *uint16
+	Available *bool
 }
 
 func CreateBook(ctx context.Context, payload CreateBookPayload) *model.Book {
@@ -126,10 +138,10 @@ func GetBookByID(ctx context.Context, id int) (*model.Book, error) {
 }
 
 type EditBookPayload struct {
-	Title     *string `json:"title"`
-	Author    *string `json:"author"`
-	Year      *uint16 `json:"year"`
-	Available *bool   `json:"available"`
+	Title     *string
+	Author    *string
+	Year      *uint16
+	Available *bool
 }
 
 func EditBookByID(ctx context.Context, id int, p EditBookPayload) (*model.Book, error) {

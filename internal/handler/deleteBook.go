@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"errors"
 	"library-api/internal/apperrors"
 	"library-api/internal/service"
 	"net/http"
@@ -25,11 +26,20 @@ func DeleteBookByID(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		w.Header().Add("Content-type", "application/json")
-		w.WriteHeader(404)
+		if errors.Is(err, apperrors.ErrNotFound) {
+			w.WriteHeader(404)
+		} else {
+			w.WriteHeader(500)
+		}
 		json.NewEncoder(w).Encode(
 			apperrors.BaseError{Error: err.Error()},
 		)
 		return
 	}
 
+	json.NewEncoder(w).Encode(
+		struct {
+			success bool
+		}{success: true},
+	)
 }

@@ -6,6 +6,7 @@ import (
 	"library-api/internal/model"
 	"library-api/internal/repository"
 	"strings"
+	"time"
 )
 
 type EditBookRequest struct {
@@ -21,6 +22,10 @@ func EditBookByID(ctx context.Context, id int, req EditBookRequest) (*model.Book
 	}
 
 	if (req.Author != nil && len(strings.TrimSpace(*req.Author)) == 0) || (req.Title != nil && len(strings.TrimSpace(*req.Title)) == 0) {
+		return nil, apperrors.ErrInvalidValues
+	}
+
+	if *req.Year > uint16(time.Now().Year()) {
 		return nil, apperrors.ErrInvalidValues
 	}
 
