@@ -26,7 +26,7 @@ func (b *Book) ToDTO() BookDTO {
 	}
 }
 
-func BookDomainListToDTO(books []*Book) []*BookDTO {
+func BookDomainListToDTO(books []Book) []*BookDTO {
 	booksDTO := make([]*BookDTO, len(books))
 
 	for i := range books {

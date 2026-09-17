@@ -9,12 +9,12 @@ import (
 
 type BookRepository struct {
 	nextID int
-	books  []*model.Book
+	books  []model.Book
 }
 
 var bookRepository = BookRepository{
 	nextID: 3,
-	books: []*model.Book{
+	books: []model.Book{
 		{
 			ID:        1,
 			Title:     "1984",
@@ -38,13 +38,13 @@ type GetBooksPayload struct {
 	Available *bool
 }
 
-func GetBooks(ctx context.Context, params GetBooksPayload) []*model.Book {
+func GetBooks(ctx context.Context, params GetBooksPayload) []model.Book {
 	mutex.Lock()
 	defer mutex.Unlock()
 
 	if params.Available != nil {
 		if *params.Available == true {
-			availableBooks := make([]*model.Book, 0, len(bookRepository.books))
+			availableBooks := make([]model.Book, 0, len(bookRepository.books))
 			index := 0
 			for i := range bookRepository.books {
 				if bookRepository.books[i].Available {
@@ -54,7 +54,7 @@ func GetBooks(ctx context.Context, params GetBooksPayload) []*model.Book {
 			}
 			return availableBooks
 		} else if *params.Available == false {
-			availableBooks := make([]*model.Book, 0, len(bookRepository.books))
+			availableBooks := make([]model.Book, 0, len(bookRepository.books))
 			index := 0
 			for i := range bookRepository.books {
 				if !bookRepository.books[i].Available {
@@ -76,7 +76,7 @@ type CreateBookPayload struct {
 	Available *bool
 }
 
-func CreateBook(ctx context.Context, payload CreateBookPayload) *model.Book {
+func CreateBook(ctx context.Context, payload CreateBookPayload) model.Book {
 	mutex.Lock()
 	defer mutex.Unlock()
 
@@ -90,9 +90,9 @@ func CreateBook(ctx context.Context, payload CreateBookPayload) *model.Book {
 
 	bookRepository.nextID++
 
-	bookRepository.books = append(bookRepository.books, &book)
+	bookRepository.books = append(bookRepository.books, book)
 
-	return &book
+	return book
 }
 
 func DeleteBookByID(ctx context.Context, id int) error {
@@ -118,7 +118,7 @@ func DeleteBookByID(ctx context.Context, id int) error {
 	return nil
 }
 
-func GetBookByID(ctx context.Context, id int) (*model.Book, error) {
+func GetBookByID(ctx context.Context, id int) (model.Book, error) {
 	mutex.Lock()
 	defer mutex.Unlock()
 	var index = -1
@@ -131,7 +131,7 @@ func GetBookByID(ctx context.Context, id int) (*model.Book, error) {
 	}
 
 	if index == -1 {
-		return nil, apperrors.ErrNotFound
+		return model.Book{}, apperrors.ErrNotFound
 	}
 
 	return bookRepository.books[index], nil
@@ -144,7 +144,7 @@ type EditBookPayload struct {
 	Available *bool
 }
 
-func EditBookByID(ctx context.Context, id int, p EditBookPayload) (*model.Book, error) {
+func EditBookByID(ctx context.Context, id int, p EditBookPayload) (model.Book, error) {
 	mutex.Lock()
 	defer mutex.Unlock()
 
@@ -158,7 +158,7 @@ func EditBookByID(ctx context.Context, id int, p EditBookPayload) (*model.Book, 
 	}
 
 	if index == -1 {
-		return nil, apperrors.ErrNotFound
+		return model.Book{}, apperrors.ErrNotFound
 	}
 
 	if p.Author != nil {

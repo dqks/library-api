@@ -10,6 +10,6 @@ type GetBooksQueryParams struct {
 	Available *bool
 }
 
-func GetBooks(ctx context.Context, params GetBooksQueryParams) []*model.Book {
+func GetBooks(ctx context.Context, params GetBooksQueryParams) []model.Book {
 	return repository.GetBooks(ctx, repository.GetBooksPayload{Available: params.Available})
 }

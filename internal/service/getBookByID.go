@@ -6,6 +6,6 @@ import (
 	"library-api/internal/repository"
 )
 
-func GetBookByID(ctx context.Context, id int) (*model.Book, error) {
+func GetBookByID(ctx context.Context, id int) (model.Book, error) {
 	return repository.GetBookByID(ctx, id)
 }

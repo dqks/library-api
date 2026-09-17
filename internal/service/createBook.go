@@ -15,13 +15,13 @@ type CreateBookRequest struct {
 	Available *bool   `json:"available"`
 }
 
-func CreateBook(ctx context.Context, req CreateBookRequest) (*model.Book, error) {
+func CreateBook(ctx context.Context, req CreateBookRequest) (model.Book, error) {
 	if req.Author == nil || req.Available == nil || req.Title == nil || req.Year == nil {
-		return nil, apperrors.ErrRequiredFields
+		return model.Book{}, apperrors.ErrRequiredFields
 	}
 
 	if len(strings.TrimSpace(*req.Author)) == 0 || len(strings.TrimSpace(*req.Title)) == 0 {
-		return nil, apperrors.ErrInvalidValues
+		return model.Book{}, apperrors.ErrInvalidValues
 	}
 
 	book := repository.CreateBook(ctx, repository.CreateBookPayload{
