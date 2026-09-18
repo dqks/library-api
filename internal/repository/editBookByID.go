@@ -14,12 +14,12 @@ type EditBookPayload struct {
 }
 
 func EditBookByID(ctx context.Context, id int, p EditBookPayload) (model.Book, error) {
-	defer mutex.Unlock()
 	select {
 	case <-ctx.Done():
 		return model.Book{}, ctx.Err()
 	default:
 		mutex.Lock()
+		defer mutex.Unlock()
 		var index = -1
 
 		for i := range bookRepository.books {

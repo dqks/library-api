@@ -34,8 +34,8 @@ func main() {
 			if errors.Is(err, http.ErrServerClosed) {
 				fmt.Println("Сервер закрылся штатно")
 			} else {
-				os.Exit(1)
 				fmt.Println(err.Error())
+				os.Exit(1)
 			}
 			return
 		}

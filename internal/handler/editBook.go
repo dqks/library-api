@@ -26,7 +26,7 @@ func EditBookByID(w http.ResponseWriter, r *http.Request) {
 	default:
 		id, err := strconv.Atoi(r.PathValue("id"))
 
-		if err != nil {
+		if err != nil && id <= 0 {
 			w.Header().Add("Content-Type", "application/json")
 			w.WriteHeader(400)
 			json.NewEncoder(w).Encode(apperrors.BaseError{Error: apperrors.ErrIncorrectPathValue.Error()})

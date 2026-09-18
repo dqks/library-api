@@ -8,10 +8,10 @@ import (
 )
 
 type EditBookInput struct {
-	Title     *string `json:"title"`
-	Author    *string `json:"author"`
-	Year      *uint16 `json:"year"`
-	Available *bool   `json:"available"`
+	Title     *string
+	Author    *string
+	Year      *uint16
+	Available *bool
 }
 
 func EditBookByID(ctx context.Context, id int, req EditBookInput) (model.Book, error) {

@@ -7,12 +7,12 @@ import (
 )
 
 func GetBookByID(ctx context.Context, id int) (model.Book, error) {
-	defer mutex.RUnlock()
 	select {
 	case <-ctx.Done():
 		return model.Book{}, ctx.Err()
 	default:
 		mutex.RLock()
+		defer mutex.RUnlock()
 		var index = -1
 
 		for i := range bookRepository.books {

@@ -10,12 +10,12 @@ type GetBooksPayload struct {
 }
 
 func GetBooks(ctx context.Context, params GetBooksPayload) ([]model.Book, error) {
-	defer mutex.Unlock()
 	select {
 	case <-ctx.Done():
 		return nil, ctx.Err()
 	default:
-		mutex.Lock()
+		mutex.RLock()
+		defer mutex.RUnlock()
 		if params.Available != nil {
 			availableBooks := make([]model.Book, 0, len(bookRepository.books))
 			for i := range bookRepository.books {

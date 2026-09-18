@@ -25,6 +25,7 @@ func GetBooks(w http.ResponseWriter, r *http.Request) {
 		if availQuery := r.URL.Query().Get("available"); availQuery != "" {
 			availParam, err = strconv.ParseBool(availQuery)
 			if err != nil {
+				w.Header().Set("Content-Type", "application/json")
 				w.WriteHeader(400)
 				err := encoder.Encode(apperrors.BaseError{Error: err.Error()})
 				if err != nil {

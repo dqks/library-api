@@ -6,12 +6,12 @@ import (
 )
 
 func DeleteBookByID(ctx context.Context, id int) error {
-	defer mutex.Unlock()
 	select {
 	case <-ctx.Done():
 		return ctx.Err()
 	default:
 		mutex.Lock()
+		defer mutex.Unlock()
 		var index = -1
 
 		for i := range bookRepository.books {

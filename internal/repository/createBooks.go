@@ -13,12 +13,12 @@ type CreateBookPayload struct {
 }
 
 func CreateBook(ctx context.Context, payload CreateBookPayload) (model.Book, error) {
-	defer mutex.Unlock()
 	select {
 	case <-ctx.Done():
 		return model.Book{}, ctx.Err()
 	default:
 		mutex.Lock()
+		defer mutex.Unlock()
 		book := model.Book{
 			ID:        bookRepository.nextID,
 			Title:     *payload.Title,
