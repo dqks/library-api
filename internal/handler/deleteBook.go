@@ -54,8 +54,11 @@ func DeleteBookByID(w http.ResponseWriter, r *http.Request) {
 		}
 
 		w.Header().Add("Content-type", "application/json")
-		json.NewEncoder(w).Encode(
-			deleteBookResponse{Success: true},
-		)
+		encoder := json.NewEncoder(w)
+		err = encoder.Encode(deleteBookResponse{Success: true})
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
 	}
 }

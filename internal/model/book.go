@@ -14,35 +14,6 @@ type Book struct {
 	Available bool
 }
 
-type BookDTO struct {
-	ID        int    `json:"id"`
-	Title     string `json:"title"`
-	Author    string `json:"author"`
-	Year      uint16 `json:"year"`
-	Available bool   `json:"available"`
-}
-
-func (b *Book) ToDTO() BookDTO {
-	return BookDTO{
-		ID:        b.ID,
-		Title:     b.Title,
-		Author:    b.Author,
-		Year:      b.Year,
-		Available: b.Available,
-	}
-}
-
-func BookDomainListToDTO(books []Book) []*BookDTO {
-	booksDTO := make([]*BookDTO, len(books))
-
-	for i := range books {
-		b := books[i].ToDTO()
-		booksDTO[i] = &b
-	}
-
-	return booksDTO
-}
-
 func ValidateBookFields(title *string, author *string, year *uint16) error {
 
 	if (author != nil && len(strings.TrimSpace(*author)) == 0) || (title != nil && len(strings.TrimSpace(*title)) == 0) {

@@ -54,7 +54,7 @@ func GetBooks(w http.ResponseWriter, r *http.Request) {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		err = encoder.Encode(model.BookDomainListToDTO(books))
+		err = encoder.Encode(BookDomainListToDTO(books))
 		if err != nil {
 			fmt.Println(err.Error())
 			return

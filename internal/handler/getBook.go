@@ -46,7 +46,11 @@ func GetBookByID(w http.ResponseWriter, r *http.Request) {
 		}
 
 		w.Header().Add("Content-Type", "application/json")
-		w.WriteHeader(200)
-		json.NewEncoder(w).Encode(book.ToDTO())
+		encoder := json.NewEncoder(w)
+		err = encoder.Encode(BookModelToDTO(&book))
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
 	}
 }

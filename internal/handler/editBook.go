@@ -26,7 +26,7 @@ func EditBookByID(w http.ResponseWriter, r *http.Request) {
 	default:
 		id, err := strconv.Atoi(r.PathValue("id"))
 
-		if err != nil && id <= 0 {
+		if err != nil || id <= 0 {
 			w.Header().Add("Content-Type", "application/json")
 			w.WriteHeader(400)
 			json.NewEncoder(w).Encode(apperrors.BaseError{Error: apperrors.ErrIncorrectPathValue.Error()})
@@ -73,6 +73,11 @@ func EditBookByID(w http.ResponseWriter, r *http.Request) {
 		}
 
 		w.Header().Add("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(newBook.ToDTO())
+		encoder := json.NewEncoder(w)
+		err = encoder.Encode(BookModelToDTO(&newBook))
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
 	}
 }

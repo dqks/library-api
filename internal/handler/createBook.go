@@ -47,32 +47,27 @@ func CreateBook(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			if errors.Is(err, context.DeadlineExceeded) {
 				w.WriteHeader(504)
-				return
 			} else if errors.Is(err, context.Canceled) {
 				return
 			} else if errors.Is(err, apperrors.ErrRequiredFields) || errors.Is(err, apperrors.ErrInvalidValues) {
 				w.Header().Add("Content-type", "application/json")
 				w.WriteHeader(400)
-				encoder := json.NewEncoder(w)
-				if err := encoder.Encode(apperrors.BaseError{Error: err.Error()}); err != nil {
-					fmt.Println(apperrors.ErrInternal.Error())
-				}
-				return
 			} else {
 				w.Header().Add("Content-type", "application/json")
 				w.WriteHeader(500)
-				encoder := json.NewEncoder(w)
-				if err := encoder.Encode(apperrors.BaseError{Error: err.Error()}); err != nil {
-					fmt.Println(apperrors.ErrInternal.Error())
-				}
-				return
 			}
+
+			encoder := json.NewEncoder(w)
+			if err := encoder.Encode(apperrors.BaseError{Error: err.Error()}); err != nil {
+				fmt.Println(apperrors.ErrInternal.Error())
+			}
+			return
 		}
 
 		w.Header().Add("Content-type", "application/json")
 		w.WriteHeader(201)
 		encoder := json.NewEncoder(w)
-		if err := encoder.Encode(book.ToDTO()); err != nil {
+		if err := encoder.Encode(BookModelToDTO(&book)); err != nil {
 			fmt.Println(apperrors.ErrInternal.Error())
 		}
 	}
