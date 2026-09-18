@@ -1,7 +1,9 @@
 package handler
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"library-api/internal/apperrors"
 	"library-api/internal/model"
@@ -16,12 +18,11 @@ func GetBooks(w http.ResponseWriter, r *http.Request) {
 	case <-ctx.Done():
 		fmt.Println(ctx.Err())
 	default:
-		w.Header().Set("Content-Type", "application/json")
 		availParam := false
 		encoder := json.NewEncoder(w)
 		var books []model.Book
+		var err error
 		if availQuery := r.URL.Query().Get("available"); availQuery != "" {
-			var err error
 			availParam, err = strconv.ParseBool(availQuery)
 			if err != nil {
 				w.WriteHeader(400)
@@ -33,20 +34,25 @@ func GetBooks(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			books, err = service.GetBooks(ctx, service.GetBooksQueryParams{Available: &availParam})
-			if err != nil {
-				fmt.Println(err.Error())
-				return
-			}
 		} else {
-			var err error
 			books, err = service.GetBooks(ctx, service.GetBooksQueryParams{Available: nil})
-			if err != nil {
-				fmt.Println(err.Error())
-				return
-			}
 		}
 
-		err := encoder.Encode(model.BookDomainListToDTO(books))
+		if err != nil {
+			if errors.Is(err, context.Canceled) {
+				return
+			} else if errors.Is(err, context.DeadlineExceeded) {
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(504)
+			} else {
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(500)
+			}
+			encoder.Encode(apperrors.BaseError{Error: err.Error()})
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		err = encoder.Encode(model.BookDomainListToDTO(books))
 		if err != nil {
 			fmt.Println(err.Error())
 			return

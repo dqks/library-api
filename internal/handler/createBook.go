@@ -38,9 +38,17 @@ func CreateBook(w http.ResponseWriter, r *http.Request) {
 				return
 			} else if errors.Is(err, context.Canceled) {
 				return
-			} else if errors.Is(err, apperrors.ErrRequiredFields) {
+			} else if errors.Is(err, apperrors.ErrRequiredFields) || errors.Is(err, apperrors.ErrInvalidValues) {
 				w.Header().Add("Content-type", "application/json")
 				w.WriteHeader(400)
+				encoder := json.NewEncoder(w)
+				if err := encoder.Encode(apperrors.BaseError{Error: err.Error()}); err != nil {
+					fmt.Println(apperrors.ErrInternal.Error())
+				}
+				return
+			} else {
+				w.Header().Add("Content-type", "application/json")
+				w.WriteHeader(500)
 				encoder := json.NewEncoder(w)
 				if err := encoder.Encode(apperrors.BaseError{Error: err.Error()}); err != nil {
 					fmt.Println(apperrors.ErrInternal.Error())

@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -21,9 +22,8 @@ func DeleteBookByID(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(ctx.Err().Error())
 	default:
 		id, err := strconv.Atoi(r.PathValue("id"))
-		w.Header().Add("Content-type", "application/json")
 
-		if err != nil {
+		if err != nil || id <= 0 {
 			w.WriteHeader(400)
 			json.NewEncoder(w).Encode(
 				apperrors.BaseError{Error: apperrors.ErrIncorrectPathValue.Error()},
@@ -35,8 +35,15 @@ func DeleteBookByID(w http.ResponseWriter, r *http.Request) {
 
 		if err != nil {
 			if errors.Is(err, apperrors.ErrNotFound) {
+				w.Header().Add("Content-type", "application/json")
 				w.WriteHeader(404)
+			} else if errors.Is(err, context.DeadlineExceeded) {
+				w.WriteHeader(504)
+				return
+			} else if errors.Is(err, context.Canceled) {
+				return
 			} else {
+				w.Header().Add("Content-type", "application/json")
 				w.WriteHeader(500)
 			}
 			json.NewEncoder(w).Encode(
@@ -45,9 +52,9 @@ func DeleteBookByID(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		w.Header().Add("Content-type", "application/json")
 		json.NewEncoder(w).Encode(
 			deleteBookResponse{Success: true},
 		)
 	}
-
 }
