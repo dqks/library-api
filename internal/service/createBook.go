@@ -7,14 +7,14 @@ import (
 	"library-api/internal/repository"
 )
 
-type CreateBookRequest struct {
-	Title     *string `json:"title"`
-	Author    *string `json:"author"`
-	Year      *uint16 `json:"year"`
-	Available *bool   `json:"available"`
+type CreateBookInput struct {
+	Title     *string
+	Author    *string
+	Year      *uint16
+	Available *bool
 }
 
-func CreateBook(ctx context.Context, req CreateBookRequest) (model.Book, error) {
+func CreateBook(ctx context.Context, req CreateBookInput) (model.Book, error) {
 	select {
 	case <-ctx.Done():
 		return model.Book{}, ctx.Err()

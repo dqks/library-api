@@ -11,6 +11,13 @@ import (
 	"strconv"
 )
 
+type EditBookBody struct {
+	Title     *string `json:"title"`
+	Author    *string `json:"author"`
+	Year      *uint16 `json:"year"`
+	Available *bool   `json:"available"`
+}
+
 func EditBookByID(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	select {
@@ -26,7 +33,7 @@ func EditBookByID(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		var body service.EditBookRequest
+		var body EditBookBody
 
 		decoder := json.NewDecoder(r.Body)
 		decoder.DisallowUnknownFields()
@@ -38,7 +45,12 @@ func EditBookByID(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		newBook, err := service.EditBookByID(ctx, id, body)
+		newBook, err := service.EditBookByID(ctx, id, service.EditBookInput{
+			Title:     body.Title,
+			Author:    body.Author,
+			Year:      body.Year,
+			Available: body.Available,
+		})
 
 		if err != nil {
 			if errors.Is(err, apperrors.ErrNotFound) {

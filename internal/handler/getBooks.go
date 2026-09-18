@@ -49,6 +49,7 @@ func GetBooks(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(500)
 			}
 			encoder.Encode(apperrors.BaseError{Error: err.Error()})
+			return
 		}
 
 		w.Header().Set("Content-Type", "application/json")

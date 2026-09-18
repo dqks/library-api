@@ -10,13 +10,20 @@ import (
 	"net/http"
 )
 
+type CreateBookBody struct {
+	Title     *string `json:"title"`
+	Author    *string `json:"author"`
+	Year      *uint16 `json:"year"`
+	Available *bool   `json:"available"`
+}
+
 func CreateBook(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	select {
 	case <-ctx.Done():
 		fmt.Println(ctx.Err().Error())
 	default:
-		var req service.CreateBookRequest
+		var req CreateBookBody
 		decoder := json.NewDecoder(r.Body)
 		decoder.DisallowUnknownFields()
 
@@ -30,7 +37,12 @@ func CreateBook(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		book, err := service.CreateBook(ctx, req)
+		book, err := service.CreateBook(ctx, service.CreateBookInput{
+			Title:     req.Title,
+			Author:    req.Author,
+			Year:      req.Year,
+			Available: req.Available,
+		})
 
 		if err != nil {
 			if errors.Is(err, context.DeadlineExceeded) {

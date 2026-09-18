@@ -7,14 +7,14 @@ import (
 	"library-api/internal/repository"
 )
 
-type EditBookRequest struct {
+type EditBookInput struct {
 	Title     *string `json:"title"`
 	Author    *string `json:"author"`
 	Year      *uint16 `json:"year"`
 	Available *bool   `json:"available"`
 }
 
-func EditBookByID(ctx context.Context, id int, req EditBookRequest) (model.Book, error) {
+func EditBookByID(ctx context.Context, id int, req EditBookInput) (model.Book, error) {
 	select {
 	case <-ctx.Done():
 		return model.Book{}, ctx.Err()

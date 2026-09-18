@@ -38,8 +38,8 @@ func DeleteBookByID(w http.ResponseWriter, r *http.Request) {
 				w.Header().Add("Content-type", "application/json")
 				w.WriteHeader(404)
 			} else if errors.Is(err, context.DeadlineExceeded) {
+				w.Header().Add("Content-type", "application/json")
 				w.WriteHeader(504)
-				return
 			} else if errors.Is(err, context.Canceled) {
 				return
 			} else {
