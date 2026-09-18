@@ -46,6 +46,7 @@ func CreateBook(w http.ResponseWriter, r *http.Request) {
 
 		if err != nil {
 			if errors.Is(err, context.DeadlineExceeded) {
+				w.Header().Add("Content-type", "application/json")
 				w.WriteHeader(504)
 			} else if errors.Is(err, context.Canceled) {
 				return
