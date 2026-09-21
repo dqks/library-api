@@ -3,7 +3,6 @@ package handler
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"library-api/internal/apperrors"
 	"library-api/internal/service"
@@ -29,7 +28,7 @@ func CreateBook(w http.ResponseWriter, r *http.Request) {
 
 		if err := decoder.Decode(&req); err != nil {
 			w.Header().Add("Content-type", "application/json")
-			w.WriteHeader(400)
+			w.WriteHeader(apperrors.ErrInvalidValuesCode)
 			encoder := json.NewEncoder(w)
 			if err := encoder.Encode(apperrors.BaseError{Error: err.Error()}); err != nil {
 				fmt.Println(apperrors.ErrInternal.Error())
@@ -45,18 +44,19 @@ func CreateBook(w http.ResponseWriter, r *http.Request) {
 		})
 
 		if err != nil {
-			if errors.Is(err, context.DeadlineExceeded) {
-				w.Header().Add("Content-type", "application/json")
-				w.WriteHeader(504)
-			} else if errors.Is(err, context.Canceled) {
+			code := apperrors.CheckErrors([]error{
+				context.DeadlineExceeded,
+				context.Canceled,
+				apperrors.ErrRequiredFields,
+				apperrors.ErrInvalidValues,
+			}, err)
+
+			if code == -1 {
 				return
-			} else if errors.Is(err, apperrors.ErrRequiredFields) || errors.Is(err, apperrors.ErrInvalidValues) {
-				w.Header().Add("Content-type", "application/json")
-				w.WriteHeader(400)
-			} else {
-				w.Header().Add("Content-type", "application/json")
-				w.WriteHeader(500)
 			}
+
+			w.Header().Add("Content-type", "application/json")
+			w.WriteHeader(code)
 
 			encoder := json.NewEncoder(w)
 			if err := encoder.Encode(apperrors.BaseError{Error: err.Error()}); err != nil {

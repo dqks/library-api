@@ -3,7 +3,6 @@ package handler
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"library-api/internal/apperrors"
 	"library-api/internal/service"
@@ -25,7 +24,7 @@ func DeleteBookByID(w http.ResponseWriter, r *http.Request) {
 
 		if err != nil || id <= 0 {
 			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(400)
+			w.WriteHeader(apperrors.ErrIncorrectPathValueCode)
 			json.NewEncoder(w).Encode(
 				apperrors.BaseError{Error: apperrors.ErrIncorrectPathValue.Error()},
 			)
@@ -35,18 +34,19 @@ func DeleteBookByID(w http.ResponseWriter, r *http.Request) {
 		err = service.DeleteBookByID(ctx, id)
 
 		if err != nil {
-			if errors.Is(err, apperrors.ErrNotFound) {
-				w.Header().Add("Content-type", "application/json")
-				w.WriteHeader(404)
-			} else if errors.Is(err, context.DeadlineExceeded) {
-				w.Header().Add("Content-type", "application/json")
-				w.WriteHeader(504)
-			} else if errors.Is(err, context.Canceled) {
+			code := apperrors.CheckErrors([]error{
+				apperrors.ErrNotFound,
+				context.DeadlineExceeded,
+				context.Canceled,
+			}, err)
+
+			if code == -1 {
 				return
-			} else {
-				w.Header().Add("Content-type", "application/json")
-				w.WriteHeader(500)
 			}
+
+			w.Header().Add("Content-type", "application/json")
+			w.WriteHeader(code)
+
 			json.NewEncoder(w).Encode(
 				apperrors.BaseError{Error: err.Error()},
 			)

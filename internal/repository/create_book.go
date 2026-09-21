@@ -16,6 +16,8 @@ func createBookHandler(payload CreateBookPayload) chan model.Book {
 	resChan := make(chan model.Book, 1)
 
 	go func() {
+		mutex.Lock()
+		defer mutex.Unlock()
 		book := model.Book{
 			ID:        bookRepository.nextID,
 			Title:     *payload.Title,

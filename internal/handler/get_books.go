@@ -3,7 +3,6 @@ package handler
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"library-api/internal/apperrors"
 	"library-api/internal/model"
@@ -26,7 +25,7 @@ func GetBooks(w http.ResponseWriter, r *http.Request) {
 			availParam, err = strconv.ParseBool(availQuery)
 			if err != nil {
 				w.Header().Set("Content-Type", "application/json")
-				w.WriteHeader(400)
+				w.WriteHeader(apperrors.ErrIncorrectPathValueCode)
 				err := encoder.Encode(apperrors.BaseError{Error: err.Error()})
 				if err != nil {
 					fmt.Println(err.Error())
@@ -40,15 +39,18 @@ func GetBooks(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if err != nil {
-			if errors.Is(err, context.Canceled) {
+			code := apperrors.CheckErrors([]error{
+				context.DeadlineExceeded,
+				context.Canceled,
+			}, err)
+
+			if code == -1 {
 				return
-			} else if errors.Is(err, context.DeadlineExceeded) {
-				w.Header().Set("Content-Type", "application/json")
-				w.WriteHeader(504)
-			} else {
-				w.Header().Set("Content-Type", "application/json")
-				w.WriteHeader(500)
 			}
+
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(code)
+
 			encoder.Encode(apperrors.BaseError{Error: err.Error()})
 			return
 		}

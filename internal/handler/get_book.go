@@ -3,7 +3,6 @@ package handler
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"library-api/internal/apperrors"
 	"library-api/internal/service"
@@ -21,7 +20,7 @@ func GetBookByID(w http.ResponseWriter, r *http.Request) {
 
 		if err != nil || id <= 0 {
 			w.Header().Add("Content-Type", "application/json")
-			w.WriteHeader(400)
+			w.WriteHeader(apperrors.ErrIncorrectPathValueCode)
 			json.NewEncoder(w).Encode(apperrors.BaseError{Error: apperrors.ErrIncorrectPathValue.Error()})
 			return
 		}
@@ -29,18 +28,19 @@ func GetBookByID(w http.ResponseWriter, r *http.Request) {
 		book, err := service.GetBookByID(ctx, id)
 
 		if err != nil {
-			if errors.Is(err, context.Canceled) {
+			code := apperrors.CheckErrors([]error{
+				apperrors.ErrNotFound,
+				context.DeadlineExceeded,
+				context.Canceled,
+			}, err)
+
+			if code == -1 {
 				return
-			} else if errors.Is(err, context.DeadlineExceeded) {
-				w.Header().Add("Content-Type", "application/json")
-				w.WriteHeader(504)
-			} else if errors.Is(err, apperrors.ErrNotFound) {
-				w.Header().Add("Content-Type", "application/json")
-				w.WriteHeader(404)
-			} else {
-				w.Header().Add("Content-Type", "application/json")
-				w.WriteHeader(500)
 			}
+
+			w.Header().Add("Content-Type", "application/json")
+			w.WriteHeader(code)
+
 			json.NewEncoder(w).Encode(apperrors.BaseError{Error: err.Error()})
 			return
 		}
