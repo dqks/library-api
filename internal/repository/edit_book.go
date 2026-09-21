@@ -13,11 +13,10 @@ type EditBookPayload struct {
 	Available *bool
 }
 
-func EditBookByID(ctx context.Context, id int, p EditBookPayload) (model.Book, error) {
-	select {
-	case <-ctx.Done():
-		return model.Book{}, ctx.Err()
-	default:
+func editBookHandler(id int) chan int {
+	resChan := make(chan int)
+
+	go func() {
 		mutex.Lock()
 		defer mutex.Unlock()
 		var index = -1
@@ -29,26 +28,39 @@ func EditBookByID(ctx context.Context, id int, p EditBookPayload) (model.Book, e
 			}
 		}
 
-		if index == -1 {
+		resChan <- index
+	}()
+
+	return resChan
+}
+
+func EditBookByID(ctx context.Context, id int, p EditBookPayload) (model.Book, error) {
+	select {
+	case <-ctx.Done():
+		return model.Book{}, ctx.Err()
+	case index := <-editBookHandler(id):
+		if index != -1 {
+			mutex.Lock()
+			defer mutex.Unlock()
+			if p.Author != nil {
+				bookRepository.books[index].Author = *p.Author
+			}
+
+			if p.Available != nil {
+				bookRepository.books[index].Available = *p.Available
+			}
+
+			if p.Title != nil {
+				bookRepository.books[index].Title = *p.Title
+			}
+
+			if p.Year != nil {
+				bookRepository.books[index].Year = *p.Year
+			}
+
+			return bookRepository.books[index], nil
+		} else {
 			return model.Book{}, apperrors.ErrNotFound
 		}
-
-		if p.Author != nil {
-			bookRepository.books[index].Author = *p.Author
-		}
-
-		if p.Available != nil {
-			bookRepository.books[index].Available = *p.Available
-		}
-
-		if p.Title != nil {
-			bookRepository.books[index].Title = *p.Title
-		}
-
-		if p.Year != nil {
-			bookRepository.books[index].Year = *p.Year
-		}
-
-		return bookRepository.books[index], nil
 	}
 }

@@ -9,11 +9,10 @@ type GetBooksPayload struct {
 	Available *bool
 }
 
-func GetBooks(ctx context.Context, params GetBooksPayload) ([]model.Book, error) {
-	select {
-	case <-ctx.Done():
-		return nil, ctx.Err()
-	default:
+func getBooksHandler(params GetBooksPayload) chan []model.Book {
+	resChan := make(chan []model.Book)
+
+	go func() {
 		mutex.RLock()
 		defer mutex.RUnlock()
 		if params.Available != nil {
@@ -23,13 +22,22 @@ func GetBooks(ctx context.Context, params GetBooksPayload) ([]model.Book, error)
 					availableBooks = append(availableBooks, bookRepository.books[i])
 				}
 			}
-			return availableBooks, nil
+			resChan <- availableBooks
+			return
 		}
 
-		// Чтобы не возвращать тот же самый backing array
-		// и подавить concurrency проблему
 		books := make([]model.Book, 0, len(bookRepository.books))
 		books = append(books, bookRepository.books...)
+	}()
+
+	return resChan
+}
+
+func GetBooks(ctx context.Context, params GetBooksPayload) ([]model.Book, error) {
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	case books := <-getBooksHandler(params):
 		return books, nil
 	}
 }
