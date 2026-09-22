@@ -38,7 +38,7 @@ func GetBookByID(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			w.Header().Add("Content-Type", "application/json")
+			w.Header().Add("Content-type", "application/json")
 			w.WriteHeader(code)
 
 			json.NewEncoder(w).Encode(apperrors.BaseError{Error: err.Error()})

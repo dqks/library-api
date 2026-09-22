@@ -25,7 +25,8 @@ func createBookHandler(payload CreateBookPayload) chan model.Book {
 			Year:      *payload.Year,
 			Available: *payload.Available,
 		}
-
+		bookRepository.nextID++
+		bookRepository.books = append(bookRepository.books, book)
 		resChan <- book
 	}()
 
@@ -37,10 +38,6 @@ func CreateBook(ctx context.Context, payload CreateBookPayload) (model.Book, err
 	case <-ctx.Done():
 		return model.Book{}, ctx.Err()
 	case book := <-createBookHandler(payload):
-		mutex.Lock()
-		defer mutex.Unlock()
-		bookRepository.nextID++
-		bookRepository.books = append(bookRepository.books, book)
 		return book, nil
 	}
 }

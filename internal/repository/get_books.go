@@ -10,7 +10,7 @@ type GetBooksPayload struct {
 }
 
 func getBooksHandler(params GetBooksPayload) chan []model.Book {
-	resChan := make(chan []model.Book)
+	resChan := make(chan []model.Book, 1)
 
 	go func() {
 		mutex.RLock()
@@ -28,6 +28,7 @@ func getBooksHandler(params GetBooksPayload) chan []model.Book {
 
 		books := make([]model.Book, 0, len(bookRepository.books))
 		books = append(books, bookRepository.books...)
+		resChan <- books
 	}()
 
 	return resChan

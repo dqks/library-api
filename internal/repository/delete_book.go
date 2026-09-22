@@ -5,8 +5,8 @@ import (
 	"library-api/internal/apperrors"
 )
 
-func deleteBookHandler(id int) chan int {
-	resChan := make(chan int)
+func deleteBookHandler(id int) chan error {
+	resChan := make(chan error, 1)
 
 	go func() {
 		mutex.Lock()
@@ -20,7 +20,15 @@ func deleteBookHandler(id int) chan int {
 			}
 		}
 
-		resChan <- index
+		if index != -1 {
+			bookRepository.books = append(
+				bookRepository.books[:index], bookRepository.books[index+1:]...,
+			)
+			resChan <- nil
+		} else {
+			resChan <- apperrors.ErrNotFound
+		}
+
 	}()
 
 	return resChan
@@ -30,16 +38,7 @@ func DeleteBookByID(ctx context.Context, id int) error {
 	select {
 	case <-ctx.Done():
 		return ctx.Err()
-	case index := <-deleteBookHandler(id):
-		if index != -1 {
-			mutex.Lock()
-			defer mutex.Unlock()
-			bookRepository.books = append(
-				bookRepository.books[:index], bookRepository.books[index+1:]...,
-			)
-			return nil
-		} else {
-			return apperrors.ErrNotFound
-		}
+	case err := <-deleteBookHandler(id):
+		return err
 	}
 }

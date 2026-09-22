@@ -13,8 +13,8 @@ type EditBookPayload struct {
 	Available *bool
 }
 
-func editBookHandler(id int) chan int {
-	resChan := make(chan int)
+func editBookHandler(id int, p EditBookPayload) chan model.Book {
+	resChan := make(chan model.Book, 1)
 
 	go func() {
 		mutex.Lock()
@@ -28,20 +28,7 @@ func editBookHandler(id int) chan int {
 			}
 		}
 
-		resChan <- index
-	}()
-
-	return resChan
-}
-
-func EditBookByID(ctx context.Context, id int, p EditBookPayload) (model.Book, error) {
-	select {
-	case <-ctx.Done():
-		return model.Book{}, ctx.Err()
-	case index := <-editBookHandler(id):
 		if index != -1 {
-			mutex.Lock()
-			defer mutex.Unlock()
 			if p.Author != nil {
 				bookRepository.books[index].Author = *p.Author
 			}
@@ -58,9 +45,24 @@ func EditBookByID(ctx context.Context, id int, p EditBookPayload) (model.Book, e
 				bookRepository.books[index].Year = *p.Year
 			}
 
-			return bookRepository.books[index], nil
+			resChan <- bookRepository.books[index]
 		} else {
-			return model.Book{}, apperrors.ErrNotFound
+			resChan <- model.Book{}
+		}
+	}()
+
+	return resChan
+}
+
+func EditBookByID(ctx context.Context, id int, p EditBookPayload) (model.Book, error) {
+	select {
+	case <-ctx.Done():
+		return model.Book{}, ctx.Err()
+	case book := <-editBookHandler(id, p):
+		if book.ID != 0 {
+			return book, nil
+		} else {
+			return book, apperrors.ErrNotFound
 		}
 	}
 }
