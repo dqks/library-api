@@ -41,6 +41,10 @@ var errorMap = map[error]int{
 func CheckErrors(errorsToCheck []error, err error) int {
 	errIndex := slices.Index(errorsToCheck, err)
 
+	if errIndex == -1 {
+		return ErrInternalCode
+	}
+
 	if errorMap[errorsToCheck[errIndex]] != 0 {
 		return errorMap[errorsToCheck[errIndex]]
 	}
