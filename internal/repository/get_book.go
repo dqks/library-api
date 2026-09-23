@@ -11,8 +11,8 @@ func (r *BookRepository) GetBookByID(ctx context.Context, id int) (model.Book, e
 	case <-ctx.Done():
 		return model.Book{}, ctx.Err()
 	default:
-		r.Mutex.RLock()
-		defer r.Mutex.RUnlock()
+		r.mutex.RLock()
+		defer r.mutex.RUnlock()
 
 		if ctx.Err() != nil {
 			return model.Book{}, ctx.Err()
@@ -20,8 +20,8 @@ func (r *BookRepository) GetBookByID(ctx context.Context, id int) (model.Book, e
 
 		var index = -1
 
-		for i := range r.Books {
-			if r.Books[i].ID == id {
+		for i := range r.books {
+			if r.books[i].ID == id {
 				index = i
 				break
 			}
@@ -31,6 +31,6 @@ func (r *BookRepository) GetBookByID(ctx context.Context, id int) (model.Book, e
 			return model.Book{}, apperrors.ErrNotFound
 		}
 
-		return r.Books[index], nil
+		return r.books[index], nil
 	}
 }

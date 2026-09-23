@@ -6,7 +6,14 @@ import (
 )
 
 type BookRepository struct {
-	NextID int
-	Books  []model.Book
-	Mutex  sync.RWMutex
+	nextID int
+	books  []model.Book
+	mutex  sync.RWMutex
+}
+
+func CreateRepo(nextID int, books []model.Book) *BookRepository {
+	return &BookRepository{
+		nextID: nextID,
+		books:  books,
+	}
 }

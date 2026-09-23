@@ -18,9 +18,9 @@ import (
 func main() {
 	mux := http.NewServeMux()
 
-	repo := repository.BookRepository{
-		NextID: 3,
-		Books: []model.Book{
+	repo := repository.CreateRepo(
+		3,
+		[]model.Book{
 			{
 				ID:        1,
 				Title:     "1984",
@@ -36,9 +36,9 @@ func main() {
 				Available: false,
 			},
 		},
-	}
+	)
 
-	service := service.BookService{Repo: &repo}
+	service := service.BookService{Repo: repo}
 
 	mux.HandleFunc("POST /books", handler.CreateBook(service))
 	mux.HandleFunc("GET /books", handler.GetBooks(service))

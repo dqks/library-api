@@ -18,8 +18,8 @@ func (r *BookRepository) EditBookByID(ctx context.Context, id int, p EditBookPay
 	case <-ctx.Done():
 		return model.Book{}, ctx.Err()
 	default:
-		r.Mutex.Lock()
-		defer r.Mutex.Unlock()
+		r.mutex.Lock()
+		defer r.mutex.Unlock()
 
 		if ctx.Err() != nil {
 			return model.Book{}, ctx.Err()
@@ -27,8 +27,8 @@ func (r *BookRepository) EditBookByID(ctx context.Context, id int, p EditBookPay
 
 		var index = -1
 
-		for i := range r.Books {
-			if r.Books[i].ID == id {
+		for i := range r.books {
+			if r.books[i].ID == id {
 				index = i
 				break
 			}
@@ -39,22 +39,22 @@ func (r *BookRepository) EditBookByID(ctx context.Context, id int, p EditBookPay
 		}
 
 		if p.Author != nil {
-			r.Books[index].Author = *p.Author
+			r.books[index].Author = *p.Author
 		}
 
 		if p.Available != nil {
-			r.Books[index].Available = *p.Available
+			r.books[index].Available = *p.Available
 		}
 
 		if p.Title != nil {
-			r.Books[index].Title = *p.Title
+			r.books[index].Title = *p.Title
 		}
 
 		if p.Year != nil {
-			r.Books[index].Year = *p.Year
+			r.books[index].Year = *p.Year
 		}
 
-		return r.Books[index], nil
+		return r.books[index], nil
 
 	}
 }

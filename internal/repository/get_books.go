@@ -14,21 +14,21 @@ func (r *BookRepository) GetBooks(ctx context.Context, params GetBooksPayload) (
 	case <-ctx.Done():
 		return nil, ctx.Err()
 	default:
-		r.Mutex.RLock()
-		defer r.Mutex.RUnlock()
+		r.mutex.RLock()
+		defer r.mutex.RUnlock()
 
 		if params.Available != nil {
-			availableBooks := make([]model.Book, 0, len(r.Books))
-			for i := range r.Books {
-				if r.Books[i].Available == *params.Available {
-					availableBooks = append(availableBooks, r.Books[i])
+			availableBooks := make([]model.Book, 0, len(r.books))
+			for i := range r.books {
+				if r.books[i].Available == *params.Available {
+					availableBooks = append(availableBooks, r.books[i])
 				}
 			}
 			return availableBooks, nil
 		}
 
-		books := make([]model.Book, 0, len(r.Books))
-		books = append(books, r.Books...)
+		books := make([]model.Book, 0, len(r.books))
+		books = append(books, r.books...)
 		return books, nil
 	}
 }

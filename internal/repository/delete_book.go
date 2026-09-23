@@ -10,14 +10,14 @@ func (r *BookRepository) DeleteBookByID(ctx context.Context, id int) error {
 	case <-ctx.Done():
 		return ctx.Err()
 	default:
-		r.Mutex.Lock()
-		defer r.Mutex.Unlock()
+		r.mutex.Lock()
+		defer r.mutex.Unlock()
 		if ctx.Err() != nil {
 			return ctx.Err()
 		}
 		var index = -1
-		for i := range r.Books {
-			if r.Books[i].ID == id {
+		for i := range r.books {
+			if r.books[i].ID == id {
 				index = i
 				break
 			}
@@ -25,8 +25,8 @@ func (r *BookRepository) DeleteBookByID(ctx context.Context, id int) error {
 		if index == -1 {
 			return apperrors.ErrNotFound
 		}
-		r.Books = append(
-			r.Books[:index], r.Books[index+1:]...,
+		r.books = append(
+			r.books[:index], r.books[index+1:]...,
 		)
 		return nil
 	}

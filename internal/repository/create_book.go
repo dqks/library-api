@@ -17,23 +17,23 @@ func (r *BookRepository) CreateBook(ctx context.Context, payload CreateBookPaylo
 	case <-ctx.Done():
 		return model.Book{}, ctx.Err()
 	default:
-		r.Mutex.Lock()
-		defer r.Mutex.Unlock()
+		r.mutex.Lock()
+		defer r.mutex.Unlock()
 
 		if ctx.Err() != nil {
 			return model.Book{}, ctx.Err()
 		}
 
 		book := model.Book{
-			ID:        r.NextID,
+			ID:        r.nextID,
 			Title:     *payload.Title,
 			Author:    *payload.Author,
 			Year:      *payload.Year,
 			Available: *payload.Available,
 		}
 
-		r.NextID++
-		r.Books = append(r.Books, book)
+		r.nextID++
+		r.books = append(r.books, book)
 		return book, nil
 	}
 }
