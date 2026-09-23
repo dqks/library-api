@@ -12,10 +12,18 @@ type CreateBookPayload struct {
 	Available *bool
 }
 
-func createBookHandler(payload CreateBookPayload) chan model.Book {
-	resChan := make(chan model.Book, 1)
+func CreateBook(ctx context.Context, payload CreateBookPayload) (model.Book, error) {
+	select {
+	case <-ctx.Done():
+		return model.Book{}, ctx.Err()
+	default:
+		mutex.Lock()
+		defer mutex.Unlock()
 
-	go func() {
+		if ctx.Err() != nil {
+			return model.Book{}, ctx.Err()
+		}
+
 		book := model.Book{
 			ID:        bookRepository.nextID,
 			Title:     *payload.Title,
@@ -24,19 +32,6 @@ func createBookHandler(payload CreateBookPayload) chan model.Book {
 			Available: *payload.Available,
 		}
 
-		resChan <- book
-	}()
-
-	return resChan
-}
-
-func CreateBook(ctx context.Context, payload CreateBookPayload) (model.Book, error) {
-	mutex.Lock()
-	defer mutex.Unlock()
-	select {
-	case <-ctx.Done():
-		return model.Book{}, ctx.Err()
-	case book := <-createBookHandler(payload):
 		bookRepository.nextID++
 		bookRepository.books = append(bookRepository.books, book)
 		return book, nil

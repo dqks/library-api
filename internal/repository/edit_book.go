@@ -13,12 +13,18 @@ type EditBookPayload struct {
 	Available *bool
 }
 
-func editBookHandler(id int, p EditBookPayload) chan model.Book {
-	resChan := make(chan model.Book, 1)
-
-	go func() {
+func EditBookByID(ctx context.Context, id int, p EditBookPayload) (model.Book, error) {
+	select {
+	case <-ctx.Done():
+		return model.Book{}, ctx.Err()
+	default:
 		mutex.Lock()
 		defer mutex.Unlock()
+
+		if ctx.Err() != nil {
+			return model.Book{}, ctx.Err()
+		}
+
 		var index = -1
 
 		for i := range bookRepository.books {
@@ -28,41 +34,27 @@ func editBookHandler(id int, p EditBookPayload) chan model.Book {
 			}
 		}
 
-		if index != -1 {
-			if p.Author != nil {
-				bookRepository.books[index].Author = *p.Author
-			}
-
-			if p.Available != nil {
-				bookRepository.books[index].Available = *p.Available
-			}
-
-			if p.Title != nil {
-				bookRepository.books[index].Title = *p.Title
-			}
-
-			if p.Year != nil {
-				bookRepository.books[index].Year = *p.Year
-			}
-
-			resChan <- bookRepository.books[index]
-		} else {
-			resChan <- model.Book{}
+		if index == -1 {
+			return model.Book{}, apperrors.ErrNotFound
 		}
-	}()
 
-	return resChan
-}
-
-func EditBookByID(ctx context.Context, id int, p EditBookPayload) (model.Book, error) {
-	select {
-	case <-ctx.Done():
-		return model.Book{}, ctx.Err()
-	case book := <-editBookHandler(id, p):
-		if book.ID != 0 {
-			return book, nil
-		} else {
-			return book, apperrors.ErrNotFound
+		if p.Author != nil {
+			bookRepository.books[index].Author = *p.Author
 		}
+
+		if p.Available != nil {
+			bookRepository.books[index].Available = *p.Available
+		}
+
+		if p.Title != nil {
+			bookRepository.books[index].Title = *p.Title
+		}
+
+		if p.Year != nil {
+			bookRepository.books[index].Year = *p.Year
+		}
+
+		return bookRepository.books[index], nil
+
 	}
 }

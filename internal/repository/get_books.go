@@ -9,12 +9,14 @@ type GetBooksPayload struct {
 	Available *bool
 }
 
-func getBooksHandler(params GetBooksPayload) chan []model.Book {
-	resChan := make(chan []model.Book, 1)
-
-	go func() {
+func GetBooks(ctx context.Context, params GetBooksPayload) ([]model.Book, error) {
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	default:
 		mutex.RLock()
 		defer mutex.RUnlock()
+
 		if params.Available != nil {
 			availableBooks := make([]model.Book, 0, len(bookRepository.books))
 			for i := range bookRepository.books {
@@ -22,23 +24,11 @@ func getBooksHandler(params GetBooksPayload) chan []model.Book {
 					availableBooks = append(availableBooks, bookRepository.books[i])
 				}
 			}
-			resChan <- availableBooks
-			return
+			return availableBooks, nil
 		}
 
 		books := make([]model.Book, 0, len(bookRepository.books))
 		books = append(books, bookRepository.books...)
-		resChan <- books
-	}()
-
-	return resChan
-}
-
-func GetBooks(ctx context.Context, params GetBooksPayload) ([]model.Book, error) {
-	select {
-	case <-ctx.Done():
-		return nil, ctx.Err()
-	case books := <-getBooksHandler(params):
 		return books, nil
 	}
 }
