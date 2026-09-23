@@ -14,7 +14,7 @@ type CreateBookInput struct {
 	Available *bool
 }
 
-func CreateBook(ctx context.Context, req CreateBookInput) (model.Book, error) {
+func (s *BookService) CreateBook(ctx context.Context, req CreateBookInput) (model.Book, error) {
 	select {
 	case <-ctx.Done():
 		return model.Book{}, ctx.Err()
@@ -27,7 +27,7 @@ func CreateBook(ctx context.Context, req CreateBookInput) (model.Book, error) {
 			return model.Book{}, err
 		}
 
-		book, err := repository.CreateBook(ctx, repository.CreateBookPayload{
+		book, err := s.Repo.CreateBook(ctx, repository.CreateBookPayload{
 			Title:     req.Title,
 			Author:    req.Author,
 			Year:      req.Year,

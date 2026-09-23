@@ -5,6 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"library-api/internal/handler"
+	"library-api/internal/model"
+	"library-api/internal/repository"
+	"library-api/internal/service"
 	"net/http"
 	"os"
 	"os/signal"
@@ -15,11 +18,33 @@ import (
 func main() {
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("POST /books", handler.CreateBook)
-	mux.HandleFunc("GET /books", handler.GetBooks)
-	mux.HandleFunc("GET /books/{id}", handler.GetBookByID)
-	mux.HandleFunc("PATCH /books/{id}", handler.EditBookByID)
-	mux.HandleFunc("DELETE /books/{id}", handler.DeleteBookByID)
+	repo := repository.BookRepository{
+		NextID: 3,
+		Books: []model.Book{
+			{
+				ID:        1,
+				Title:     "1984",
+				Author:    "George Orwell",
+				Year:      uint16(1956),
+				Available: true,
+			},
+			{
+				ID:        2,
+				Title:     "Kallocain",
+				Author:    "Karin Boye",
+				Year:      uint16(1937),
+				Available: false,
+			},
+		},
+	}
+
+	service := service.BookService{Repo: &repo}
+
+	mux.HandleFunc("POST /books", handler.CreateBook(service))
+	mux.HandleFunc("GET /books", handler.GetBooks(service))
+	mux.HandleFunc("GET /books/{id}", handler.GetBookByID(service))
+	mux.HandleFunc("PATCH /books/{id}", handler.EditBookByID(service))
+	mux.HandleFunc("DELETE /books/{id}", handler.DeleteBookByID(service))
 
 	server := &http.Server{
 		Addr:    ":8080",

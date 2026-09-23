@@ -10,11 +10,11 @@ type GetBooksQueryParams struct {
 	Available *bool
 }
 
-func GetBooks(ctx context.Context, params GetBooksQueryParams) ([]model.Book, error) {
+func (s *BookService) GetBooks(ctx context.Context, params GetBooksQueryParams) ([]model.Book, error) {
 	select {
 	case <-ctx.Done():
 		return nil, ctx.Err()
 	default:
-		return repository.GetBooks(ctx, repository.GetBooksPayload{Available: params.Available})
+		return s.Repo.GetBooks(ctx, repository.GetBooksPayload{Available: params.Available})
 	}
 }

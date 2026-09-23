@@ -14,51 +14,53 @@ type deleteBookResponse struct {
 	Success bool `json:"success"`
 }
 
-func DeleteBookByID(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	select {
-	case <-ctx.Done():
-		fmt.Println(ctx.Err().Error())
-	default:
-		id, err := strconv.Atoi(r.PathValue("id"))
+func DeleteBookByID(s service.BookService) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		select {
+		case <-ctx.Done():
+			fmt.Println(ctx.Err().Error())
+		default:
+			id, err := strconv.Atoi(r.PathValue("id"))
 
-		if err != nil || id <= 0 {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(apperrors.ErrIncorrectPathValueCode)
-			json.NewEncoder(w).Encode(
-				apperrors.BaseError{Error: apperrors.ErrIncorrectPathValue.Error()},
-			)
-			return
-		}
+			if err != nil || id <= 0 {
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(apperrors.ErrIncorrectPathValueCode)
+				json.NewEncoder(w).Encode(
+					apperrors.BaseError{Error: apperrors.ErrIncorrectPathValue.Error()},
+				)
+				return
+			}
 
-		err = service.DeleteBookByID(ctx, id)
+			err = s.DeleteBookByID(ctx, id)
 
-		if err != nil {
-			code := apperrors.CheckErrors([]error{
-				apperrors.ErrNotFound,
-				context.DeadlineExceeded,
-				context.Canceled,
-			}, err)
+			if err != nil {
+				code := apperrors.CheckErrors([]error{
+					apperrors.ErrNotFound,
+					context.DeadlineExceeded,
+					context.Canceled,
+				}, err)
 
-			if code == -1 {
+				if code == -1 {
+					return
+				}
+
+				w.Header().Add("Content-Type", "application/json")
+				w.WriteHeader(code)
+
+				json.NewEncoder(w).Encode(
+					apperrors.BaseError{Error: err.Error()},
+				)
 				return
 			}
 
 			w.Header().Add("Content-Type", "application/json")
-			w.WriteHeader(code)
-
-			json.NewEncoder(w).Encode(
-				apperrors.BaseError{Error: err.Error()},
-			)
-			return
-		}
-
-		w.Header().Add("Content-Type", "application/json")
-		encoder := json.NewEncoder(w)
-		err = encoder.Encode(deleteBookResponse{Success: true})
-		if err != nil {
-			fmt.Println(err.Error())
-			return
+			encoder := json.NewEncoder(w)
+			err = encoder.Encode(deleteBookResponse{Success: true})
+			if err != nil {
+				fmt.Println(err.Error())
+				return
+			}
 		}
 	}
 }

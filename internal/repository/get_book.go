@@ -6,13 +6,13 @@ import (
 	"library-api/internal/model"
 )
 
-func GetBookByID(ctx context.Context, id int) (model.Book, error) {
+func (r *BookRepository) GetBookByID(ctx context.Context, id int) (model.Book, error) {
 	select {
 	case <-ctx.Done():
 		return model.Book{}, ctx.Err()
 	default:
-		mutex.RLock()
-		defer mutex.RUnlock()
+		r.Mutex.RLock()
+		defer r.Mutex.RUnlock()
 
 		if ctx.Err() != nil {
 			return model.Book{}, ctx.Err()
@@ -20,8 +20,8 @@ func GetBookByID(ctx context.Context, id int) (model.Book, error) {
 
 		var index = -1
 
-		for i := range bookRepository.books {
-			if bookRepository.books[i].ID == id {
+		for i := range r.Books {
+			if r.Books[i].ID == id {
 				index = i
 				break
 			}
@@ -31,6 +31,6 @@ func GetBookByID(ctx context.Context, id int) (model.Book, error) {
 			return model.Book{}, apperrors.ErrNotFound
 		}
 
-		return bookRepository.books[index], nil
+		return r.Books[index], nil
 	}
 }

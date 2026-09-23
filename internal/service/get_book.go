@@ -3,14 +3,13 @@ package service
 import (
 	"context"
 	"library-api/internal/model"
-	"library-api/internal/repository"
 )
 
-func GetBookByID(ctx context.Context, id int) (model.Book, error) {
+func (s *BookService) GetBookByID(ctx context.Context, id int) (model.Book, error) {
 	select {
 	case <-ctx.Done():
 		return model.Book{}, ctx.Err()
 	default:
-		return repository.GetBookByID(ctx, id)
+		return s.Repo.GetBookByID(ctx, id)
 	}
 }

@@ -13,13 +13,13 @@ type EditBookPayload struct {
 	Available *bool
 }
 
-func EditBookByID(ctx context.Context, id int, p EditBookPayload) (model.Book, error) {
+func (r *BookRepository) EditBookByID(ctx context.Context, id int, p EditBookPayload) (model.Book, error) {
 	select {
 	case <-ctx.Done():
 		return model.Book{}, ctx.Err()
 	default:
-		mutex.Lock()
-		defer mutex.Unlock()
+		r.Mutex.Lock()
+		defer r.Mutex.Unlock()
 
 		if ctx.Err() != nil {
 			return model.Book{}, ctx.Err()
@@ -27,8 +27,8 @@ func EditBookByID(ctx context.Context, id int, p EditBookPayload) (model.Book, e
 
 		var index = -1
 
-		for i := range bookRepository.books {
-			if bookRepository.books[i].ID == id {
+		for i := range r.Books {
+			if r.Books[i].ID == id {
 				index = i
 				break
 			}
@@ -39,22 +39,22 @@ func EditBookByID(ctx context.Context, id int, p EditBookPayload) (model.Book, e
 		}
 
 		if p.Author != nil {
-			bookRepository.books[index].Author = *p.Author
+			r.Books[index].Author = *p.Author
 		}
 
 		if p.Available != nil {
-			bookRepository.books[index].Available = *p.Available
+			r.Books[index].Available = *p.Available
 		}
 
 		if p.Title != nil {
-			bookRepository.books[index].Title = *p.Title
+			r.Books[index].Title = *p.Title
 		}
 
 		if p.Year != nil {
-			bookRepository.books[index].Year = *p.Year
+			r.Books[index].Year = *p.Year
 		}
 
-		return bookRepository.books[index], nil
+		return r.Books[index], nil
 
 	}
 }

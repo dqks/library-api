@@ -12,28 +12,28 @@ type CreateBookPayload struct {
 	Available *bool
 }
 
-func CreateBook(ctx context.Context, payload CreateBookPayload) (model.Book, error) {
+func (r *BookRepository) CreateBook(ctx context.Context, payload CreateBookPayload) (model.Book, error) {
 	select {
 	case <-ctx.Done():
 		return model.Book{}, ctx.Err()
 	default:
-		mutex.Lock()
-		defer mutex.Unlock()
+		r.Mutex.Lock()
+		defer r.Mutex.Unlock()
 
 		if ctx.Err() != nil {
 			return model.Book{}, ctx.Err()
 		}
 
 		book := model.Book{
-			ID:        bookRepository.nextID,
+			ID:        r.NextID,
 			Title:     *payload.Title,
 			Author:    *payload.Author,
 			Year:      *payload.Year,
 			Available: *payload.Available,
 		}
 
-		bookRepository.nextID++
-		bookRepository.books = append(bookRepository.books, book)
+		r.NextID++
+		r.Books = append(r.Books, book)
 		return book, nil
 	}
 }
