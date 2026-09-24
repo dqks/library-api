@@ -7,5 +7,10 @@ type BookService struct {
 }
 
 func CreateBookService(repo *repository.BookRepository) *BookService {
+
+	if repo == nil {
+		return nil
+	}
+
 	return &BookService{repo: repo}
 }

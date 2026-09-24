@@ -22,6 +22,14 @@ func CreateRepo(nextID int, books []model.Book) *BookRepository {
 		}
 	}
 
+	for i := range books {
+		for j := range books {
+			if books[i].ID == books[j].ID && i != j {
+				return nil
+			}
+		}
+	}
+
 	// Мы не должны передавать тот же самый backing array
 	// иначе если мы передадим просто books, то вне репозитория
 	// мы сможем менять этот слайс из-за backing array

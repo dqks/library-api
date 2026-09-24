@@ -39,11 +39,16 @@ func main() {
 	)
 
 	if repo == nil {
-		fmt.Println("произошла ошибка при запуске сервера - не получилсь создать репозиторий")
+		fmt.Println("произошла ошибка при запуске сервера - не получилось создать репозиторий")
 		return
 	}
 
 	service := service.CreateBookService(repo)
+
+	if service == nil {
+		fmt.Println("произошла ошибка при запуске сервера - не получилось создать сервис")
+		return
+	}
 
 	mux.HandleFunc("POST /books", handler.CreateBook(service))
 	mux.HandleFunc("GET /books", handler.GetBooks(service))

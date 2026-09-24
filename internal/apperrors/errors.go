@@ -3,7 +3,6 @@ package apperrors
 import (
 	"context"
 	"errors"
-	"slices"
 )
 
 var (
@@ -39,7 +38,13 @@ var errorMap = map[error]int{
 }
 
 func CheckErrors(errorsToCheck []error, err error) int {
-	errIndex := slices.Index(errorsToCheck, err)
+	errIndex := -1
+
+	for i := range errorsToCheck {
+		if errors.Is(errorsToCheck[i], err) {
+			errIndex = i
+		}
+	}
 
 	if errIndex == -1 {
 		return ErrInternalCode
