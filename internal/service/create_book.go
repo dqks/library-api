@@ -27,7 +27,7 @@ func (s *BookService) CreateBook(ctx context.Context, req CreateBookInput) (mode
 			return model.Book{}, err
 		}
 
-		book, err := s.Repo.CreateBook(ctx, repository.CreateBookPayload{
+		book, err := s.Repo().CreateBook(ctx, repository.CreateBookPayload{
 			Title:     req.Title,
 			Author:    req.Author,
 			Year:      req.Year,

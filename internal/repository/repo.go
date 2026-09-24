@@ -12,8 +12,21 @@ type BookRepository struct {
 }
 
 func CreateRepo(nextID int, books []model.Book) *BookRepository {
+
+	for i := range books {
+		if books[i].ID >= nextID {
+			return nil
+		}
+	}
+
+	// Мы не должны передавать тот же самый backing array
+	// иначе если мы передадим просто books, то вне репозитория
+	// мы сможем менять этот слайс из-за backing array
+	repoBooks := make([]model.Book, 0, len(books))
+	repoBooks = append(repoBooks, books...)
+
 	return &BookRepository{
 		nextID: nextID,
-		books:  books,
+		books:  repoBooks,
 	}
 }

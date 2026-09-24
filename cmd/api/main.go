@@ -38,13 +38,18 @@ func main() {
 		},
 	)
 
-	service := service.BookService{Repo: repo}
+	if repo == nil {
+		fmt.Println("произошла ошибка при запуске сервера - не получилсь создать репозиторий")
+		return
+	}
 
-	mux.HandleFunc("POST /books", handler.CreateBook(service))
-	mux.HandleFunc("GET /books", handler.GetBooks(service))
-	mux.HandleFunc("GET /books/{id}", handler.GetBookByID(service))
-	mux.HandleFunc("PATCH /books/{id}", handler.EditBookByID(service))
-	mux.HandleFunc("DELETE /books/{id}", handler.DeleteBookByID(service))
+	service := service.CreateBookService(repo)
+
+	mux.HandleFunc("POST /books", handler.CreateBook(*service))
+	mux.HandleFunc("GET /books", handler.GetBooks(*service))
+	mux.HandleFunc("GET /books/{id}", handler.GetBookByID(*service))
+	mux.HandleFunc("PATCH /books/{id}", handler.EditBookByID(*service))
+	mux.HandleFunc("DELETE /books/{id}", handler.DeleteBookByID(*service))
 
 	server := &http.Server{
 		Addr:    ":8080",
