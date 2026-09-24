@@ -14,7 +14,7 @@ type deleteBookResponse struct {
 	Success bool `json:"success"`
 }
 
-func DeleteBookByID(s service.BookService) func(w http.ResponseWriter, r *http.Request) {
+func DeleteBookByID(s *service.BookService) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		select {

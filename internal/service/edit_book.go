@@ -27,7 +27,7 @@ func (s *BookService) EditBookByID(ctx context.Context, id int, req EditBookInpu
 			return model.Book{}, err
 		}
 
-		return s.Repo().EditBookByID(ctx, id, repository.EditBookPayload{
+		return s.repo.EditBookByID(ctx, id, repository.EditBookPayload{
 			Title:     req.Title,
 			Author:    req.Author,
 			Year:      req.Year,

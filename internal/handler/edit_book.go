@@ -17,7 +17,7 @@ type EditBookBody struct {
 	Available *bool   `json:"available"`
 }
 
-func EditBookByID(s service.BookService) func(w http.ResponseWriter, r *http.Request) {
+func EditBookByID(s *service.BookService) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		select {

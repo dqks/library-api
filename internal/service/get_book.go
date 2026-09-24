@@ -10,6 +10,6 @@ func (s *BookService) GetBookByID(ctx context.Context, id int) (model.Book, erro
 	case <-ctx.Done():
 		return model.Book{}, ctx.Err()
 	default:
-		return s.Repo().GetBookByID(ctx, id)
+		return s.repo.GetBookByID(ctx, id)
 	}
 }

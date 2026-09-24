@@ -12,9 +12,12 @@ type BookRepository struct {
 }
 
 func CreateRepo(nextID int, books []model.Book) *BookRepository {
+	if nextID <= 0 {
+		return nil
+	}
 
 	for i := range books {
-		if books[i].ID >= nextID {
+		if books[i].ID >= nextID || books[i].ID <= 0 {
 			return nil
 		}
 	}

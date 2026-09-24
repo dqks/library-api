@@ -9,6 +9,6 @@ func (s *BookService) DeleteBookByID(ctx context.Context, id int) error {
 	case <-ctx.Done():
 		return ctx.Err()
 	default:
-		return s.Repo().DeleteBookByID(ctx, id)
+		return s.repo.DeleteBookByID(ctx, id)
 	}
 }

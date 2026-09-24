@@ -11,7 +11,7 @@ import (
 	"strconv"
 )
 
-func GetBooks(s service.BookService) func(w http.ResponseWriter, r *http.Request) {
+func GetBooks(s *service.BookService) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		select {

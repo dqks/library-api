@@ -17,6 +17,10 @@ func (r *BookRepository) GetBooks(ctx context.Context, params GetBooksPayload) (
 		r.mutex.RLock()
 		defer r.mutex.RUnlock()
 
+		if ctx.Err() != nil {
+			return nil, ctx.Err()
+		}
+
 		if params.Available != nil {
 			availableBooks := make([]model.Book, 0, len(r.books))
 			for i := range r.books {

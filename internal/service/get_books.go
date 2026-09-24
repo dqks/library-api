@@ -15,6 +15,6 @@ func (s *BookService) GetBooks(ctx context.Context, params GetBooksQueryParams) 
 	case <-ctx.Done():
 		return nil, ctx.Err()
 	default:
-		return s.Repo().GetBooks(ctx, repository.GetBooksPayload{Available: params.Available})
+		return s.repo.GetBooks(ctx, repository.GetBooksPayload{Available: params.Available})
 	}
 }

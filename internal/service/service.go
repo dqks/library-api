@@ -9,11 +9,3 @@ type BookService struct {
 func CreateBookService(repo *repository.BookRepository) *BookService {
 	return &BookService{repo: repo}
 }
-
-func (b *BookService) Repo() *repository.BookRepository {
-	if b.repo == nil {
-		return &repository.BookRepository{}
-	}
-
-	return b.repo
-}
