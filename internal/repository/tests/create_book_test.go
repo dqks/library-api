@@ -3,6 +3,7 @@ package repository_test
 import (
 	"context"
 	"errors"
+	"fmt"
 	"library-api/internal/model"
 	"library-api/internal/repository"
 	"sync"
@@ -43,6 +44,7 @@ func TestCreateBook(t *testing.T) {
 		wantBook     model.Book
 		wantToAppear bool
 		wantToCancel bool
+		wantLen      int
 	}{
 		{
 			name:      "success",
@@ -61,6 +63,7 @@ func TestCreateBook(t *testing.T) {
 			},
 			wantToAppear: true,
 			wantToCancel: false,
+			wantLen:      3,
 		},
 		{
 			name:         "canceled",
@@ -73,6 +76,7 @@ func TestCreateBook(t *testing.T) {
 			wantBook:     model.Book{},
 			wantToAppear: false,
 			wantToCancel: true,
+			wantLen:      2,
 		},
 	}
 
@@ -105,7 +109,7 @@ func TestCreateBook(t *testing.T) {
 			}
 
 			if book != tt.wantBook {
-				t.Fatalf("got error %v but expected %v", book, tt.wantBook)
+				t.Fatalf("got %v but expected %v", book, tt.wantBook)
 			}
 
 			ctxGet := context.WithoutCancel(context.Background())
@@ -116,16 +120,13 @@ func TestCreateBook(t *testing.T) {
 				t.Fatalf("failed to get books")
 			}
 
-			foundBook := false
-
-			for _, b := range books {
-				if b == book {
-					foundBook = true
-				}
+			if (books[len(books)-1] != tt.wantBook && tt.wantToAppear) ||
+				(books[len(books)-1] == tt.wantBook && !tt.wantToAppear) {
+				t.Fatalf("new book %v didn't appear on book list", book)
 			}
 
-			if (!foundBook && tt.wantToAppear) || (foundBook && !tt.wantToAppear) {
-				t.Fatalf("new book %v didn't appear on book list", book)
+			if len(books) != tt.wantLen {
+				t.Fatalf("got len %d but expercted %d", len(books), tt.wantLen)
 			}
 		})
 	}
@@ -196,6 +197,87 @@ func TestCreateBookConcurrent(t *testing.T) {
 			if len(books) != tt.wantLen {
 				t.Fatalf("got len %d but expected %d", len(books), tt.wantLen)
 			}
+
+			for i := range books {
+				for j := range books {
+					if books[i].ID == books[j].ID && i != j {
+						t.Fatalf("got not unique id %d", books[i].ID)
+					}
+				}
+			}
+		})
+	}
+}
+
+func TestCreateBookMutex(t *testing.T) {
+	tests := []struct {
+		name      string
+		ctx       context.Context
+		title     string
+		author    string
+		year      uint16
+		available bool
+		wantID    int
+		wantLen   int
+	}{
+		{
+			name:      "concurrent test",
+			ctx:       context.Background(),
+			title:     "New book",
+			author:    "New author",
+			year:      2025,
+			available: true,
+			wantID:    102,
+			wantLen:   102,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			repo := createTestRepo()
+
+			if repo == nil {
+				t.Fatalf("failed to create test repo")
+			}
+
+			ctx1 := context.WithoutCancel(tt.ctx)
+			ctx2, cancel := context.WithCancel(tt.ctx)
+			defer cancel()
+			var wg sync.WaitGroup
+
+			wg.Add(2)
+
+			go func() {
+				defer wg.Done()
+				repo.CreateBook(ctx1, repository.CreateBookPayload{
+					Title:     &tt.title,
+					Author:    &tt.author,
+					Year:      &tt.year,
+					Available: &tt.available,
+				})
+			}()
+
+			go func() {
+				defer wg.Done()
+				cancel()
+				repo.CreateBook(ctx2, repository.CreateBookPayload{
+					Title:     &tt.title,
+					Author:    &tt.author,
+					Year:      &tt.year,
+					Available: &tt.available,
+				})
+			}()
+
+			wg.Wait()
+
+			ctxGet := context.WithoutCancel(context.Background())
+			books, err := repo.GetBooks(ctxGet, repository.GetBooksPayload{})
+
+			if err != nil {
+				t.Fatalf("failed to get books")
+			}
+
+			fmt.Println(len(books))
 		})
 	}
 }
