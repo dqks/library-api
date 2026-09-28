@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"fmt"
 	"library-api/internal/model"
 )
 
@@ -19,6 +20,8 @@ func (r *BookRepository) CreateBook(ctx context.Context, payload CreateBookPaylo
 	default:
 		r.mutex.Lock()
 		defer r.mutex.Unlock()
+
+		fmt.Println("unlock inside create")
 
 		if ctx.Err() != nil {
 			return model.Book{}, ctx.Err()

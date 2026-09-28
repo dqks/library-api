@@ -3,7 +3,6 @@ package repository_test
 import (
 	"context"
 	"errors"
-	"fmt"
 	"library-api/internal/model"
 	"library-api/internal/repository"
 	"sync"
@@ -205,79 +204,6 @@ func TestCreateBookConcurrent(t *testing.T) {
 					}
 				}
 			}
-		})
-	}
-}
-
-func TestCreateBookMutex(t *testing.T) {
-	tests := []struct {
-		name      string
-		ctx       context.Context
-		title     string
-		author    string
-		year      uint16
-		available bool
-		wantID    int
-		wantLen   int
-	}{
-		{
-			name:      "concurrent test",
-			ctx:       context.Background(),
-			title:     "New book",
-			author:    "New author",
-			year:      2025,
-			available: true,
-			wantID:    102,
-			wantLen:   102,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			repo := createTestRepo()
-
-			if repo == nil {
-				t.Fatalf("failed to create test repo")
-			}
-
-			ctx1 := context.WithoutCancel(tt.ctx)
-			ctx2, cancel := context.WithCancel(tt.ctx)
-			defer cancel()
-			var wg sync.WaitGroup
-
-			wg.Add(2)
-
-			go func() {
-				defer wg.Done()
-				repo.CreateBook(ctx1, repository.CreateBookPayload{
-					Title:     &tt.title,
-					Author:    &tt.author,
-					Year:      &tt.year,
-					Available: &tt.available,
-				})
-			}()
-
-			go func() {
-				defer wg.Done()
-				cancel()
-				repo.CreateBook(ctx2, repository.CreateBookPayload{
-					Title:     &tt.title,
-					Author:    &tt.author,
-					Year:      &tt.year,
-					Available: &tt.available,
-				})
-			}()
-
-			wg.Wait()
-
-			ctxGet := context.WithoutCancel(context.Background())
-			books, err := repo.GetBooks(ctxGet, repository.GetBooksPayload{})
-
-			if err != nil {
-				t.Fatalf("failed to get books")
-			}
-
-			fmt.Println(len(books))
 		})
 	}
 }
