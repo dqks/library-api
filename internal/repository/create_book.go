@@ -21,9 +21,8 @@ func (r *BookRepository) CreateBook(ctx context.Context, payload CreateBookPaylo
 		r.mutex.Lock()
 		defer r.mutex.Unlock()
 
-		fmt.Println("unlock inside create")
-
 		if ctx.Err() != nil {
+			fmt.Println("return inside ctx.Err() != nil")
 			return model.Book{}, ctx.Err()
 		}
 

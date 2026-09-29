@@ -2,11 +2,11 @@ package repository
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"library-api/internal/model"
+	"slices"
 	"sync"
 	"testing"
-	"time"
 )
 
 func createTestRepo() *BookRepository {
@@ -33,61 +33,67 @@ func createTestRepo() *BookRepository {
 
 func TestCreateBookConcurrentCancel(t *testing.T) {
 	tests := []struct {
-		name      string
-		ctx       context.Context
-		title     string
-		author    string
-		year      uint16
-		available bool
-		stopIndex int
+		name    string
+		ctx     context.Context
+		wantLen int
+		book    model.Book
 	}{
 		{
-			name:      "concurrent test",
-			ctx:       context.Background(),
-			title:     "New book",
-			author:    "New author",
-			year:      2025,
-			available: true,
-			stopIndex: 50,
+			name:    "concurrent test",
+			ctx:     context.Background(),
+			wantLen: 2,
+			book: model.Book{
+				ID:        3,
+				Title:     "New book",
+				Author:    "New author",
+				Year:      2025,
+				Available: true,
+			},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			repo := createTestRepo()
-
 			if repo == nil {
 				t.Fatalf("failed to create test repo")
 			}
 
+			var err error
+
 			ctx, cancel := context.WithCancel(tt.ctx)
 			defer cancel()
 			var wg sync.WaitGroup
-			wg.Add(2)
+			wg.Add(3)
 			waitChan := make(chan bool, 1)
 
 			go func() {
 				defer wg.Done()
 				repo.mutex.Lock()
+				go func() {
+					defer wg.Done()
+					_, err = repo.CreateBook(ctx, CreateBookPayload{
+						Title:     &tt.book.Title,
+						Author:    &tt.book.Author,
+						Year:      &tt.book.Year,
+						Available: &tt.book.Available,
+					})
+				}()
 				waitChan <- true
-				cancel()
-				repo.mutex.Unlock()
 			}()
 
 			go func() {
 				defer wg.Done()
 				<-waitChan
-				repo.CreateBook(ctx, CreateBookPayload{
-					Title:     &tt.title,
-					Author:    &tt.author,
-					Year:      &tt.year,
-					Available: &tt.available,
-				})
+				cancel()
+				repo.mutex.Unlock()
 			}()
 
 			wg.Wait()
 
-			time.Sleep(5 * time.Second)
+			if !errors.Is(err, context.Canceled) {
+				t.Fatalf("expected %v but got %v", context.Canceled, err)
+			}
 
 			ctxGet := context.WithoutCancel(context.Background())
 			books, err := repo.GetBooks(ctxGet, GetBooksPayload{})
@@ -96,7 +102,102 @@ func TestCreateBookConcurrentCancel(t *testing.T) {
 				t.Fatalf("failed to get books")
 			}
 
-			fmt.Println(books)
+			if len(books) != tt.wantLen {
+				t.Fatalf("got len %d but expected %d", len(books), tt.wantLen)
+			}
+
+			if slices.Contains(books, tt.book) {
+				t.Fatalf("got book with identical fiends that shouldn't appear %v", tt.book)
+			}
 		})
 	}
 }
+
+// func TestCreateBookConcurrentCancel(t *testing.T) {
+// 	tests := []struct {
+// 		name    string
+// 		ctx     context.Context
+// 		wantLen int
+// 		book    model.Book
+// 	}{
+// 		{
+// 			name:    "concurrent test",
+// 			ctx:     context.Background(),
+// 			wantLen: 2,
+// 			book: model.Book{
+// 				ID:        3,
+// 				Title:     "New book",
+// 				Author:    "New author",
+// 				Year:      2025,
+// 				Available: true,
+// 			},
+// 		},
+// 	}
+
+// 	for _, tt := range tests {
+// 		t.Run(tt.name, func(t *testing.T) {
+// 			repo := createTestRepo()
+// 			if repo == nil {
+// 				t.Fatalf("failed to create test repo")
+// 			}
+
+// 			var err error
+
+// 			ctx, cancel := context.WithCancel(tt.ctx)
+// 			defer cancel()
+// 			var wg sync.WaitGroup
+// 			wg.Add(2)
+// 			waitChan := make(chan bool, 1)
+
+// 			go func() {
+// 				defer wg.Done()
+// 				repo.mutex.Lock()
+// 				waitChan <- true
+// 				<-waitChan
+// 				// cancel при r.mutex.Lock() должен быть
+// 				// time.Sleep(time.Second * 5)
+// 				cancel()
+// 				repo.mutex.Unlock()
+// 			}()
+
+// 			go func() {
+// 				defer wg.Done()
+// 				<-waitChan
+
+// 				// go func() {
+// 				// 	defer wg.Done()
+// 				_, err = repo.CreateBook(ctx, CreateBookPayload{
+// 					Title:     &tt.book.Title,
+// 					Author:    &tt.book.Author,
+// 					Year:      &tt.book.Year,
+// 					Available: &tt.book.Available,
+// 				})
+// 				// 	})
+// 				// }()
+
+// 				waitChan <- true
+// 			}()
+
+// 			wg.Wait()
+
+// 			if !errors.Is(err, context.Canceled) {
+// 				t.Fatalf("expected %v but got %v", context.Canceled, err)
+// 			}
+
+// 			ctxGet := context.WithoutCancel(context.Background())
+// 			books, err := repo.GetBooks(ctxGet, GetBooksPayload{})
+
+// 			if err != nil {
+// 				t.Fatalf("failed to get books")
+// 			}
+
+// 			if len(books) != tt.wantLen {
+// 				t.Fatalf("got len %d but expected %d", len(books), tt.wantLen)
+// 			}
+
+// 			if slices.Contains(books, tt.book) {
+// 				t.Fatalf("got book with identical fiends that shouldn't appear %v", tt.book)
+// 			}
+// 		})
+// 	}
+// }
