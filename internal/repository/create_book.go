@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"fmt"
 	"library-api/internal/model"
 )
 
@@ -18,11 +17,13 @@ func (r *BookRepository) CreateBook(ctx context.Context, payload CreateBookPaylo
 	case <-ctx.Done():
 		return model.Book{}, ctx.Err()
 	default:
+		if r.beforeLock != nil {
+			r.beforeLock()
+		}
 		r.mutex.Lock()
 		defer r.mutex.Unlock()
 
 		if ctx.Err() != nil {
-			fmt.Println("return inside ctx.Err() != nil")
 			return model.Book{}, ctx.Err()
 		}
 

@@ -6,9 +6,10 @@ import (
 )
 
 type BookRepository struct {
-	nextID int
-	books  []model.Book
-	mutex  sync.RWMutex
+	nextID     int
+	books      []model.Book
+	mutex      sync.RWMutex
+	beforeLock func()
 }
 
 func CreateRepo(nextID int, books []model.Book) *BookRepository {
@@ -32,7 +33,8 @@ func CreateRepo(nextID int, books []model.Book) *BookRepository {
 
 	// Мы не должны передавать тот же самый backing array
 	// иначе если мы передадим просто books, то вне репозитория
-	// мы сможем менять этот слайс из-за backing array
+	// мы сможем менять слайс books из-за backing array
+	// вне репозитория
 	repoBooks := make([]model.Book, 0, len(books))
 	repoBooks = append(repoBooks, books...)
 
