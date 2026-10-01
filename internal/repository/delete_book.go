@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"fmt"
 	"library-api/internal/apperrors"
 )
 
@@ -10,9 +11,13 @@ func (r *BookRepository) DeleteBookByID(ctx context.Context, id int) error {
 	case <-ctx.Done():
 		return ctx.Err()
 	default:
+		if r.beforeLock != nil {
+			r.beforeLock()
+		}
 		r.mutex.Lock()
 		defer r.mutex.Unlock()
 		if ctx.Err() != nil {
+			fmt.Println("ctx.Err() != nil")
 			return ctx.Err()
 		}
 		var index = -1

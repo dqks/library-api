@@ -95,7 +95,7 @@ func TestEditBookConcurrenyCancel(t *testing.T) {
 			book, err := repo.GetBookByID(ctxGet, tt.id)
 
 			if err != nil {
-				t.Fatalf("failed to get books")
+				t.Fatal("failed to get books")
 			}
 
 			if book != tt.book {

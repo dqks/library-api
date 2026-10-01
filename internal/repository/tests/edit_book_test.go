@@ -165,7 +165,7 @@ func TestEditBookByID(t *testing.T) {
 			repo := createTestRepo()
 
 			if repo == nil {
-				t.Fatalf("failed to create repository")
+				t.Fatal("failed to create repository")
 			}
 
 			ctx, cancel := context.WithCancel(context.Background())
@@ -207,7 +207,7 @@ func TestEditBookByID(t *testing.T) {
 			books, err := repo.GetBooks(ctxGet, repository.GetBooksPayload{})
 
 			if err != nil {
-				t.Fatalf("failed to get books")
+				t.Fatal("failed to get books")
 			}
 
 			if !tt.wantCancel && tt.wantErr == nil {
@@ -237,7 +237,7 @@ func TestEditBookByIDConcurrent(t *testing.T) {
 			repo := createTestRepo()
 
 			if repo == nil {
-				t.Fatalf("failed to create repo")
+				t.Fatal("failed to create repo")
 			}
 
 			ctx := context.WithoutCancel(context.Background())
@@ -267,7 +267,7 @@ func TestEditBookByIDConcurrent(t *testing.T) {
 			wg.Wait()
 
 			if errEdit != nil {
-				t.Fatalf("failed to edit book")
+				t.Fatal("failed to edit book")
 			}
 
 			ctxGet := context.WithoutCancel(context.Background())
