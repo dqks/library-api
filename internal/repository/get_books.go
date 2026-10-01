@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"fmt"
 	"library-api/internal/model"
 )
 
@@ -22,7 +21,6 @@ func (r *BookRepository) GetBooks(ctx context.Context, params GetBooksPayload) (
 		defer r.mutex.RUnlock()
 
 		if ctx.Err() != nil {
-			fmt.Println("ctx.Err() != nil")
 			return nil, ctx.Err()
 		}
 

@@ -2,7 +2,7 @@ package repository
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"library-api/internal/model"
 	"sync"
 	"testing"
@@ -121,7 +121,6 @@ func TestGetBooksConcurrentCancel(t *testing.T) {
 
 			var err error
 			var books []model.Book
-			waitChan := make(chan bool, 1)
 			testChan := make(chan bool, 1)
 			repo.beforeLock = func() {
 				testChan <- true
@@ -132,29 +131,29 @@ func TestGetBooksConcurrentCancel(t *testing.T) {
 
 			go func() {
 				defer wg.Done()
-				<-waitChan
+				repo.mutex.Lock()
 				go func() {
 					defer wg.Done()
 					books, err = repo.GetBooks(ctx, GetBooksPayload{})
 				}()
-
-				<-testChan
-				waitChan <- true
 			}()
 
 			go func() {
 				defer wg.Done()
-				repo.mutex.RLock()
-				waitChan <- true
-				<-waitChan
+				<-testChan
 				cancel()
-				repo.mutex.RUnlock()
+				repo.mutex.Unlock()
 			}()
 
 			wg.Wait()
 
-			fmt.Println(books)
-			fmt.Println(err)
+			if books != nil {
+				t.Fatalf("expected books to be nil but got %v", books)
+			}
+
+			if !errors.Is(err, context.Canceled) {
+				t.Fatalf("expected err to be %v but got %v", context.Canceled, err)
+			}
 		})
 	}
 }

@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-func TestEditBookConcurrenyCancel(t *testing.T) {
+func TestEditBookConcurrentCancel(t *testing.T) {
 	tests := []struct {
 		name      string
 		title     string
@@ -73,7 +73,6 @@ func TestEditBookConcurrenyCancel(t *testing.T) {
 				<-waitChan
 
 				testChan <- true
-
 			}()
 
 			go func() {
