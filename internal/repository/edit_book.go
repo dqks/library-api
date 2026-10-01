@@ -18,6 +18,9 @@ func (r *BookRepository) EditBookByID(ctx context.Context, id int, p EditBookPay
 	case <-ctx.Done():
 		return model.Book{}, ctx.Err()
 	default:
+		if r.beforeLock != nil {
+			r.beforeLock()
+		}
 		r.mutex.Lock()
 		defer r.mutex.Unlock()
 
@@ -55,6 +58,5 @@ func (r *BookRepository) EditBookByID(ctx context.Context, id int, p EditBookPay
 		}
 
 		return r.books[index], nil
-
 	}
 }

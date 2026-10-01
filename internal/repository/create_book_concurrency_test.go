@@ -33,15 +33,17 @@ func createTestRepo() *BookRepository {
 
 func TestCreateBookConcurrentCancel(t *testing.T) {
 	tests := []struct {
-		name    string
-		ctx     context.Context
-		wantLen int
-		book    model.Book
+		name       string
+		ctx        context.Context
+		wantLen    int
+		wantNextID int
+		book       model.Book
 	}{
 		{
-			name:    "concurrent test",
-			ctx:     context.Background(),
-			wantLen: 2,
+			name:       "concurrent test",
+			ctx:        context.Background(),
+			wantLen:    2,
+			wantNextID: 3,
 			book: model.Book{
 				ID:        3,
 				Title:     "New book",
@@ -96,6 +98,10 @@ func TestCreateBookConcurrentCancel(t *testing.T) {
 
 			if !errors.Is(err, context.Canceled) {
 				t.Fatalf("expected %v but got %v", context.Canceled, err)
+			}
+
+			if tt.wantNextID != repo.nextID {
+				t.Fatalf("expected nextID %d but got %d", tt.wantNextID, repo.nextID)
 			}
 
 			ctxGet := context.WithoutCancel(context.Background())

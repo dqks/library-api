@@ -125,7 +125,7 @@ func TestCreateBook(t *testing.T) {
 			}
 
 			if len(books) != tt.wantLen {
-				t.Fatalf("got len %d but expercted %d", len(books), tt.wantLen)
+				t.Fatalf("got len %d but expected %d", len(books), tt.wantLen)
 			}
 		})
 	}
