@@ -21,8 +21,13 @@ func (r *BookRepository) EditBookByID(ctx context.Context, id int, p EditBookPay
 		if r.beforeLock != nil {
 			r.beforeLock()
 		}
+
 		r.mutex.Lock()
 		defer r.mutex.Unlock()
+
+		if r.afterLock != nil {
+			r.afterLock()
+		}
 
 		if ctx.Err() != nil {
 			return model.Book{}, ctx.Err()

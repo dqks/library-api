@@ -10,6 +10,7 @@ type BookRepository struct {
 	books      []model.Book
 	mutex      sync.RWMutex
 	beforeLock func()
+	afterLock  func()
 }
 
 func CreateRepo(nextID int, books []model.Book) *BookRepository {
