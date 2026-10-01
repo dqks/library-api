@@ -196,11 +196,11 @@ func TestEditBookByID(t *testing.T) {
 			book, err := repo.EditBookByID(ctx, tt.id, payload)
 
 			if !errors.Is(err, tt.wantErr) {
-				t.Fatalf("expected err %v but got %v", err, tt.wantErr)
+				t.Fatalf("expected err %v but got %v", tt.wantErr, err)
 			}
 
 			if book != tt.wantBook {
-				t.Fatalf("expected err %v but got %v", book, tt.wantBook)
+				t.Fatalf("expected book %v but got %v", tt.wantBook, book)
 			}
 
 			ctxGet := context.WithoutCancel(context.Background())
@@ -274,7 +274,7 @@ func TestEditBookByIDConcurrent(t *testing.T) {
 			books, err := repo.GetBooks(ctxGet, repository.GetBooksPayload{})
 
 			if err != nil {
-				t.Fatalf("failed to get book")
+				t.Fatalf("failed to get books")
 			}
 
 			if len(yearSlice) != tt.iterations {

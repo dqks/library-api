@@ -62,7 +62,7 @@ func TestDeleteBookByID(t *testing.T) {
 			err = repo.DeleteBookByID(ctx, tt.id)
 
 			if !errors.Is(err, tt.wantErr) {
-				t.Fatalf("expected err %v but got %v", err, tt.wantErr)
+				t.Fatalf("expected err %v but got %v", tt.wantErr, err)
 			}
 
 			books, err := repo.GetBooks(ctxGet, repository.GetBooksPayload{})

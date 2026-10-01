@@ -63,11 +63,11 @@ func TestGetBookByID(t *testing.T) {
 			book, err := repo.GetBookByID(ctx, tt.id)
 
 			if !errors.Is(err, tt.wantErr) {
-				t.Fatalf("expected err %v but got %v", err, tt.wantErr)
+				t.Fatalf("expected err %v but got %v", tt.wantErr, err)
 			}
 
 			if book != tt.wantBook {
-				t.Fatalf("expected book %v but got %v", book, tt.wantBook)
+				t.Fatalf("expected book %v but got %v", tt.wantBook, book)
 			}
 		})
 	}

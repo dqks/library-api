@@ -23,6 +23,10 @@ func (r *BookRepository) CreateBook(ctx context.Context, payload CreateBookPaylo
 		r.mutex.Lock()
 		defer r.mutex.Unlock()
 
+		if r.afterLock != nil {
+			r.afterLock()
+		}
+
 		if ctx.Err() != nil {
 			return model.Book{}, ctx.Err()
 		}
