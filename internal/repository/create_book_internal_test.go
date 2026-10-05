@@ -69,7 +69,6 @@ func TestCreateBookConcurrentCancel(t *testing.T) {
 			defer cancel()
 			var wg sync.WaitGroup
 			wg.Add(3)
-			waitChan := make(chan bool, 1)
 
 			go func() {
 				defer wg.Done()
@@ -83,13 +82,11 @@ func TestCreateBookConcurrentCancel(t *testing.T) {
 						Available: &tt.book.Available,
 					})
 				}()
-				<-testChan
-				waitChan <- true
 			}()
 
 			go func() {
 				defer wg.Done()
-				<-waitChan
+				<-testChan
 				cancel()
 				repo.mutex.Unlock()
 			}()
