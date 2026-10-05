@@ -100,19 +100,22 @@ func TestDeleteBookByID(t *testing.T) {
 
 func TestDeleteBookByIDMultiple(t *testing.T) {
 	tests := []struct {
-		name    string
-		ids     []int
-		wantErr error
+		name            string
+		ids             []int
+		wantErr         error
+		wantDeleteCount int8
 	}{
 		{
-			name:    "success",
-			ids:     []int{1, 4, 6},
-			wantErr: nil,
+			name:            "success",
+			ids:             []int{1, 4, 6},
+			wantErr:         nil,
+			wantDeleteCount: 3,
 		},
 		{
-			name:    "same ids",
-			ids:     []int{1, 1},
-			wantErr: apperrors.ErrNotFound,
+			name:            "error, not found",
+			ids:             []int{1, 1},
+			wantErr:         apperrors.ErrNotFound,
+			wantDeleteCount: 1,
 		},
 	}
 
@@ -176,6 +179,11 @@ func TestDeleteBookByIDMultiple(t *testing.T) {
 			errChan := make(chan error, len(tt.ids))
 			var wg sync.WaitGroup
 			ctx := context.WithoutCancel(context.Background())
+			booksBefore, err := repo.GetBooks(ctx, repository.GetBooksPayload{})
+
+			if err != nil {
+				t.Fatal("failed to get books")
+			}
 
 			for _, id := range tt.ids {
 				wg.Add(1)
@@ -197,15 +205,19 @@ func TestDeleteBookByIDMultiple(t *testing.T) {
 				}
 			}
 
-			books, err := repo.GetBooks(ctx, repository.GetBooksPayload{})
+			booksAfter, err := repo.GetBooks(ctx, repository.GetBooksPayload{})
 
 			if err != nil {
 				t.Fatal("failed to get books")
 			}
 
+			if len(booksBefore)-int(tt.wantDeleteCount) != len(booksAfter) {
+				t.Fatal("failed to delete book")
+			}
+
 			for i := range tt.ids {
-				for j := range books {
-					if tt.ids[i] == books[j].ID {
+				for j := range booksAfter {
+					if tt.ids[i] == booksAfter[j].ID {
 						t.Fatalf("failed to delete book by id %d", tt.ids[i])
 					}
 				}

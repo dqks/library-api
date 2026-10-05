@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"errors"
-	"fmt"
 	"sync"
 	"testing"
 )
@@ -65,8 +64,6 @@ func TestDeleteBookByIDConcurrentCancel(t *testing.T) {
 			}()
 
 			wg.Wait()
-
-			fmt.Println(err)
 
 			if !errors.Is(err, tt.wantErr) {
 				t.Fatalf("got err %v but expected %v", err, tt.wantErr)

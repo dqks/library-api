@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"fmt"
 	"library-api/internal/apperrors"
 )
 
@@ -17,7 +16,6 @@ func (r *BookRepository) DeleteBookByID(ctx context.Context, id int) error {
 		r.mutex.Lock()
 		defer r.mutex.Unlock()
 		if ctx.Err() != nil {
-			fmt.Println("ctx.Err() != nil")
 			return ctx.Err()
 		}
 		var index = -1
