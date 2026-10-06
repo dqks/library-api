@@ -3,6 +3,7 @@ package repository_test
 import (
 	"context"
 	"errors"
+	"fmt"
 	"library-api/internal/apperrors"
 	"library-api/internal/model"
 	"library-api/internal/repository"
@@ -65,30 +66,40 @@ func TestDeleteBookByID(t *testing.T) {
 				t.Fatalf("expected err %v but got %v", tt.wantErr, err)
 			}
 
-			books, err := repo.GetBooks(ctxGet, repository.GetBooksPayload{})
+			booksAfter, err := repo.GetBooks(ctxGet, repository.GetBooksPayload{})
+			if err != nil {
+				t.Fatal("failed to get books")
+			}
+
 			if tt.wantErr != nil {
-				for i := 0; i < len(books); i++ {
-					if books[i] != booksBefore[i] {
+				for i := 0; i < len(booksAfter); i++ {
+					if booksAfter[i] != booksBefore[i] {
 						t.Fatalf("got changes in books after delete")
 					}
 				}
 
-				if len(books) != len(booksBefore) {
+				fmt.Println(booksBefore)
+				fmt.Println(booksAfter)
+
+				if len(booksAfter) != len(booksBefore) {
 					t.Fatalf(
 						"got len of books %d but before delete it was %d",
-						len(books),
+						len(booksAfter),
 						len(booksBefore),
 					)
 				}
 			}
 
 			if tt.wantErr == nil && !tt.wantCancel {
-
-				if err != nil {
-					t.Fatal("failed to get books")
+				if len(booksAfter) != len(booksBefore)-1 {
+					t.Fatalf(
+						"got len of books %d but before delete it was %d",
+						len(booksAfter),
+						len(booksBefore),
+					)
 				}
 
-				for _, b := range books {
+				for _, b := range booksAfter {
 					if b.ID == tt.id {
 						t.Fatalf("expected to delete book %v but got it in books", b)
 					}
@@ -102,20 +113,25 @@ func TestDeleteBookByIDMultiple(t *testing.T) {
 	tests := []struct {
 		name            string
 		ids             []int
-		wantErr         error
 		wantDeleteCount int8
+		wantErrs        map[error]int
 	}{
 		{
 			name:            "success",
 			ids:             []int{1, 4, 6},
-			wantErr:         nil,
 			wantDeleteCount: 3,
+			wantErrs: map[error]int{
+				nil: 3,
+			},
 		},
 		{
 			name:            "error, not found",
-			ids:             []int{1, 1},
-			wantErr:         apperrors.ErrNotFound,
-			wantDeleteCount: 1,
+			ids:             []int{1, 1, 2},
+			wantDeleteCount: 2,
+			wantErrs: map[error]int{
+				apperrors.ErrNotFound: 1,
+				nil:                   2,
+			},
 		},
 	}
 
@@ -190,18 +206,27 @@ func TestDeleteBookByIDMultiple(t *testing.T) {
 				go func() {
 					defer wg.Done()
 					err := repo.DeleteBookByID(ctx, id)
-					if err != nil {
-						errChan <- err
-					}
+					errChan <- err
 				}()
 			}
 
 			wg.Wait()
 
 			close(errChan)
+
+			gotErrs := make(map[error]int)
+
 			for e := range errChan {
-				if !errors.Is(e, tt.wantErr) {
-					t.Errorf("expected err %v but got %v", tt.wantErr, e)
+				gotErrs[e] = gotErrs[e] + 1
+			}
+
+			for key, val := range tt.wantErrs {
+				if errCount, ok := gotErrs[key]; ok {
+					if val != errCount {
+						t.Fatalf("expected errCount %d of error %v but got %d", val, key, errCount)
+					}
+				} else {
+					t.Fatalf("expected to have err %v but didn't", key)
 				}
 			}
 

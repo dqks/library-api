@@ -235,6 +235,14 @@ func TestEditBookByID(t *testing.T) {
 						booksBefore[i],
 						booksAfter[i],
 					)
+				} else if tt.wantRepoChange &&
+					booksAfter[i] != booksBefore[i] &&
+					((tt.wantBook.ID != booksAfter[i].ID) || (tt.wantBook.ID != booksBefore[i].ID)) {
+					t.Fatalf(
+						"got book %v changed unexpectedly %v",
+						booksBefore[i],
+						booksAfter[i],
+					)
 				}
 			}
 
@@ -281,17 +289,17 @@ func TestEditBookByIDConcurrent(t *testing.T) {
 					Year: &year,
 				}
 
-				mutex.Lock()
 				go func() {
 					defer wg.Done()
+					mutex.Lock()
 					_, errEdit = repo.EditBookByID(ctx, 1, payload)
 					years = append(years, uint16(i))
+					mutex.Unlock()
 				}()
 
 				if errEdit != nil {
 					t.Fatalf("failed to edit book with id %d and payload %v", 1, payload)
 				}
-				mutex.Unlock()
 			}
 
 			wg.Wait()
