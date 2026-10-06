@@ -279,7 +279,7 @@ func TestEditBookByIDConcurrent(t *testing.T) {
 			ctx := context.WithoutCancel(context.Background())
 			var wg sync.WaitGroup
 			var errEdit error
-			var mutex sync.Mutex
+			editChan := make(chan uint16, tt.iterations)
 			years := make([]uint16, 0, tt.iterations)
 
 			for i := 1; i <= tt.iterations; i++ {
@@ -291,10 +291,8 @@ func TestEditBookByIDConcurrent(t *testing.T) {
 
 				go func() {
 					defer wg.Done()
-					mutex.Lock()
 					_, errEdit = repo.EditBookByID(ctx, 1, payload)
-					years = append(years, uint16(i))
-					mutex.Unlock()
+					editChan <- uint16(i)
 				}()
 
 				if errEdit != nil {
@@ -303,6 +301,12 @@ func TestEditBookByIDConcurrent(t *testing.T) {
 			}
 
 			wg.Wait()
+
+			close(editChan)
+
+			for e := range editChan {
+				years = append(years, e)
+			}
 
 			ctxGet := context.WithoutCancel(context.Background())
 			books, err := repo.GetBooks(ctxGet, repository.GetBooksPayload{})

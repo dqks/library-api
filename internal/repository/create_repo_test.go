@@ -167,6 +167,52 @@ func TestCreateRepo(t *testing.T) {
 			wantRepoNil: true,
 			wantNextID:  0,
 		},
+		{
+			name:   "nil repo, id is 0",
+			nextID: 3,
+			books: []model.Book{
+				{
+					ID:        0,
+					Title:     "Test Title 1",
+					Author:    "Test Author 1",
+					Year:      2003,
+					Available: true,
+				},
+				{
+					ID:        2,
+					Title:     "Test Title 2",
+					Author:    "Test author 2",
+					Year:      2005,
+					Available: false,
+				},
+			},
+			wantBooks:   []model.Book{},
+			wantRepoNil: true,
+			wantNextID:  0,
+		},
+		{
+			name:   "nil repo, id == nextID",
+			nextID: 2,
+			books: []model.Book{
+				{
+					ID:        1,
+					Title:     "Test Title 1",
+					Author:    "Test Author 1",
+					Year:      2003,
+					Available: true,
+				},
+				{
+					ID:        2,
+					Title:     "Test Title 2",
+					Author:    "Test author 2",
+					Year:      2005,
+					Available: false,
+				},
+			},
+			wantBooks:   []model.Book{},
+			wantRepoNil: true,
+			wantNextID:  0,
+		},
 	}
 
 	for _, tt := range tests {
@@ -200,7 +246,7 @@ func TestCreateRepo(t *testing.T) {
 						)
 					}
 
-					if tt.nextID != repo.nextID {
+					if tt.wantNextID != repo.nextID {
 						t.Fatalf(
 							"expected nextID %d but got %d",
 							tt.wantNextID,

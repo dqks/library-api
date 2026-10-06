@@ -223,18 +223,18 @@ func TestGetBooks(t *testing.T) {
 			}
 
 			for i := range tt.wantBooks {
-				tt.wantBooks[i].ID++
+				books[i].ID = books[i].ID + 1
 			}
 
 			if !tt.wantCancel {
-				books, err = repo.GetBooks(ctx, payload)
+				booksAfter, err := repo.GetBooks(ctx, payload)
 
 				if err != nil {
 					t.Fatalf("failed to get books")
 				}
 
 				for i := range tt.wantBooks {
-					if tt.wantBooks[i] == books[i] {
+					if books[i] == booksAfter[i] {
 						t.Fatal("repo chnaged expectedly")
 					}
 				}
