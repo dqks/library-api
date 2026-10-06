@@ -261,10 +261,12 @@ func TestEditBookByIDConcurrent(t *testing.T) {
 	tests := []struct {
 		name       string
 		iterations int
+		id         int
 	}{
 		{
 			name:       "success",
 			iterations: 100,
+			id:         1,
 		},
 	}
 
@@ -276,11 +278,20 @@ func TestEditBookByIDConcurrent(t *testing.T) {
 				t.Fatal("failed to create repo")
 			}
 
+			ctxGet := context.WithoutCancel(context.Background())
+			bookBefore, err := repo.GetBookByID(ctxGet, tt.id)
+
+			if err != nil {
+				t.Fatalf("failed to get book by id %d", tt.id)
+			}
+
 			ctx := context.WithoutCancel(context.Background())
 			var wg sync.WaitGroup
-			var errEdit error
-			editChan := make(chan uint16, tt.iterations)
-			years := make([]uint16, 0, tt.iterations)
+			data := make(chan struct {
+				year uint16
+				book model.Book
+				err  error
+			}, tt.iterations)
 
 			for i := 1; i <= tt.iterations; i++ {
 				wg.Add(1)
@@ -291,36 +302,53 @@ func TestEditBookByIDConcurrent(t *testing.T) {
 
 				go func() {
 					defer wg.Done()
-					_, errEdit = repo.EditBookByID(ctx, 1, payload)
-					editChan <- uint16(i)
+					book, err := repo.EditBookByID(ctx, tt.id, payload)
+					data <- struct {
+						year uint16
+						book model.Book
+						err  error
+					}{
+						year: *payload.Year,
+						book: book,
+						err:  err,
+					}
 				}()
-
-				if errEdit != nil {
-					t.Fatalf("failed to edit book with id %d and payload %v", 1, payload)
-				}
 			}
 
 			wg.Wait()
 
-			close(editChan)
+			close(data)
 
-			for e := range editChan {
-				years = append(years, e)
+			for d := range data {
+				if d.err != nil {
+					t.Fatalf("failed to edit book wtih error %v", d.err)
+				}
+				if d.book.Year != uint16(d.year) {
+					t.Fatalf("got book's year %d but expected %d", d.book.Year, d.year)
+				}
+				if bookBefore.Author != d.book.Author ||
+					bookBefore.Title != d.book.Title ||
+					bookBefore.Available != d.book.Available ||
+					bookBefore.ID != d.book.ID {
+					t.Fatalf("book's fields got changed unexpectedly %v", d.book)
+				}
 			}
 
-			ctxGet := context.WithoutCancel(context.Background())
-			books, err := repo.GetBooks(ctxGet, repository.GetBooksPayload{})
+			bookAfter, err := repo.GetBookByID(ctxGet, tt.id)
 
 			if err != nil {
-				t.Fatalf("failed to get books")
+				t.Fatalf("failed to get book by id %d", tt.id)
 			}
 
-			if books[0].Year != years[len(years)-1] {
-				t.Fatalf(
-					"expected final year %d but got %d",
-					books[0].Year,
-					years[len(years)-1],
-				)
+			if bookBefore.Author != bookAfter.Author ||
+				bookBefore.Title != bookAfter.Title ||
+				bookBefore.Available != bookAfter.Available ||
+				bookBefore.ID != bookAfter.ID {
+				t.Fatalf("book's fields got changed unexpectedly %v", bookAfter)
+			}
+
+			if bookAfter.Year < 1 || bookAfter.Year > 100 {
+				t.Fatalf("got book's year out of bounds %d", bookAfter.Year)
 			}
 		})
 	}
