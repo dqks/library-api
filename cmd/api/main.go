@@ -19,23 +19,8 @@ func main() {
 	mux := http.NewServeMux()
 
 	repo := repository.CreateRepo(
-		3,
-		[]model.Book{
-			{
-				ID:        1,
-				Title:     "1984",
-				Author:    "George Orwell",
-				Year:      uint16(1956),
-				Available: true,
-			},
-			{
-				ID:        2,
-				Title:     "Kallocain",
-				Author:    "Karin Boye",
-				Year:      uint16(1937),
-				Available: false,
-			},
-		},
+		1,
+		[]model.Book{},
 	)
 
 	if repo == nil {
@@ -43,7 +28,7 @@ func main() {
 		return
 	}
 
-	service := service.CreateBookService(repo)
+	service := service.Create(repo)
 
 	if service == nil {
 		fmt.Println("произошла ошибка при запуске сервера - не получилось создать сервис")
