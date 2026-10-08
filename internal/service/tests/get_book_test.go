@@ -2,6 +2,7 @@ package tests
 
 import (
 	"context"
+	"library-api/internal/apperrors"
 	"library-api/internal/model"
 	"library-api/internal/service"
 	"testing"
@@ -9,11 +10,13 @@ import (
 
 func TestGetBook(t *testing.T) {
 	tests := []struct {
-		name     string
-		id       int
-		cancel   bool
-		wantBook model.Book
-		wantErr  error
+		name           string
+		id             int
+		cancel         bool
+		wantBook       model.Book
+		wantErr        error
+		repositoryErr  error
+		repositoryBook model.Book
 	}{
 		{
 			name:   "success",
@@ -27,6 +30,13 @@ func TestGetBook(t *testing.T) {
 				Available: false,
 			},
 			wantErr: nil,
+			repositoryBook: model.Book{
+				ID:        1,
+				Title:     "Mock Title",
+				Author:    "Mock Author",
+				Year:      2000,
+				Available: false,
+			},
 		},
 		{
 			name:     "canceled",
@@ -34,6 +44,15 @@ func TestGetBook(t *testing.T) {
 			wantBook: model.Book{},
 			wantErr:  context.Canceled,
 			cancel:   true,
+		},
+		{
+			name:           "not found",
+			id:             1,
+			cancel:         false,
+			wantBook:       model.Book{},
+			wantErr:        apperrors.ErrNotFound,
+			repositoryBook: model.Book{},
+			repositoryErr:  apperrors.ErrNotFound,
 		},
 	}
 
@@ -45,7 +64,10 @@ func TestGetBook(t *testing.T) {
 				cancel()
 			}
 
-			s := service.Create(&MockRepo{})
+			s := service.Create(&MockRepo{
+				err:  tt.repositoryErr,
+				book: tt.repositoryBook,
+			})
 
 			book, err := s.GetBookByID(ctx, tt.id)
 

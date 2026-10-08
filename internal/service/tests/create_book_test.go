@@ -11,18 +11,20 @@ import (
 
 func TestCreateBook(t *testing.T) {
 	tests := []struct {
-		name         string
-		title        string
-		titleNil     bool
-		author       string
-		authorNil    bool
-		year         uint16
-		yearNil      bool
-		available    bool
-		availableNil bool
-		cancel       bool
-		wantBook     model.Book
-		wantErr      error
+		name           string
+		title          string
+		titleNil       bool
+		author         string
+		authorNil      bool
+		year           uint16
+		yearNil        bool
+		available      bool
+		availableNil   bool
+		cancel         bool
+		wantBook       model.Book
+		wantErr        error
+		repositoryBook model.Book
+		repositoryErr  error
 	}{
 		{
 			name:      "success",
@@ -32,6 +34,13 @@ func TestCreateBook(t *testing.T) {
 			available: true,
 			cancel:    false,
 			wantBook: model.Book{
+				ID:        1,
+				Title:     "New Title",
+				Author:    "New Author",
+				Year:      uint16(2000),
+				Available: true,
+			},
+			repositoryBook: model.Book{
 				ID:        1,
 				Title:     "New Title",
 				Author:    "New Author",
@@ -96,8 +105,8 @@ func TestCreateBook(t *testing.T) {
 		},
 		{
 			name:      "err, empty string author",
-			title:     "",
-			author:    "New Author",
+			title:     "New Title",
+			author:    "",
 			year:      uint16(0),
 			available: true,
 			cancel:    false,
@@ -124,6 +133,25 @@ func TestCreateBook(t *testing.T) {
 			wantBook:  model.Book{},
 			wantErr:   context.Canceled,
 		},
+		{
+			name:         "err, all fields nil",
+			titleNil:     true,
+			authorNil:    true,
+			yearNil:      true,
+			availableNil: true,
+			wantBook:     model.Book{},
+			wantErr:      apperrors.ErrRequiredFields,
+		},
+		{
+			name:          "err, repository context canceled",
+			title:         "New Title",
+			author:        "New Author",
+			year:          uint16(2000),
+			available:     true,
+			wantBook:      model.Book{},
+			wantErr:       context.Canceled,
+			repositoryErr: context.Canceled,
+		},
 	}
 
 	for _, tt := range tests {
@@ -135,7 +163,10 @@ func TestCreateBook(t *testing.T) {
 				cancel()
 			}
 
-			s := service.Create(&MockRepo{})
+			s := service.Create(&MockRepo{
+				book: tt.repositoryBook,
+				err:  tt.repositoryErr,
+			})
 
 			input := service.CreateBookInput{}
 

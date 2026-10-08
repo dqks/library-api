@@ -9,12 +9,14 @@ import (
 
 func TestGetBooks(t *testing.T) {
 	tests := []struct {
-		name         string
-		available    bool
-		availableNil bool
-		cancel       bool
-		wantBooks    []model.Book
-		wantErr      error
+		name            string
+		available       bool
+		availableNil    bool
+		cancel          bool
+		wantBooks       []model.Book
+		wantErr         error
+		repositoryErr   error
+		repositoryBooks []model.Book
 	}{
 		{
 			name:      "success, available false",
@@ -29,12 +31,22 @@ func TestGetBooks(t *testing.T) {
 					Available: false,
 				},
 			},
-			wantErr: nil,
+			wantErr:       nil,
+			repositoryErr: nil,
+			repositoryBooks: []model.Book{
+				{
+					ID:        1,
+					Title:     "Mock Title",
+					Author:    "Mock Author",
+					Year:      2000,
+					Available: false,
+				},
+			},
 		},
 		{
 			name:         "success, available true",
 			available:    true,
-			availableNil: true,
+			availableNil: false,
 			cancel:       false,
 			wantBooks: []model.Book{
 				{
@@ -45,14 +57,32 @@ func TestGetBooks(t *testing.T) {
 					Available: false,
 				},
 			},
-			wantErr: nil,
+			wantErr:       nil,
+			repositoryErr: nil,
+			repositoryBooks: []model.Book{
+				{
+					ID:        1,
+					Title:     "Mock Title",
+					Author:    "Mock Author",
+					Year:      2000,
+					Available: false,
+				},
+			},
 		},
 		{
-			name:      "canceled",
+			name:      "canceled by service",
 			available: false,
 			wantBooks: []model.Book{},
 			wantErr:   context.Canceled,
 			cancel:    true,
+		},
+		{
+			name:            "canceled by service",
+			available:       false,
+			wantBooks:       []model.Book{},
+			wantErr:         context.Canceled,
+			repositoryBooks: nil,
+			repositoryErr:   context.Canceled,
 		},
 	}
 
@@ -64,7 +94,10 @@ func TestGetBooks(t *testing.T) {
 				cancel()
 			}
 
-			s := service.Create(&MockRepo{})
+			s := service.Create(&MockRepo{
+				books: tt.repositoryBooks,
+				err:   tt.repositoryErr,
+			})
 
 			params := service.GetBooksQueryParams{}
 

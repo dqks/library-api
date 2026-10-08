@@ -6,20 +6,18 @@ import (
 	"library-api/internal/repository"
 )
 
-type MockRepo struct{}
+type MockRepo struct {
+	book  model.Book
+	err   error
+	books []model.Book
+}
 
 func (r *MockRepo) CreateBook(ctx context.Context, p repository.CreateBookPayload) (model.Book, error) {
-	return model.Book{
-		ID:        1,
-		Title:     *p.Title,
-		Author:    *p.Author,
-		Year:      *p.Year,
-		Available: *p.Available,
-	}, nil
+	return r.book, r.err
 }
 
 func (r *MockRepo) DeleteBookByID(ctx context.Context, id int) error {
-	return nil
+	return r.err
 }
 
 // TODO в тесте и здесь продумать nil поля
@@ -27,33 +25,13 @@ func (r *MockRepo) DeleteBookByID(ctx context.Context, id int) error {
 // но я думаю что нужен, т.к. сервис может взаимодействовать
 // с nil полями
 func (r *MockRepo) EditBookByID(ctx context.Context, id int, p repository.EditBookPayload) (model.Book, error) {
-	return model.Book{
-		ID:        1,
-		Title:     *p.Title,
-		Author:    *p.Author,
-		Year:      *p.Year,
-		Available: *p.Available,
-	}, nil
+	return r.book, r.err
 }
 
 func (r *MockRepo) GetBookByID(ctx context.Context, id int) (model.Book, error) {
-	return model.Book{
-		ID:        1,
-		Title:     "Mock Title",
-		Author:    "Mock Author",
-		Year:      2000,
-		Available: false,
-	}, nil
+	return r.book, r.err
 }
 
 func (r *MockRepo) GetBooks(ctx context.Context, params repository.GetBooksPayload) ([]model.Book, error) {
-	return []model.Book{
-		{
-			ID:        1,
-			Title:     "Mock Title",
-			Author:    "Mock Author",
-			Year:      2000,
-			Available: false,
-		},
-	}, nil
+	return r.books, r.err
 }
