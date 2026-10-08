@@ -3,9 +3,15 @@ package tests
 import (
 	"context"
 	"library-api/internal/model"
+	"library-api/internal/repository"
 	"library-api/internal/service"
+	"reflect"
 	"testing"
 )
+
+type getBooksPayload struct {
+	available bool
+}
 
 func TestGetBooks(t *testing.T) {
 	tests := []struct {
@@ -17,6 +23,7 @@ func TestGetBooks(t *testing.T) {
 		wantErr         error
 		repositoryErr   error
 		repositoryBooks []model.Book
+		receivedPayload getBooksPayload
 	}{
 		{
 			name:      "success, available false",
@@ -41,6 +48,9 @@ func TestGetBooks(t *testing.T) {
 					Year:      2000,
 					Available: false,
 				},
+			},
+			receivedPayload: getBooksPayload{
+				available: false,
 			},
 		},
 		{
@@ -68,6 +78,9 @@ func TestGetBooks(t *testing.T) {
 					Available: false,
 				},
 			},
+			receivedPayload: getBooksPayload{
+				available: true,
+			},
 		},
 		{
 			name:      "canceled by service",
@@ -77,12 +90,15 @@ func TestGetBooks(t *testing.T) {
 			cancel:    true,
 		},
 		{
-			name:            "canceled by service",
+			name:            "canceled by repository",
 			available:       false,
 			wantBooks:       []model.Book{},
 			wantErr:         context.Canceled,
 			repositoryBooks: nil,
 			repositoryErr:   context.Canceled,
+			receivedPayload: getBooksPayload{
+				available: false,
+			},
 		},
 	}
 
@@ -94,10 +110,12 @@ func TestGetBooks(t *testing.T) {
 				cancel()
 			}
 
-			s := service.Create(&MockRepo{
+			repo := &MockRepo{
 				books: tt.repositoryBooks,
 				err:   tt.repositoryErr,
-			})
+			}
+
+			s := service.Create(repo)
 
 			params := service.GetBooksQueryParams{}
 
@@ -106,6 +124,18 @@ func TestGetBooks(t *testing.T) {
 			}
 
 			books, err := s.GetBooks(ctx, params)
+
+			if repo.gotInside {
+				payload := repository.GetBooksPayload{}
+
+				if !tt.availableNil {
+					payload.Available = &tt.receivedPayload.available
+				}
+
+				if !reflect.DeepEqual(payload, repo.getBooksPayload) {
+					t.Fatalf("expected to call repository with payload %v\nbut got %v", payload, repo.getBooksPayload)
+				}
+			}
 
 			if err != tt.wantErr {
 				t.Fatalf(

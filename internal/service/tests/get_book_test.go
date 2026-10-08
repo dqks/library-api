@@ -64,12 +64,20 @@ func TestGetBook(t *testing.T) {
 				cancel()
 			}
 
-			s := service.Create(&MockRepo{
+			repo := &MockRepo{
 				err:  tt.repositoryErr,
 				book: tt.repositoryBook,
-			})
+			}
+
+			s := service.Create(repo)
 
 			book, err := s.GetBookByID(ctx, tt.id)
+
+			if repo.gotInside {
+				if repo.id != tt.id {
+					t.Fatalf("expected to call repository with id %d but got %d", tt.id, repo.id)
+				}
+			}
 
 			if err != tt.wantErr {
 				t.Fatalf(

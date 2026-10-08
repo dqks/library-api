@@ -4,27 +4,37 @@ import (
 	"context"
 	"library-api/internal/apperrors"
 	"library-api/internal/model"
+	"library-api/internal/repository"
 	"library-api/internal/service"
+	"reflect"
 	"testing"
 	"time"
 )
 
+type createBookPayload struct {
+	title     string
+	author    string
+	year      uint16
+	available bool
+}
+
 func TestCreateBook(t *testing.T) {
 	tests := []struct {
-		name           string
-		title          string
-		titleNil       bool
-		author         string
-		authorNil      bool
-		year           uint16
-		yearNil        bool
-		available      bool
-		availableNil   bool
-		cancel         bool
-		wantBook       model.Book
-		wantErr        error
-		repositoryBook model.Book
-		repositoryErr  error
+		name                      string
+		title                     string
+		titleNil                  bool
+		author                    string
+		authorNil                 bool
+		year                      uint16
+		yearNil                   bool
+		available                 bool
+		availableNil              bool
+		cancel                    bool
+		wantBook                  model.Book
+		wantErr                   error
+		repositoryBook            model.Book
+		repositoryErr             error
+		receivedCreateBookPayload createBookPayload
 	}{
 		{
 			name:      "success",
@@ -48,6 +58,12 @@ func TestCreateBook(t *testing.T) {
 				Available: true,
 			},
 			wantErr: nil,
+			receivedCreateBookPayload: createBookPayload{
+				title:     "New Title",
+				author:    "New Author",
+				year:      uint16(2000),
+				available: true,
+			},
 		},
 		{
 			name:      "err, nil title",
@@ -124,7 +140,7 @@ func TestCreateBook(t *testing.T) {
 			wantErr:   apperrors.ErrInvalidValues,
 		},
 		{
-			name:      "err, canceled",
+			name:      "err, canceled by service",
 			title:     "New Title",
 			author:    "New Author",
 			year:      uint16(time.Now().Year()),
@@ -134,13 +150,14 @@ func TestCreateBook(t *testing.T) {
 			wantErr:   context.Canceled,
 		},
 		{
-			name:         "err, all fields nil",
-			titleNil:     true,
-			authorNil:    true,
-			yearNil:      true,
-			availableNil: true,
-			wantBook:     model.Book{},
-			wantErr:      apperrors.ErrRequiredFields,
+			name:                      "err, all fields nil",
+			titleNil:                  true,
+			authorNil:                 true,
+			yearNil:                   true,
+			availableNil:              true,
+			wantBook:                  model.Book{},
+			wantErr:                   apperrors.ErrRequiredFields,
+			receivedCreateBookPayload: createBookPayload{},
 		},
 		{
 			name:          "err, repository context canceled",
@@ -151,6 +168,12 @@ func TestCreateBook(t *testing.T) {
 			wantBook:      model.Book{},
 			wantErr:       context.Canceled,
 			repositoryErr: context.Canceled,
+			receivedCreateBookPayload: createBookPayload{
+				title:     "New Title",
+				author:    "New Author",
+				year:      uint16(2000),
+				available: true,
+			},
 		},
 	}
 
@@ -163,10 +186,12 @@ func TestCreateBook(t *testing.T) {
 				cancel()
 			}
 
-			s := service.Create(&MockRepo{
+			repo := MockRepo{
 				book: tt.repositoryBook,
 				err:  tt.repositoryErr,
-			})
+			}
+
+			s := service.Create(&repo)
 
 			input := service.CreateBookInput{}
 
@@ -187,6 +212,34 @@ func TestCreateBook(t *testing.T) {
 			}
 
 			book, err := s.CreateBook(ctx, input)
+
+			if repo.gotInside {
+				expectedPayload := repository.CreateBookPayload{}
+
+				if !tt.authorNil {
+					expectedPayload.Author = &tt.receivedCreateBookPayload.author
+				}
+
+				if !tt.titleNil {
+					expectedPayload.Title = &tt.receivedCreateBookPayload.title
+				}
+
+				if !tt.yearNil {
+					expectedPayload.Year = &tt.receivedCreateBookPayload.year
+				}
+
+				if !tt.availableNil {
+					expectedPayload.Available = &tt.receivedCreateBookPayload.available
+				}
+
+				if !reflect.DeepEqual(repo.createBookPayload, expectedPayload) {
+					t.Fatalf(
+						"expected repository payload %#v\nbut got %#v",
+						expectedPayload,
+						repo.createBookPayload,
+					)
+				}
+			}
 
 			if err != tt.wantErr {
 				t.Fatalf("expected err %v but got %v", tt.wantErr, err)

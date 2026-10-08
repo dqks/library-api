@@ -3,19 +3,17 @@ package tests
 import (
 	"context"
 	"library-api/internal/apperrors"
-	"library-api/internal/model"
 	"library-api/internal/service"
 	"testing"
 )
 
 func TestDeleteBookByID(t *testing.T) {
 	tests := []struct {
-		name           string
-		id             int
-		cancel         bool
-		repositoryBook model.Book
-		repositoryErr  error
-		wantErr        error
+		name          string
+		id            int
+		cancel        bool
+		repositoryErr error
+		wantErr       error
 	}{
 		{
 			name:    "success",
@@ -52,9 +50,17 @@ func TestDeleteBookByID(t *testing.T) {
 				cancel()
 			}
 
-			s := service.Create(&MockRepo{
+			repo := &MockRepo{
 				err: tt.repositoryErr,
-			})
+			}
+
+			s := service.Create(repo)
+
+			if repo.gotInside {
+				if repo.id != tt.id {
+					t.Fatalf("expected to call repository with id %d but got %d", tt.id, repo.id)
+				}
+			}
 
 			err := s.DeleteBookByID(ctx, tt.id)
 
