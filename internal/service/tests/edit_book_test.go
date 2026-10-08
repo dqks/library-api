@@ -336,7 +336,7 @@ func TestEditBookByID(t *testing.T) {
 					t.Fatalf(
 						"expected repository payload %#v\nbut got %#v",
 						expectedPayload,
-						repo.createBookPayload,
+						repo.editBookPayload,
 					)
 				}
 

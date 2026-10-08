@@ -56,13 +56,13 @@ func TestDeleteBookByID(t *testing.T) {
 
 			s := service.Create(repo)
 
+			err := s.DeleteBookByID(ctx, tt.id)
+
 			if repo.gotInside {
 				if repo.id != tt.id {
 					t.Fatalf("expected to call repository with id %d but got %d", tt.id, repo.id)
 				}
 			}
-
-			err := s.DeleteBookByID(ctx, tt.id)
 
 			if err != tt.wantErr {
 				t.Fatalf("expected err %v but got %v", tt.wantErr, err)

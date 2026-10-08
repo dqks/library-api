@@ -2,7 +2,6 @@ package tests
 
 import (
 	"context"
-	"fmt"
 	"library-api/internal/model"
 	"library-api/internal/repository"
 )
@@ -21,7 +20,6 @@ type MockRepo struct {
 func (r *MockRepo) CreateBook(ctx context.Context, p repository.CreateBookPayload) (model.Book, error) {
 	r.gotInside = true
 	r.createBookPayload = p
-	fmt.Printf("%#v CreateBook\n", p)
 	return r.book, r.err
 }
 
