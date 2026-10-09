@@ -35,11 +35,11 @@ func TestCreate(t *testing.T) {
 
 			if tt.serviceNil {
 				if service != nil {
-					t.Fatalf("expected service to be %v but got %v", tt.wantService, *service)
+					t.Fatalf("expected service to be %v but got %v", tt.wantService, service)
 				}
 			} else {
-				if !reflect.DeepEqual(*service, tt.wantService) {
-					t.Fatalf("expected service to be %v but got %v", tt.wantService, *service)
+				if !reflect.DeepEqual(service, &tt.wantService) {
+					t.Fatalf("expected service to be %#v but got %#v", &tt.wantService, service)
 				}
 			}
 		})

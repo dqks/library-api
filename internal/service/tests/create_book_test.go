@@ -243,10 +243,9 @@ func TestCreateBook(t *testing.T) {
 					)
 				}
 			} else if tt.getInRepo && !repo.gotInside {
-				t.Fatalf("expected not to get in repository but got")
-
-			} else if !tt.getInRepo && repo.gotInside {
 				t.Fatalf("expected to get in repository but didn't")
+			} else if !tt.getInRepo && repo.gotInside {
+				t.Fatalf("expected not to get in repository but got")
 			}
 
 			if err != tt.wantErr {

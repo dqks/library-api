@@ -166,10 +166,9 @@ func TestGetBooks(t *testing.T) {
 					t.Fatalf("expected to call repository with payload %v\nbut got %v", payload, repo.getBooksPayload)
 				}
 			} else if tt.getInRepo && !repo.gotInside {
-				t.Fatalf("expected not to get in repository but got")
-
-			} else if !tt.getInRepo && repo.gotInside {
 				t.Fatalf("expected to get in repository but didn't")
+			} else if !tt.getInRepo && repo.gotInside {
+				t.Fatalf("expected not to get in repository but got")
 			}
 
 			if err != tt.wantErr {
