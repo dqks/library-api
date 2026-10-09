@@ -24,6 +24,7 @@ func TestGetBooks(t *testing.T) {
 		repositoryErr   error
 		repositoryBooks []model.Book
 		receivedPayload getBooksPayload
+		getInRepo       bool
 	}{
 		{
 			name:      "success, available false",
@@ -52,6 +53,7 @@ func TestGetBooks(t *testing.T) {
 			receivedPayload: getBooksPayload{
 				available: false,
 			},
+			getInRepo: true,
 		},
 		{
 			name:         "success, available true",
@@ -81,6 +83,7 @@ func TestGetBooks(t *testing.T) {
 			receivedPayload: getBooksPayload{
 				available: true,
 			},
+			getInRepo: true,
 		},
 		{
 			name:      "canceled by service",
@@ -99,6 +102,7 @@ func TestGetBooks(t *testing.T) {
 			receivedPayload: getBooksPayload{
 				available: false,
 			},
+			getInRepo: true,
 		},
 	}
 
@@ -125,15 +129,19 @@ func TestGetBooks(t *testing.T) {
 
 			books, err := s.GetBooks(ctx, params)
 
-			if repo.gotInside {
-				payload := repository.GetBooksPayload{}
+			if tt.getInRepo {
+				if repo.gotInside {
+					payload := repository.GetBooksPayload{}
 
-				if !tt.availableNil {
-					payload.Available = &tt.receivedPayload.available
-				}
+					if !tt.availableNil {
+						payload.Available = &tt.receivedPayload.available
+					}
 
-				if !reflect.DeepEqual(payload, repo.getBooksPayload) {
-					t.Fatalf("expected to call repository with payload %v\nbut got %v", payload, repo.getBooksPayload)
+					if !reflect.DeepEqual(payload, repo.getBooksPayload) {
+						t.Fatalf("expected to call repository with payload %v\nbut got %v", payload, repo.getBooksPayload)
+					}
+				} else {
+					t.Fatalf("expected to get in repository but didn't")
 				}
 			}
 

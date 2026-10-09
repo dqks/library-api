@@ -32,6 +32,7 @@ func TestCreateBook(t *testing.T) {
 		cancel                    bool
 		wantBook                  model.Book
 		wantErr                   error
+		getInRepo                 bool
 		repositoryBook            model.Book
 		repositoryErr             error
 		receivedCreateBookPayload createBookPayload
@@ -64,6 +65,7 @@ func TestCreateBook(t *testing.T) {
 				year:      uint16(2000),
 				available: true,
 			},
+			getInRepo: true,
 		},
 		{
 			name:      "err, nil title",
@@ -174,6 +176,7 @@ func TestCreateBook(t *testing.T) {
 				year:      uint16(2000),
 				available: true,
 			},
+			getInRepo: true,
 		},
 	}
 
@@ -213,31 +216,35 @@ func TestCreateBook(t *testing.T) {
 
 			book, err := s.CreateBook(ctx, input)
 
-			if repo.gotInside {
-				expectedPayload := repository.CreateBookPayload{}
+			if tt.getInRepo {
+				if repo.gotInside {
+					expectedPayload := repository.CreateBookPayload{}
 
-				if !tt.authorNil {
-					expectedPayload.Author = &tt.receivedCreateBookPayload.author
-				}
+					if !tt.authorNil {
+						expectedPayload.Author = &tt.receivedCreateBookPayload.author
+					}
 
-				if !tt.titleNil {
-					expectedPayload.Title = &tt.receivedCreateBookPayload.title
-				}
+					if !tt.titleNil {
+						expectedPayload.Title = &tt.receivedCreateBookPayload.title
+					}
 
-				if !tt.yearNil {
-					expectedPayload.Year = &tt.receivedCreateBookPayload.year
-				}
+					if !tt.yearNil {
+						expectedPayload.Year = &tt.receivedCreateBookPayload.year
+					}
 
-				if !tt.availableNil {
-					expectedPayload.Available = &tt.receivedCreateBookPayload.available
-				}
+					if !tt.availableNil {
+						expectedPayload.Available = &tt.receivedCreateBookPayload.available
+					}
 
-				if !reflect.DeepEqual(repo.createBookPayload, expectedPayload) {
-					t.Fatalf(
-						"expected repository payload %#v\nbut got %#v",
-						expectedPayload,
-						repo.createBookPayload,
-					)
+					if !reflect.DeepEqual(repo.createBookPayload, expectedPayload) {
+						t.Fatalf(
+							"expected repository payload %#v\nbut got %#v",
+							expectedPayload,
+							repo.createBookPayload,
+						)
+					}
+				} else {
+					t.Fatalf("expected to get in repository but didn't")
 				}
 			}
 

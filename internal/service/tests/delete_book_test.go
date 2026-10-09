@@ -14,12 +14,14 @@ func TestDeleteBookByID(t *testing.T) {
 		cancel        bool
 		repositoryErr error
 		wantErr       error
+		getInRepo     bool
 	}{
 		{
-			name:    "success",
-			id:      1,
-			cancel:  false,
-			wantErr: nil,
+			name:      "success",
+			id:        1,
+			cancel:    false,
+			wantErr:   nil,
+			getInRepo: true,
 		},
 		{
 			name:    "canceled by service",
@@ -32,12 +34,14 @@ func TestDeleteBookByID(t *testing.T) {
 			id:            1,
 			wantErr:       context.Canceled,
 			repositoryErr: context.Canceled,
+			getInRepo:     true,
 		},
 		{
 			name:          "not found",
 			id:            1,
 			wantErr:       apperrors.ErrNotFound,
 			repositoryErr: apperrors.ErrNotFound,
+			getInRepo:     true,
 		},
 	}
 
@@ -58,9 +62,13 @@ func TestDeleteBookByID(t *testing.T) {
 
 			err := s.DeleteBookByID(ctx, tt.id)
 
-			if repo.gotInside {
-				if repo.id != tt.id {
-					t.Fatalf("expected to call repository with id %d but got %d", tt.id, repo.id)
+			if tt.getInRepo {
+				if repo.gotInside {
+					if repo.id != tt.id {
+						t.Fatalf("expected to call repository with id %d but got %d", tt.id, repo.id)
+					}
+				} else {
+					t.Fatalf("expected to get in repository but didn't")
 				}
 			}
 

@@ -36,6 +36,7 @@ func TestEditBookByID(t *testing.T) {
 		yearNil         bool
 		availableNil    bool
 		receivedPayload editBookPayload
+		getInRepo       bool
 	}{
 		{
 			id:        1,
@@ -67,6 +68,7 @@ func TestEditBookByID(t *testing.T) {
 				year:      uint16(2000),
 				available: true,
 			},
+			getInRepo: true,
 		},
 		{
 			id:             1,
@@ -86,6 +88,7 @@ func TestEditBookByID(t *testing.T) {
 				year:      uint16(2000),
 				available: true,
 			},
+			getInRepo: true,
 		},
 		{
 			id:        1,
@@ -149,6 +152,7 @@ func TestEditBookByID(t *testing.T) {
 				year:      uint16(time.Now().Year()),
 				available: true,
 			},
+			getInRepo: true,
 		},
 		{
 			id:           1,
@@ -309,37 +313,40 @@ func TestEditBookByID(t *testing.T) {
 
 			book, err := s.EditBookByID(ctx, tt.id, input)
 
-			if repo.gotInside {
-				if tt.id != repo.id {
-					t.Fatalf("expected to call repository with id %d but got %d", tt.id, repo.id)
+			if tt.getInRepo {
+				if repo.gotInside {
+					if tt.id != repo.id {
+						t.Fatalf("expected to call repository with id %d but got %d", tt.id, repo.id)
+					}
+
+					expectedPayload := repository.EditBookPayload{}
+
+					if !tt.authorNil {
+						expectedPayload.Author = &tt.receivedPayload.author
+					}
+
+					if !tt.titleNil {
+						expectedPayload.Title = &tt.receivedPayload.title
+					}
+
+					if !tt.yearNil {
+						expectedPayload.Year = &tt.receivedPayload.year
+					}
+
+					if !tt.availableNil {
+						expectedPayload.Available = &tt.receivedPayload.available
+					}
+
+					if !reflect.DeepEqual(repo.editBookPayload, expectedPayload) {
+						t.Fatalf(
+							"expected repository payload %#v\nbut got %#v",
+							expectedPayload,
+							repo.editBookPayload,
+						)
+					}
+				} else {
+					t.Fatalf("expected to get in repository but didn't")
 				}
-
-				expectedPayload := repository.EditBookPayload{}
-
-				if !tt.authorNil {
-					expectedPayload.Author = &tt.receivedPayload.author
-				}
-
-				if !tt.titleNil {
-					expectedPayload.Title = &tt.receivedPayload.title
-				}
-
-				if !tt.yearNil {
-					expectedPayload.Year = &tt.receivedPayload.year
-				}
-
-				if !tt.availableNil {
-					expectedPayload.Available = &tt.receivedPayload.available
-				}
-
-				if !reflect.DeepEqual(repo.editBookPayload, expectedPayload) {
-					t.Fatalf(
-						"expected repository payload %#v\nbut got %#v",
-						expectedPayload,
-						repo.editBookPayload,
-					)
-				}
-
 			}
 
 			if book != tt.wantBook {

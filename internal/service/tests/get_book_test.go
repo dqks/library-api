@@ -17,6 +17,7 @@ func TestGetBook(t *testing.T) {
 		wantErr        error
 		repositoryErr  error
 		repositoryBook model.Book
+		getInRepo      bool
 	}{
 		{
 			name:   "success",
@@ -37,6 +38,7 @@ func TestGetBook(t *testing.T) {
 				Year:      2000,
 				Available: false,
 			},
+			getInRepo: true,
 		},
 		{
 			name:     "canceled",
@@ -53,6 +55,7 @@ func TestGetBook(t *testing.T) {
 			wantErr:        apperrors.ErrNotFound,
 			repositoryBook: model.Book{},
 			repositoryErr:  apperrors.ErrNotFound,
+			getInRepo:      true,
 		},
 	}
 
@@ -73,9 +76,13 @@ func TestGetBook(t *testing.T) {
 
 			book, err := s.GetBookByID(ctx, tt.id)
 
-			if repo.gotInside {
-				if repo.id != tt.id {
-					t.Fatalf("expected to call repository with id %d but got %d", tt.id, repo.id)
+			if tt.getInRepo {
+				if repo.gotInside {
+					if repo.id != tt.id {
+						t.Fatalf("expected to call repository with id %d but got %d", tt.id, repo.id)
+					}
+				} else {
+					t.Fatalf("expected to get in repository but didn't")
 				}
 			}
 
