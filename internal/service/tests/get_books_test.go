@@ -56,10 +56,9 @@ func TestGetBooks(t *testing.T) {
 			getInRepo: true,
 		},
 		{
-			name:         "success, available true",
-			available:    true,
-			availableNil: false,
-			cancel:       false,
+			name:      "success, available true",
+			available: true,
+			cancel:    false,
 			wantBooks: []model.Book{
 				{
 					ID:        1,
@@ -104,6 +103,33 @@ func TestGetBooks(t *testing.T) {
 			},
 			getInRepo: true,
 		},
+		{
+			name:         "available nil",
+			available:    false,
+			availableNil: true,
+			wantBooks: []model.Book{
+				{
+					ID:        1,
+					Title:     "Mock Title",
+					Author:    "Mock Author",
+					Year:      2000,
+					Available: false,
+				},
+			},
+			wantErr: nil,
+			repositoryBooks: []model.Book{
+				{
+					ID:        1,
+					Title:     "Mock Title",
+					Author:    "Mock Author",
+					Year:      2000,
+					Available: false,
+				},
+			},
+			repositoryErr:   nil,
+			receivedPayload: getBooksPayload{},
+			getInRepo:       true,
+		},
 	}
 
 	for _, tt := range tests {
@@ -129,20 +155,21 @@ func TestGetBooks(t *testing.T) {
 
 			books, err := s.GetBooks(ctx, params)
 
-			if tt.getInRepo {
-				if repo.gotInside {
-					payload := repository.GetBooksPayload{}
+			if tt.getInRepo && repo.gotInside {
+				payload := repository.GetBooksPayload{}
 
-					if !tt.availableNil {
-						payload.Available = &tt.receivedPayload.available
-					}
-
-					if !reflect.DeepEqual(payload, repo.getBooksPayload) {
-						t.Fatalf("expected to call repository with payload %v\nbut got %v", payload, repo.getBooksPayload)
-					}
-				} else {
-					t.Fatalf("expected to get in repository but didn't")
+				if !tt.availableNil {
+					payload.Available = &tt.receivedPayload.available
 				}
+
+				if !reflect.DeepEqual(payload, repo.getBooksPayload) {
+					t.Fatalf("expected to call repository with payload %v\nbut got %v", payload, repo.getBooksPayload)
+				}
+			} else if tt.getInRepo && !repo.gotInside {
+				t.Fatalf("expected not to get in repository but got")
+
+			} else if !tt.getInRepo && repo.gotInside {
+				t.Fatalf("expected to get in repository but didn't")
 			}
 
 			if err != tt.wantErr {

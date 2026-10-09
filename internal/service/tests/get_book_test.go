@@ -76,14 +76,15 @@ func TestGetBook(t *testing.T) {
 
 			book, err := s.GetBookByID(ctx, tt.id)
 
-			if tt.getInRepo {
-				if repo.gotInside {
-					if repo.id != tt.id {
-						t.Fatalf("expected to call repository with id %d but got %d", tt.id, repo.id)
-					}
-				} else {
-					t.Fatalf("expected to get in repository but didn't")
+			if tt.getInRepo && repo.gotInside {
+				if repo.id != tt.id {
+					t.Fatalf("expected to call repository with id %d but got %d", tt.id, repo.id)
 				}
+			} else if tt.getInRepo && !repo.gotInside {
+				t.Fatalf("expected not to get in repository but got")
+
+			} else if !tt.getInRepo && repo.gotInside {
+				t.Fatalf("expected to get in repository but didn't")
 			}
 
 			if err != tt.wantErr {

@@ -216,36 +216,37 @@ func TestCreateBook(t *testing.T) {
 
 			book, err := s.CreateBook(ctx, input)
 
-			if tt.getInRepo {
-				if repo.gotInside {
-					expectedPayload := repository.CreateBookPayload{}
+			if tt.getInRepo && repo.gotInside {
+				expectedPayload := repository.CreateBookPayload{}
 
-					if !tt.authorNil {
-						expectedPayload.Author = &tt.receivedCreateBookPayload.author
-					}
-
-					if !tt.titleNil {
-						expectedPayload.Title = &tt.receivedCreateBookPayload.title
-					}
-
-					if !tt.yearNil {
-						expectedPayload.Year = &tt.receivedCreateBookPayload.year
-					}
-
-					if !tt.availableNil {
-						expectedPayload.Available = &tt.receivedCreateBookPayload.available
-					}
-
-					if !reflect.DeepEqual(repo.createBookPayload, expectedPayload) {
-						t.Fatalf(
-							"expected repository payload %#v\nbut got %#v",
-							expectedPayload,
-							repo.createBookPayload,
-						)
-					}
-				} else {
-					t.Fatalf("expected to get in repository but didn't")
+				if !tt.authorNil {
+					expectedPayload.Author = &tt.receivedCreateBookPayload.author
 				}
+
+				if !tt.titleNil {
+					expectedPayload.Title = &tt.receivedCreateBookPayload.title
+				}
+
+				if !tt.yearNil {
+					expectedPayload.Year = &tt.receivedCreateBookPayload.year
+				}
+
+				if !tt.availableNil {
+					expectedPayload.Available = &tt.receivedCreateBookPayload.available
+				}
+
+				if !reflect.DeepEqual(repo.createBookPayload, expectedPayload) {
+					t.Fatalf(
+						"expected repository payload %#v\nbut got %#v",
+						expectedPayload,
+						repo.createBookPayload,
+					)
+				}
+			} else if tt.getInRepo && !repo.gotInside {
+				t.Fatalf("expected not to get in repository but got")
+
+			} else if !tt.getInRepo && repo.gotInside {
+				t.Fatalf("expected to get in repository but didn't")
 			}
 
 			if err != tt.wantErr {
