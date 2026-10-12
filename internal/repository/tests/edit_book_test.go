@@ -168,9 +168,28 @@ func TestEditBookByID(t *testing.T) {
 		},
 	}
 
+	testBooks := []model.Book{
+		{
+			ID:        1,
+			Title:     "1984",
+			Author:    "George Orwell",
+			Year:      uint16(1956),
+			Available: true,
+		},
+		{
+			ID:        2,
+			Title:     "Kallocain",
+			Author:    "Karin Boye",
+			Year:      uint16(1937),
+			Available: false,
+		},
+	}
+
+	nextID := 3
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			repo := createTestRepo()
+			repo := repository.CreateRepo(nextID, testBooks)
 
 			if repo == nil {
 				t.Fatal("failed to create repository")
@@ -270,9 +289,28 @@ func TestEditBookByIDConcurrent(t *testing.T) {
 		},
 	}
 
+	testBooks := []model.Book{
+		{
+			ID:        1,
+			Title:     "1984",
+			Author:    "George Orwell",
+			Year:      uint16(1956),
+			Available: true,
+		},
+		{
+			ID:        2,
+			Title:     "Kallocain",
+			Author:    "Karin Boye",
+			Year:      uint16(1937),
+			Available: false,
+		},
+	}
+
+	nextID := 3
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			repo := createTestRepo()
+			repo := repository.CreateRepo(nextID, testBooks)
 
 			if repo == nil {
 				t.Fatal("failed to create repo")

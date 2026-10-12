@@ -1,6 +1,8 @@
 package handler
 
-import "library-api/internal/model"
+import (
+	"library-api/internal/model"
+)
 
 type BookDTO struct {
 	ID        int    `json:"id"`

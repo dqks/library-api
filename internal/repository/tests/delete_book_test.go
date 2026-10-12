@@ -38,9 +38,28 @@ func TestDeleteBookByID(t *testing.T) {
 		},
 	}
 
+	testBooks := []model.Book{
+		{
+			ID:        1,
+			Title:     "1984",
+			Author:    "George Orwell",
+			Year:      uint16(1956),
+			Available: true,
+		},
+		{
+			ID:        2,
+			Title:     "Kallocain",
+			Author:    "Karin Boye",
+			Year:      uint16(1937),
+			Available: false,
+		},
+	}
+
+	nextID := 3
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			repo := createTestRepo()
+			repo := repository.CreateRepo(nextID, testBooks)
 
 			if repo == nil {
 				t.Fatal("failed to create repository")
@@ -135,59 +154,58 @@ func TestDeleteBookByIDMultiple(t *testing.T) {
 		},
 	}
 
-	createTestRepo := func() *repository.BookRepository {
-		return repository.CreateRepo(
-			7,
-			[]model.Book{
-				{
-					ID:        1,
-					Title:     "1984",
-					Author:    "George Orwell",
-					Year:      uint16(1956),
-					Available: true,
-				},
-				{
-					ID:        2,
-					Title:     "Kallocain",
-					Author:    "Karin Boye",
-					Year:      uint16(1937),
-					Available: false,
-				},
-				{
-					ID:        3,
-					Title:     "Kallocain",
-					Author:    "Karin Boye",
-					Year:      uint16(1937),
-					Available: false,
-				},
-				{
-					ID:        4,
-					Title:     "Kallocain",
-					Author:    "Karin Boye",
-					Year:      uint16(1937),
-					Available: false,
-				},
-				{
-					ID:        5,
-					Title:     "Kallocain",
-					Author:    "Karin Boye",
-					Year:      uint16(1937),
-					Available: false,
-				},
-				{
-					ID:        6,
-					Title:     "Kallocain",
-					Author:    "Karin Boye",
-					Year:      uint16(1937),
-					Available: false,
-				},
-			},
-		)
+	testBooks := []model.Book{
+		{
+			ID:        1,
+			Title:     "1984",
+			Author:    "George Orwell",
+			Year:      uint16(1956),
+			Available: true,
+		},
+		{
+			ID:        2,
+			Title:     "Kallocain",
+			Author:    "Karin Boye",
+			Year:      uint16(1937),
+			Available: false,
+		},
+		{
+			ID:        3,
+			Title:     "Kallocain",
+			Author:    "Karin Boye",
+			Year:      uint16(1937),
+			Available: false,
+		},
+		{
+			ID:        4,
+			Title:     "Kallocain",
+			Author:    "Karin Boye",
+			Year:      uint16(1937),
+			Available: true,
+		},
+		{
+			ID:        5,
+			Title:     "Kallocain",
+			Author:    "Karin Boye",
+			Year:      uint16(1937),
+			Available: false,
+		},
+		{
+			ID:        6,
+			Title:     "Kallocain",
+			Author:    "Karin Boye",
+			Year:      uint16(1937),
+			Available: false,
+		},
 	}
+	nextID := 7
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			repo := createTestRepo()
+			repo := repository.CreateRepo(
+				nextID,
+				testBooks,
+			)
 
 			if repo == nil {
 				t.Fatal("failed to create repository")

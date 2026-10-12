@@ -11,18 +11,18 @@ func TestCreate(t *testing.T) {
 		name        string
 		repo        Repository
 		serviceNil  bool
-		wantService BookService
+		wantService bookService
 	}{
 		{
 			name:        "success, service nil",
 			repo:        nil,
 			serviceNil:  true,
-			wantService: BookService{},
+			wantService: bookService{},
 		},
 		{
 			name: "success",
 			repo: &tests.MockRepo{},
-			wantService: BookService{
+			wantService: bookService{
 				repo: &tests.MockRepo{},
 			},
 		},

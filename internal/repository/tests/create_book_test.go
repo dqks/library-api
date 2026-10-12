@@ -9,28 +9,6 @@ import (
 	"testing"
 )
 
-func createTestRepo() *repository.BookRepository {
-	return repository.CreateRepo(
-		3,
-		[]model.Book{
-			{
-				ID:        1,
-				Title:     "1984",
-				Author:    "George Orwell",
-				Year:      uint16(1956),
-				Available: true,
-			},
-			{
-				ID:        2,
-				Title:     "Kallocain",
-				Author:    "Karin Boye",
-				Year:      uint16(1937),
-				Available: false,
-			},
-		},
-	)
-}
-
 func TestCreateBook(t *testing.T) {
 	tests := []struct {
 		name         string
@@ -79,6 +57,25 @@ func TestCreateBook(t *testing.T) {
 		},
 	}
 
+	testBooks := []model.Book{
+		{
+			ID:        1,
+			Title:     "1984",
+			Author:    "George Orwell",
+			Year:      uint16(1956),
+			Available: true,
+		},
+		{
+			ID:        2,
+			Title:     "Kallocain",
+			Author:    "Karin Boye",
+			Year:      uint16(1937),
+			Available: false,
+		},
+	}
+
+	nextID := 3
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			payload := repository.CreateBookPayload{
@@ -88,7 +85,10 @@ func TestCreateBook(t *testing.T) {
 				Available: &tt.available,
 			}
 
-			repo := createTestRepo()
+			repo := repository.CreateRepo(
+				nextID,
+				testBooks,
+			)
 
 			if repo == nil {
 				t.Fatalf("failed to create test repo")
@@ -154,9 +154,28 @@ func TestCreateBookConcurrent(t *testing.T) {
 		},
 	}
 
+	testBooks := []model.Book{
+		{
+			ID:        1,
+			Title:     "1984",
+			Author:    "George Orwell",
+			Year:      uint16(1956),
+			Available: true,
+		},
+		{
+			ID:        2,
+			Title:     "Kallocain",
+			Author:    "Karin Boye",
+			Year:      uint16(1937),
+			Available: false,
+		},
+	}
+
+	nextID := 3
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			repo := createTestRepo()
+			repo := repository.CreateRepo(nextID, testBooks)
 
 			if repo == nil {
 				t.Fatalf("failed to create test repo")

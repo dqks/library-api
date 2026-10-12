@@ -14,7 +14,7 @@ type CreateBookInput struct {
 	Available *bool
 }
 
-func (s *BookService) CreateBook(ctx context.Context, req CreateBookInput) (model.Book, error) {
+func (s *bookService) CreateBook(ctx context.Context, req CreateBookInput) (model.Book, error) {
 	select {
 	case <-ctx.Done():
 		return model.Book{}, ctx.Err()

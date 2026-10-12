@@ -5,12 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"library-api/internal/apperrors"
-	"library-api/internal/service"
 	"net/http"
 	"strconv"
 )
 
-func GetBookByID(s service.Service) func(w http.ResponseWriter, r *http.Request) {
+func GetBookByID(s Service) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		select {

@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"library-api/internal/apperrors"
-	"library-api/internal/service"
 	"net/http"
 	"strconv"
 )
@@ -14,7 +13,7 @@ type deleteBookResponse struct {
 	Success bool `json:"success"`
 }
 
-func DeleteBookByID(s service.Service) func(w http.ResponseWriter, r *http.Request) {
+func DeleteBookByID(s Service) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		select {

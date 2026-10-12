@@ -10,7 +10,7 @@ type GetBooksQueryParams struct {
 	Available *bool
 }
 
-func (s *BookService) GetBooks(ctx context.Context, params GetBooksQueryParams) ([]model.Book, error) {
+func (s *bookService) GetBooks(ctx context.Context, params GetBooksQueryParams) ([]model.Book, error) {
 	select {
 	case <-ctx.Done():
 		return nil, ctx.Err()

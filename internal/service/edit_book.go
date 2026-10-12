@@ -14,7 +14,7 @@ type EditBookInput struct {
 	Available *bool
 }
 
-func (s *BookService) EditBookByID(ctx context.Context, id int, req EditBookInput) (model.Book, error) {
+func (s *bookService) EditBookByID(ctx context.Context, id int, req EditBookInput) (model.Book, error) {
 	select {
 	case <-ctx.Done():
 		return model.Book{}, ctx.Err()

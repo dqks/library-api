@@ -4,7 +4,7 @@ import (
 	"context"
 )
 
-func (s *BookService) DeleteBookByID(ctx context.Context, id int) error {
+func (s *bookService) DeleteBookByID(ctx context.Context, id int) error {
 	select {
 	case <-ctx.Done():
 		return ctx.Err()
