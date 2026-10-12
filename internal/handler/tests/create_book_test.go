@@ -27,7 +27,7 @@ func TestCreateBook(t *testing.T) {
 		cancel           bool
 		wantCode         int
 		wantHeader       http.Header
-		wantResultBody   string
+		wantBody         string
 	}{
 		{
 			name:             "success",
@@ -45,7 +45,7 @@ func TestCreateBook(t *testing.T) {
 				Year:      2003,
 				Available: false,
 			},
-			wantResultBody: `{"id":1,"title":"New title","author":"New Author","year":2003,"available":false}`,
+			wantBody: `{"id":1,"title":"New title","author":"New Author","year":2003,"available":false}`,
 		},
 		{
 			name:             "canceled",
@@ -56,7 +56,7 @@ func TestCreateBook(t *testing.T) {
 			cancel:           true,
 			serviceErr:       nil,
 			serviceBook:      model.Book{},
-			wantResultBody:   ``,
+			wantBody:         ``,
 		},
 		{
 			name:             "err, body invalid values",
@@ -66,9 +66,9 @@ func TestCreateBook(t *testing.T) {
 			wantHeader: map[string][]string{
 				"Content-Type": {"application/json"},
 			},
-			serviceErr:     apperrors.ErrInvalidValues,
-			serviceBook:    model.Book{},
-			wantResultBody: `{"error":"` + apperrors.ErrInvalidValues.Error() + `"}`,
+			serviceErr:  apperrors.ErrInvalidValues,
+			serviceBook: model.Book{},
+			wantBody:    `{"error":"` + apperrors.ErrInvalidValues.Error() + `"}`,
 		},
 		{
 			name:             "err, body absence of required field",
@@ -78,9 +78,9 @@ func TestCreateBook(t *testing.T) {
 			wantHeader: map[string][]string{
 				"Content-Type": {"application/json"},
 			},
-			serviceErr:     apperrors.ErrRequiredFields,
-			serviceBook:    model.Book{},
-			wantResultBody: `{"error":"` + apperrors.ErrRequiredFields.Error() + `"}`,
+			serviceErr:  apperrors.ErrRequiredFields,
+			serviceBook: model.Book{},
+			wantBody:    `{"error":"` + apperrors.ErrRequiredFields.Error() + `"}`,
 		},
 		{
 			name:             "err, incorrect json",
@@ -90,9 +90,9 @@ func TestCreateBook(t *testing.T) {
 			wantHeader: map[string][]string{
 				"Content-Type": {"application/json"},
 			},
-			serviceErr:     nil,
-			serviceBook:    model.Book{},
-			wantResultBody: `{"error":"unexpected EOF"}`,
+			serviceErr:  nil,
+			serviceBook: model.Book{},
+			wantBody:    `{"error":"unexpected EOF"}`,
 		},
 		{
 			name:             "err, unknown field json",
@@ -102,9 +102,9 @@ func TestCreateBook(t *testing.T) {
 			wantHeader: map[string][]string{
 				"Content-Type": {"application/json"},
 			},
-			serviceErr:     nil,
-			serviceBook:    model.Book{},
-			wantResultBody: `{"error":"json: unknown field \"test\""}`,
+			serviceErr:  nil,
+			serviceBook: model.Book{},
+			wantBody:    `{"error":"json: unknown field \"test\""}`,
 		},
 		{
 			name:             "err, deadline exceeded",
@@ -115,7 +115,7 @@ func TestCreateBook(t *testing.T) {
 			wantHeader:       map[string][]string{},
 			serviceErr:       nil,
 			serviceBook:      model.Book{},
-			wantResultBody:   ``,
+			wantBody:         ``,
 		},
 		{
 			name:             "err, service canceled context",
@@ -125,7 +125,7 @@ func TestCreateBook(t *testing.T) {
 			wantHeader:       map[string][]string{},
 			serviceErr:       context.Canceled,
 			serviceBook:      model.Book{},
-			wantResultBody:   ``,
+			wantBody:         ``,
 		},
 		{
 			name:             "err, deadline exceeded in service",
@@ -135,9 +135,9 @@ func TestCreateBook(t *testing.T) {
 			wantHeader: map[string][]string{
 				"Content-Type": {"application/json"},
 			},
-			serviceErr:     context.DeadlineExceeded,
-			serviceBook:    model.Book{},
-			wantResultBody: `{"error":"` + context.DeadlineExceeded.Error() + `"}`,
+			serviceErr:  context.DeadlineExceeded,
+			serviceBook: model.Book{},
+			wantBody:    `{"error":"` + context.DeadlineExceeded.Error() + `"}`,
 		},
 		{
 			name:             "internal err",
@@ -147,9 +147,9 @@ func TestCreateBook(t *testing.T) {
 			wantHeader: map[string][]string{
 				"Content-Type": {"application/json"},
 			},
-			serviceErr:     apperrors.ErrInternal,
-			serviceBook:    model.Book{},
-			wantResultBody: `{"error":"` + apperrors.ErrInternal.Error() + `"}`,
+			serviceErr:  apperrors.ErrInternal,
+			serviceBook: model.Book{},
+			wantBody:    `{"error":"` + apperrors.ErrInternal.Error() + `"}`,
 		},
 		{
 			name:             "unknown err",
@@ -159,9 +159,9 @@ func TestCreateBook(t *testing.T) {
 			wantHeader: map[string][]string{
 				"Content-Type": {"application/json"},
 			},
-			serviceErr:     errors.New("new error"),
-			serviceBook:    model.Book{},
-			wantResultBody: `{"error":"new error"}`,
+			serviceErr:  errors.New("new error"),
+			serviceBook: model.Book{},
+			wantBody:    `{"error":"new error"}`,
 		},
 		{
 			name:             "err, wrong year type",
@@ -171,9 +171,9 @@ func TestCreateBook(t *testing.T) {
 			wantHeader: map[string][]string{
 				"Content-Type": {"application/json"},
 			},
-			serviceErr:     nil,
-			serviceBook:    model.Book{},
-			wantResultBody: `{"error":"json: cannot unmarshal string into Go struct field CreateBookBody.year of type uint16"}`,
+			serviceErr:  nil,
+			serviceBook: model.Book{},
+			wantBody:    `{"error":"json: cannot unmarshal string into Go struct field CreateBookBody.year of type uint16"}`,
 		},
 		{
 			name:             "err, wrong available type",
@@ -183,9 +183,9 @@ func TestCreateBook(t *testing.T) {
 			wantHeader: map[string][]string{
 				"Content-Type": {"application/json"},
 			},
-			serviceErr:     nil,
-			serviceBook:    model.Book{},
-			wantResultBody: `{"error":"json: cannot unmarshal string into Go struct field CreateBookBody.available of type bool"}`,
+			serviceErr:  nil,
+			serviceBook: model.Book{},
+			wantBody:    `{"error":"json: cannot unmarshal string into Go struct field CreateBookBody.available of type bool"}`,
 		},
 	}
 
@@ -262,10 +262,10 @@ func TestCreateBook(t *testing.T) {
 				}
 			}
 
-			if strings.TrimSpace(tt.wantResultBody) != strings.TrimSpace(rr.Body.String()) {
+			if strings.TrimSpace(tt.wantBody) != strings.TrimSpace(rr.Body.String()) {
 				t.Fatalf(
 					"expected result body %s\nbut got %s",
-					tt.wantResultBody,
+					tt.wantBody,
 					rr.Body.String(),
 				)
 			}
