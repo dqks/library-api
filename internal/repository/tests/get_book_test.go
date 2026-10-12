@@ -10,11 +10,11 @@ import (
 
 func TestGetBookByID(t *testing.T) {
 	tests := []struct {
-		name       string
-		id         int
-		wantBook   model.Book
-		wantErr    error
-		wantCancel bool
+		cancel   bool
+		name     string
+		id       int
+		wantBook model.Book
+		wantErr  error
 	}{
 		{
 			name: "success",
@@ -26,22 +26,22 @@ func TestGetBookByID(t *testing.T) {
 				Year:      uint16(1956),
 				Available: true,
 			},
-			wantErr:    nil,
-			wantCancel: false,
+			wantErr: nil,
+			cancel:  false,
 		},
 		{
-			name:       "not found",
-			id:         10,
-			wantBook:   model.Book{},
-			wantErr:    apperrors.ErrNotFound,
-			wantCancel: false,
+			name:     "not found",
+			id:       10,
+			wantBook: model.Book{},
+			wantErr:  apperrors.ErrNotFound,
+			cancel:   false,
 		},
 		{
-			name:       "canceled",
-			id:         10,
-			wantBook:   model.Book{},
-			wantErr:    context.Canceled,
-			wantCancel: true,
+			name:     "canceled",
+			id:       10,
+			wantBook: model.Book{},
+			wantErr:  context.Canceled,
+			cancel:   true,
 		},
 	}
 
@@ -56,7 +56,7 @@ func TestGetBookByID(t *testing.T) {
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
 
-			if tt.wantCancel {
+			if tt.cancel {
 				cancel()
 			}
 

@@ -14,6 +14,7 @@ import (
 func TestEditBookByID(t *testing.T) {
 	tests := []struct {
 		name           string
+		cancel         bool
 		id             int
 		title          string
 		author         string
@@ -25,7 +26,6 @@ func TestEditBookByID(t *testing.T) {
 		availableNil   bool
 		wantBook       model.Book
 		wantErr        error
-		wantCancel     bool
 		wantRepoChange bool
 	}{
 		{
@@ -47,7 +47,7 @@ func TestEditBookByID(t *testing.T) {
 				Available: true,
 			},
 			wantErr:        nil,
-			wantCancel:     false,
+			cancel:         false,
 			wantRepoChange: true,
 		},
 		{
@@ -69,7 +69,7 @@ func TestEditBookByID(t *testing.T) {
 				Available: true,
 			},
 			wantErr:        nil,
-			wantCancel:     false,
+			cancel:         false,
 			wantRepoChange: true,
 		},
 		{
@@ -91,7 +91,7 @@ func TestEditBookByID(t *testing.T) {
 				Available: true,
 			},
 			wantErr:        nil,
-			wantCancel:     false,
+			cancel:         false,
 			wantRepoChange: true,
 		},
 		{
@@ -113,7 +113,7 @@ func TestEditBookByID(t *testing.T) {
 				Available: true,
 			},
 			wantErr:        nil,
-			wantCancel:     false,
+			cancel:         false,
 			wantRepoChange: true,
 		},
 		{
@@ -135,7 +135,7 @@ func TestEditBookByID(t *testing.T) {
 				Available: false,
 			},
 			wantErr:        nil,
-			wantCancel:     false,
+			cancel:         false,
 			wantRepoChange: true,
 		},
 		{
@@ -147,7 +147,7 @@ func TestEditBookByID(t *testing.T) {
 			available:      true,
 			wantBook:       model.Book{},
 			wantErr:        context.Canceled,
-			wantCancel:     true,
+			cancel:         true,
 			wantRepoChange: false,
 		},
 		{
@@ -163,7 +163,7 @@ func TestEditBookByID(t *testing.T) {
 			availableNil:   false,
 			wantBook:       model.Book{},
 			wantErr:        apperrors.ErrNotFound,
-			wantCancel:     false,
+			cancel:         false,
 			wantRepoChange: false,
 		},
 	}
@@ -179,7 +179,7 @@ func TestEditBookByID(t *testing.T) {
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
 
-			if tt.wantCancel {
+			if tt.cancel {
 				cancel()
 			}
 
@@ -246,7 +246,7 @@ func TestEditBookByID(t *testing.T) {
 				}
 			}
 
-			if !tt.wantCancel && tt.wantErr == nil {
+			if !tt.cancel && tt.wantErr == nil {
 				index := slices.Contains(booksAfter, book)
 
 				if !index {

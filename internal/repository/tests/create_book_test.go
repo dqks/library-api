@@ -34,6 +34,7 @@ func createTestRepo() *repository.BookRepository {
 func TestCreateBook(t *testing.T) {
 	tests := []struct {
 		name         string
+		cancel       bool
 		ctx          context.Context
 		title        string
 		author       string
@@ -42,7 +43,6 @@ func TestCreateBook(t *testing.T) {
 		wantError    error
 		wantBook     model.Book
 		wantToAppear bool
-		wantToCancel bool
 		wantLen      int
 	}{
 		{
@@ -61,7 +61,7 @@ func TestCreateBook(t *testing.T) {
 				Available: true,
 			},
 			wantToAppear: true,
-			wantToCancel: false,
+			cancel:       false,
 			wantLen:      3,
 		},
 		{
@@ -74,7 +74,7 @@ func TestCreateBook(t *testing.T) {
 			wantError:    context.Canceled,
 			wantBook:     model.Book{},
 			wantToAppear: false,
-			wantToCancel: true,
+			cancel:       true,
 			wantLen:      2,
 		},
 	}
@@ -97,7 +97,7 @@ func TestCreateBook(t *testing.T) {
 			ctx, cancel := context.WithCancel(tt.ctx)
 			defer cancel()
 
-			if tt.wantToCancel {
+			if tt.cancel {
 				cancel()
 			}
 

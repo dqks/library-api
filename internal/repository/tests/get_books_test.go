@@ -10,11 +10,11 @@ import (
 
 func TestGetBooks(t *testing.T) {
 	tests := []struct {
+		cancel       bool
 		name         string
 		available    bool
 		availableNil bool
 		wantErr      error
-		wantCancel   bool
 		wantBooks    []model.Book
 	}{
 		{
@@ -130,7 +130,7 @@ func TestGetBooks(t *testing.T) {
 			available:    false,
 			availableNil: true,
 			wantErr:      context.Canceled,
-			wantCancel:   true,
+			cancel:       true,
 			wantBooks:    []model.Book{},
 		},
 	}
@@ -196,7 +196,7 @@ func TestGetBooks(t *testing.T) {
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
 
-			if tt.wantCancel {
+			if tt.cancel {
 				cancel()
 			}
 
@@ -226,7 +226,7 @@ func TestGetBooks(t *testing.T) {
 				books[i].ID = books[i].ID + 1
 			}
 
-			if !tt.wantCancel {
+			if !tt.cancel {
 				booksAfter, err := repo.GetBooks(ctx, payload)
 
 				if err != nil {

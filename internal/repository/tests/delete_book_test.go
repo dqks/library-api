@@ -13,28 +13,28 @@ import (
 
 func TestDeleteBookByID(t *testing.T) {
 	tests := []struct {
-		name       string
-		id         int
-		wantErr    error
-		wantCancel bool
+		cancel  bool
+		name    string
+		id      int
+		wantErr error
 	}{
 		{
-			name:       "success",
-			id:         1,
-			wantErr:    nil,
-			wantCancel: false,
+			name:    "success",
+			id:      1,
+			wantErr: nil,
+			cancel:  false,
 		},
 		{
-			name:       "not found",
-			id:         5,
-			wantErr:    apperrors.ErrNotFound,
-			wantCancel: false,
+			name:    "not found",
+			id:      5,
+			wantErr: apperrors.ErrNotFound,
+			cancel:  false,
 		},
 		{
-			name:       "canceled",
-			id:         1,
-			wantErr:    context.Canceled,
-			wantCancel: true,
+			name:    "canceled",
+			id:      1,
+			wantErr: context.Canceled,
+			cancel:  true,
 		},
 	}
 
@@ -56,7 +56,7 @@ func TestDeleteBookByID(t *testing.T) {
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
 
-			if tt.wantCancel {
+			if tt.cancel {
 				cancel()
 			}
 
@@ -90,7 +90,7 @@ func TestDeleteBookByID(t *testing.T) {
 				}
 			}
 
-			if tt.wantErr == nil && !tt.wantCancel {
+			if tt.wantErr == nil && !tt.cancel {
 				if len(booksAfter) != len(booksBefore)-1 {
 					t.Fatalf(
 						"got len of books %d but before delete it was %d",
