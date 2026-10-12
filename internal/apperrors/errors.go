@@ -19,8 +19,8 @@ var (
 	ErrNotFoundCode           = 404
 	ErrIncorrectPathValueCode = 400
 	ErrInvalidValuesCode      = 400
-	ErrDeadlineExceeded       = 504
-	ErrCanceled               = -1
+	ErrDeadlineExceededCode   = 504
+	ErrCanceledCode           = -1
 )
 
 type BaseError struct {
@@ -33,8 +33,8 @@ var errorMap = map[error]int{
 	ErrNotFound:              ErrNotFoundCode,
 	ErrIncorrectPathValue:    ErrIncorrectPathValueCode,
 	ErrInvalidValues:         ErrInvalidValuesCode,
-	context.DeadlineExceeded: ErrDeadlineExceeded,
-	context.Canceled:         ErrCanceled,
+	context.DeadlineExceeded: ErrDeadlineExceededCode,
+	context.Canceled:         ErrCanceledCode,
 }
 
 func CheckErrors(errorsToCheck []error, err error) int {

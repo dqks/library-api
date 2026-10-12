@@ -3,6 +3,7 @@ package tests
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"library-api/internal/apperrors"
 	"library-api/internal/handler"
 	"library-api/internal/model"
@@ -17,22 +18,22 @@ import (
 
 func TestCreateBook(t *testing.T) {
 	tests := []struct {
-		name            string
-		body            string
-		getInService    bool
-		serviceErr      error
-		serviceBook     model.Book
-		deadlineContext bool
-		cancel          bool
-		wantCode        int
-		wantHeader      http.Header
-		wantResultBody  string
+		name             string
+		body             string
+		serviceCallCount int
+		serviceErr       error
+		serviceBook      model.Book
+		deadlineContext  bool
+		cancel           bool
+		wantCode         int
+		wantHeader       http.Header
+		wantResultBody   string
 	}{
 		{
-			name:         "success",
-			body:         `{"title":"New title","author":"New Author","year":2000,"available":false}`,
-			getInService: true,
-			wantCode:     201,
+			name:             "success",
+			body:             `{"title":"New title","author":"New Author","year":2000,"available":false}`,
+			serviceCallCount: 1,
+			wantCode:         201,
 			wantHeader: map[string][]string{
 				"Content-Type": {"application/json"},
 			},
@@ -47,21 +48,21 @@ func TestCreateBook(t *testing.T) {
 			wantResultBody: `{"id":1,"title":"New title","author":"New Author","year":2003,"available":false}`,
 		},
 		{
-			name:           "canceled",
-			body:           `{"title":"New title","author":"New Author","year":2000,"available":false}`,
-			getInService:   false,
-			wantCode:       200,
-			wantHeader:     map[string][]string{},
-			cancel:         true,
-			serviceErr:     nil,
-			serviceBook:    model.Book{},
-			wantResultBody: ``,
+			name:             "canceled",
+			body:             `{"title":"New title","author":"New Author","year":2000,"available":false}`,
+			serviceCallCount: 0,
+			wantCode:         200,
+			wantHeader:       map[string][]string{},
+			cancel:           true,
+			serviceErr:       nil,
+			serviceBook:      model.Book{},
+			wantResultBody:   ``,
 		},
 		{
-			name:         "err, body invalid values",
-			body:         `{"title":"New title","author":"New Author","year":2077,"available":false}`,
-			getInService: true,
-			wantCode:     400,
+			name:             "err, body invalid values",
+			body:             `{"title":"New title","author":"New Author","year":2077,"available":false}`,
+			serviceCallCount: 1,
+			wantCode:         400,
 			wantHeader: map[string][]string{
 				"Content-Type": {"application/json"},
 			},
@@ -70,10 +71,10 @@ func TestCreateBook(t *testing.T) {
 			wantResultBody: `{"error":"` + apperrors.ErrInvalidValues.Error() + `"}`,
 		},
 		{
-			name:         "err, body absence of required field",
-			body:         `{"title":"New title","author":"New Author","available":false}`,
-			getInService: true,
-			wantCode:     400,
+			name:             "err, body absence of required field",
+			body:             `{"title":"New title","author":"New Author","available":false}`,
+			serviceCallCount: 1,
+			wantCode:         400,
 			wantHeader: map[string][]string{
 				"Content-Type": {"application/json"},
 			},
@@ -82,10 +83,10 @@ func TestCreateBook(t *testing.T) {
 			wantResultBody: `{"error":"` + apperrors.ErrRequiredFields.Error() + `"}`,
 		},
 		{
-			name:         "err, incorrect json",
-			body:         `{"title":"New title","author":"New Author","available":`,
-			getInService: false,
-			wantCode:     400,
+			name:             "err, incorrect json",
+			body:             `{"title":"New title","author":"New Author","available":`,
+			serviceCallCount: 0,
+			wantCode:         400,
 			wantHeader: map[string][]string{
 				"Content-Type": {"application/json"},
 			},
@@ -94,10 +95,10 @@ func TestCreateBook(t *testing.T) {
 			wantResultBody: `{"error":"unexpected EOF"}`,
 		},
 		{
-			name:         "err, unknown field json",
-			body:         `{"title":"New title","author":"New Author","available":false,"test":"test"}`,
-			getInService: false,
-			wantCode:     400,
+			name:             "err, unknown field json",
+			body:             `{"title":"New title","author":"New Author","available":false,"test":"test"}`,
+			serviceCallCount: 0,
+			wantCode:         400,
 			wantHeader: map[string][]string{
 				"Content-Type": {"application/json"},
 			},
@@ -106,37 +107,85 @@ func TestCreateBook(t *testing.T) {
 			wantResultBody: `{"error":"json: unknown field \"test\""}`,
 		},
 		{
-			name:            "err, deadline exceeded",
-			body:            `{"title":"New title","author":"New Author","available":false}`,
-			getInService:    false,
-			wantCode:        200,
-			deadlineContext: true,
-			wantHeader:      map[string][]string{},
-			serviceErr:      nil,
-			serviceBook:     model.Book{},
-			wantResultBody:  ``,
+			name:             "err, deadline exceeded",
+			body:             `{"title":"New title","author":"New Author","available":false}`,
+			serviceCallCount: 0,
+			wantCode:         504,
+			deadlineContext:  true,
+			wantHeader:       map[string][]string{},
+			serviceErr:       nil,
+			serviceBook:      model.Book{},
+			wantResultBody:   ``,
 		},
 		{
-			name:           "err, service canceled context",
-			body:           `{"title":"New title","author":"New Author","year":2000,"available":false}`,
-			getInService:   true,
-			wantCode:       200,
-			wantHeader:     map[string][]string{},
-			serviceErr:     context.Canceled,
-			serviceBook:    model.Book{},
-			wantResultBody: ``,
+			name:             "err, service canceled context",
+			body:             `{"title":"New title","author":"New Author","year":2000,"available":false}`,
+			serviceCallCount: 1,
+			wantCode:         200,
+			wantHeader:       map[string][]string{},
+			serviceErr:       context.Canceled,
+			serviceBook:      model.Book{},
+			wantResultBody:   ``,
 		},
 		{
-			name:         "err, deadline exceeded in service",
-			body:         `{"title":"New title","author":"New Author","year":2000,"available":false}`,
-			getInService: true,
-			wantCode:     504,
+			name:             "err, deadline exceeded in service",
+			body:             `{"title":"New title","author":"New Author","year":2000,"available":false}`,
+			serviceCallCount: 1,
+			wantCode:         504,
 			wantHeader: map[string][]string{
 				"Content-Type": {"application/json"},
 			},
 			serviceErr:     context.DeadlineExceeded,
 			serviceBook:    model.Book{},
 			wantResultBody: `{"error":"` + context.DeadlineExceeded.Error() + `"}`,
+		},
+		{
+			name:             "internal err",
+			body:             `{"title":"New title","author":"New Author","year":2000,"available":false}`,
+			serviceCallCount: 1,
+			wantCode:         500,
+			wantHeader: map[string][]string{
+				"Content-Type": {"application/json"},
+			},
+			serviceErr:     apperrors.ErrInternal,
+			serviceBook:    model.Book{},
+			wantResultBody: `{"error":"` + apperrors.ErrInternal.Error() + `"}`,
+		},
+		{
+			name:             "unknown err",
+			body:             `{"title":"New title","author":"New Author","year":2000,"available":false}`,
+			serviceCallCount: 1,
+			wantCode:         500,
+			wantHeader: map[string][]string{
+				"Content-Type": {"application/json"},
+			},
+			serviceErr:     errors.New("new error"),
+			serviceBook:    model.Book{},
+			wantResultBody: `{"error":"new error"}`,
+		},
+		{
+			name:             "err, wrong year type",
+			body:             `{"title":"New title","author":"New Author","available":false,"year":"2000"}`,
+			serviceCallCount: 0,
+			wantCode:         400,
+			wantHeader: map[string][]string{
+				"Content-Type": {"application/json"},
+			},
+			serviceErr:     nil,
+			serviceBook:    model.Book{},
+			wantResultBody: `{"error":"json: cannot unmarshal string into Go struct field CreateBookBody.year of type uint16"}`,
+		},
+		{
+			name:             "err, wrong available type",
+			body:             `{"title":"New title","author":"New Author","available":"false","year":2000}`,
+			serviceCallCount: 0,
+			wantCode:         400,
+			wantHeader: map[string][]string{
+				"Content-Type": {"application/json"},
+			},
+			serviceErr:     nil,
+			serviceBook:    model.Book{},
+			wantResultBody: `{"error":"json: cannot unmarshal string into Go struct field CreateBookBody.available of type bool"}`,
 		},
 	}
 
@@ -173,7 +222,7 @@ func TestCreateBook(t *testing.T) {
 
 			handler.CreateBook(&s)(rr, req)
 
-			if ctx != s.ctx && tt.getInService {
+			if ctx != s.ctx && tt.serviceCallCount == 1 {
 				t.Fatalf("context passed to service is not equal to request's context")
 			}
 
@@ -189,10 +238,21 @@ func TestCreateBook(t *testing.T) {
 				)
 			}
 
-			if tt.getInService && s.gotIntoService {
+			if tt.serviceCallCount != s.callCount {
+				t.Fatalf(
+					"expected to call service %d times but got %d",
+					tt.serviceCallCount,
+					s.callCount,
+				)
+			}
+
+			if s.callCount >= 1 {
 				var expectedInput service.CreateBookInput
 				decoder := json.NewDecoder(strings.NewReader(tt.body))
-				decoder.Decode(&expectedInput)
+				err := decoder.Decode(&expectedInput)
+				if err != nil {
+					t.Fatal("failed to decode expected input")
+				}
 				if !reflect.DeepEqual(expectedInput, s.createInput) {
 					t.Fatalf(
 						"expected to call service with input %v\nbut got %v",
@@ -200,10 +260,6 @@ func TestCreateBook(t *testing.T) {
 						s.createInput,
 					)
 				}
-			} else if !tt.getInService && s.gotIntoService {
-				t.Fatal("expected not to get into service but got")
-			} else if tt.getInService && !s.gotIntoService {
-				t.Fatal("expected to get into service but didn't")
 			}
 
 			if strings.TrimSpace(tt.wantResultBody) != strings.TrimSpace(rr.Body.String()) {
