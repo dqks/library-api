@@ -222,7 +222,7 @@ func TestCreateBook(t *testing.T) {
 
 			handler.CreateBook(&s)(rr, req)
 
-			if ctx != s.ctx && tt.serviceCallCount == 1 {
+			if ctx != s.ctx && tt.serviceCallCount >= 1 {
 				t.Fatalf("context passed to service is not equal to request's context")
 			}
 

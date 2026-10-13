@@ -2,6 +2,7 @@ package tests
 
 import (
 	"context"
+	"errors"
 	"library-api/internal/apperrors"
 	"library-api/internal/handler"
 	"net/http"
@@ -99,7 +100,7 @@ func TestDeleteBookByID(t *testing.T) {
 			wantServiceCallCount: 0,
 		},
 		{
-			name:                 "cancel in repository",
+			name:                 "deadline exceeded in repository",
 			id:                   1,
 			serviceErr:           nil,
 			wantCode:             504,
@@ -107,6 +108,17 @@ func TestDeleteBookByID(t *testing.T) {
 			wantBody:             ``,
 			wantHeaders:          map[string][]string{},
 			wantServiceCallCount: 0,
+		},
+		{
+			name:       "unknown error in service",
+			id:         1,
+			serviceErr: errors.New("unknown error"),
+			wantCode:   500,
+			wantBody:   `{"error":"unknown error"}`,
+			wantHeaders: map[string][]string{
+				"Content-Type": {"application/json"},
+			},
+			wantServiceCallCount: 1,
 		},
 	}
 
@@ -126,7 +138,7 @@ func TestDeleteBookByID(t *testing.T) {
 			rr := httptest.NewRecorder()
 			req := httptest.NewRequestWithContext(
 				ctx,
-				"DELETE",
+				http.MethodDelete,
 				"http://localhost:8080/books/"+strconv.Itoa(tt.id),
 				nil,
 			)
@@ -145,11 +157,6 @@ func TestDeleteBookByID(t *testing.T) {
 			if ctx != s.ctx && tt.wantServiceCallCount >= 1 {
 				t.Fatalf("expected context to be %v but got %v", ctx, s.ctx)
 			}
-
-			// id, err := strconv.Atoi(req.PathValue("id"))
-			// if err != nil {
-			// 	t.Fatalf("failed to get id %v", err)
-			// }
 
 			if s.id != tt.id && tt.wantServiceCallCount >= 1 {
 				t.Fatalf("expeceted to pass to service id %d but got %d", tt.id, s.id)
@@ -182,7 +189,6 @@ func TestDeleteBookByID(t *testing.T) {
 					rr.Body.String(),
 				)
 			}
-
 		})
 	}
 }

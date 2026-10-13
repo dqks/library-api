@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"library-api/internal/apperrors"
 	"net/http"
@@ -14,6 +15,9 @@ func GetBookByID(s Service) func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		select {
 		case <-ctx.Done():
+			if errors.Is(ctx.Err(), context.DeadlineExceeded) {
+				w.WriteHeader(apperrors.ErrDeadlineExceededCode)
+			}
 			fmt.Println(ctx.Err())
 		default:
 			id, err := strconv.Atoi(r.PathValue("id"))

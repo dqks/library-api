@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"library-api/internal/apperrors"
 	"library-api/internal/service"
@@ -22,6 +23,9 @@ func EditBookByID(s Service) func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		select {
 		case <-ctx.Done():
+			if errors.Is(ctx.Err(), context.DeadlineExceeded) {
+				w.WriteHeader(504)
+			}
 			fmt.Println(ctx.Err().Error())
 		default:
 			id, err := strconv.Atoi(r.PathValue("id"))
