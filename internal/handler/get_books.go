@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"library-api/internal/apperrors"
 	"library-api/internal/model"
@@ -16,6 +17,9 @@ func GetBooks(s Service) func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		select {
 		case <-ctx.Done():
+			if errors.Is(ctx.Err(), context.DeadlineExceeded) {
+				w.WriteHeader(apperrors.ErrDeadlineExceededCode)
+			}
 			fmt.Println(ctx.Err())
 		default:
 			availParam := false
@@ -29,7 +33,6 @@ func GetBooks(s Service) func(w http.ResponseWriter, r *http.Request) {
 					w.WriteHeader(apperrors.ErrIncorrectPathValueCode)
 					err := encoder.Encode(apperrors.BaseError{Error: err.Error()})
 					if err != nil {
-						fmt.Println(err.Error())
 						return
 					}
 					return

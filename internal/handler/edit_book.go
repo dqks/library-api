@@ -24,7 +24,7 @@ func EditBookByID(s Service) func(w http.ResponseWriter, r *http.Request) {
 		select {
 		case <-ctx.Done():
 			if errors.Is(ctx.Err(), context.DeadlineExceeded) {
-				w.WriteHeader(504)
+				w.WriteHeader(apperrors.ErrDeadlineExceededCode)
 			}
 			fmt.Println(ctx.Err().Error())
 		default:
