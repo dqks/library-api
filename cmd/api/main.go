@@ -55,6 +55,7 @@ func main() {
 				fmt.Println("Сервер закрылся штатно")
 			} else {
 				fmt.Println(err.Error())
+				time.Sleep(10 * time.Second)
 				os.Exit(1)
 			}
 			return
