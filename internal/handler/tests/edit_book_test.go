@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"reflect"
-	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -19,7 +18,7 @@ import (
 func TestEditBookByID(t *testing.T) {
 	tests := []struct {
 		name                 string
-		id                   int
+		id                   string
 		body                 string
 		cancel               bool
 		deadlineContext      bool
@@ -34,7 +33,7 @@ func TestEditBookByID(t *testing.T) {
 	}{
 		{
 			name:       "success",
-			id:         1,
+			id:         "1",
 			body:       `{"title":"New title","author":"New Author","year":2000,"available":false}`,
 			serviceErr: nil,
 			serviceBook: model.Book{
@@ -55,13 +54,13 @@ func TestEditBookByID(t *testing.T) {
 		},
 		{
 			name:                 "err, id is zero",
-			id:                   0,
+			id:                   "0",
 			body:                 `{"title":"New title","author":"New Author","year":2000,"available":false}`,
 			serviceErr:           nil,
 			serviceBook:          model.Book{},
 			wantServiceCallCount: 0,
 			wantErr:              nil,
-			wantBody:             `{"error":"неверное значение в пути"}`,
+			wantBody:             `{"error":"` + apperrors.ErrIncorrectPathValue.Error() + `"}`,
 			wantHeaders: map[string][]string{
 				"Content-Type": {"application/json"},
 			},
@@ -69,12 +68,25 @@ func TestEditBookByID(t *testing.T) {
 		},
 		{
 			name:                 "err, id is negative",
-			id:                   -1,
+			id:                   "-1",
 			body:                 `{"title":"New title","author":"New Author","year":2000,"available":false}`,
 			serviceErr:           nil,
 			serviceBook:          model.Book{},
 			wantServiceCallCount: 0,
-			wantBody:             `{"error":"неверное значение в пути"}`,
+			wantBody:             `{"error":"` + apperrors.ErrIncorrectPathValue.Error() + `"}`,
+			wantHeaders: map[string][]string{
+				"Content-Type": {"application/json"},
+			},
+			wantCode: 400,
+		},
+		{
+			name:                 "err, id is not number",
+			id:                   "1lgdf",
+			body:                 `{"title":"New title","author":"New Author","year":2000,"available":false}`,
+			serviceErr:           nil,
+			serviceBook:          model.Book{},
+			wantServiceCallCount: 0,
+			wantBody:             `{"error":"` + apperrors.ErrIncorrectPathValue.Error() + `"}`,
 			wantHeaders: map[string][]string{
 				"Content-Type": {"application/json"},
 			},
@@ -82,7 +94,7 @@ func TestEditBookByID(t *testing.T) {
 		},
 		{
 			name:                 "err, bad json",
-			id:                   1,
+			id:                   "1",
 			body:                 `{"title":"New title","author":"New Author","year":2000,"available":}`,
 			serviceErr:           nil,
 			serviceBook:          model.Book{},
@@ -95,7 +107,7 @@ func TestEditBookByID(t *testing.T) {
 		},
 		{
 			name:                 "err, year is string",
-			id:                   1,
+			id:                   "1",
 			body:                 `{"title":"New title","author":"New Author","year":"2000","available":false}`,
 			serviceErr:           nil,
 			serviceBook:          model.Book{},
@@ -108,7 +120,7 @@ func TestEditBookByID(t *testing.T) {
 		},
 		{
 			name:                 "err, available is string",
-			id:                   1,
+			id:                   "1",
 			body:                 `{"title":"New title","author":"New Author","year":2000,"available":"false"}`,
 			serviceErr:           nil,
 			serviceBook:          model.Book{},
@@ -121,7 +133,7 @@ func TestEditBookByID(t *testing.T) {
 		},
 		{
 			name:                 "err, unknown fiels",
-			id:                   1,
+			id:                   "1",
 			body:                 `{"title":"New title","author":"New Author","year":2000,"available":false,"test":10}`,
 			serviceErr:           nil,
 			serviceBook:          model.Book{},
@@ -134,7 +146,7 @@ func TestEditBookByID(t *testing.T) {
 		},
 		{
 			name:                 "err, not found",
-			id:                   1,
+			id:                   "1",
 			body:                 `{"title":"New title","author":"New Author","year":2000,"available":false}`,
 			serviceErr:           apperrors.ErrNotFound,
 			serviceBook:          model.Book{},
@@ -148,7 +160,7 @@ func TestEditBookByID(t *testing.T) {
 		},
 		{
 			name:                 "err, empty json",
-			id:                   1,
+			id:                   "1",
 			body:                 `{}`,
 			serviceErr:           apperrors.ErrRequiredFields,
 			serviceBook:          model.Book{},
@@ -162,7 +174,7 @@ func TestEditBookByID(t *testing.T) {
 		},
 		{
 			name:                 "err, empty json",
-			id:                   1,
+			id:                   "1",
 			body:                 `{"title":"New title","author":"New Author","year":2100,"available":false}`,
 			serviceErr:           apperrors.ErrInvalidValues,
 			serviceBook:          model.Book{},
@@ -176,7 +188,7 @@ func TestEditBookByID(t *testing.T) {
 		},
 		{
 			name:                 "err, cancel in service",
-			id:                   1,
+			id:                   "1",
 			body:                 `{"title":"New title","author":"New Author","year":2000,"available":false}`,
 			serviceErr:           context.Canceled,
 			serviceBook:          model.Book{},
@@ -188,7 +200,7 @@ func TestEditBookByID(t *testing.T) {
 		},
 		{
 			name:                 "err, deadline exceeded in service",
-			id:                   1,
+			id:                   "1",
 			body:                 `{"title":"New title","author":"New Author","year":2000,"available":false}`,
 			serviceErr:           context.DeadlineExceeded,
 			serviceBook:          model.Book{},
@@ -202,7 +214,7 @@ func TestEditBookByID(t *testing.T) {
 		},
 		{
 			name:                 "err, cancel in service",
-			id:                   1,
+			id:                   "1",
 			cancel:               true,
 			body:                 `{"title":"New title","author":"New Author","year":2000,"available":false}`,
 			wantServiceCallCount: 0,
@@ -212,7 +224,7 @@ func TestEditBookByID(t *testing.T) {
 		},
 		{
 			name:                 "err, cancel in service",
-			id:                   1,
+			id:                   "1",
 			deadlineContext:      true,
 			body:                 `{"title":"New title","author":"New Author","year":2000,"available":false}`,
 			wantServiceCallCount: 0,
@@ -239,7 +251,7 @@ func TestEditBookByID(t *testing.T) {
 			req := httptest.NewRequestWithContext(
 				ctx,
 				http.MethodPut,
-				"http://localhost:8080/books/"+strconv.Itoa(tt.id),
+				"http://localhost:8080/books/"+tt.id,
 				strings.NewReader(tt.body),
 			)
 
@@ -254,7 +266,7 @@ func TestEditBookByID(t *testing.T) {
 				cancel()
 			}
 
-			req.SetPathValue("id", strconv.Itoa(tt.id))
+			req.SetPathValue("id", tt.id)
 			handler.EditBookByID(&s)(rr, req)
 
 			if ctx != s.ctx && tt.wantServiceCallCount >= 1 {

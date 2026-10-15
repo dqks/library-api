@@ -3,12 +3,12 @@ package tests
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"library-api/internal/apperrors"
 	"library-api/internal/handler"
 	"library-api/internal/model"
 	"net/http"
 	"net/http/httptest"
-	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -17,7 +17,7 @@ import (
 func TestGetBookByID(t *testing.T) {
 	tests := []struct {
 		name                 string
-		id                   int
+		id                   string
 		cancel               bool
 		deadlineContext      bool
 		serviceErr           error
@@ -30,7 +30,7 @@ func TestGetBookByID(t *testing.T) {
 	}{
 		{
 			name:       "success",
-			id:         1,
+			id:         "1",
 			serviceErr: nil,
 			serviceBook: model.Book{
 				ID:        1,
@@ -49,7 +49,7 @@ func TestGetBookByID(t *testing.T) {
 		},
 		{
 			name:        "not found",
-			id:          1,
+			id:          "1",
 			serviceErr:  apperrors.ErrNotFound,
 			serviceBook: model.Book{},
 			wantId:      1,
@@ -62,7 +62,7 @@ func TestGetBookByID(t *testing.T) {
 		},
 		{
 			name:        "deadline exceeded in service",
-			id:          1,
+			id:          "1",
 			serviceErr:  context.DeadlineExceeded,
 			serviceBook: model.Book{},
 			wantId:      1,
@@ -75,7 +75,7 @@ func TestGetBookByID(t *testing.T) {
 		},
 		{
 			name:                 "canceled in service",
-			id:                   1,
+			id:                   "1",
 			serviceErr:           context.Canceled,
 			serviceBook:          model.Book{},
 			wantId:               1,
@@ -86,7 +86,7 @@ func TestGetBookByID(t *testing.T) {
 		},
 		{
 			name:                 "canceled in handler",
-			id:                   1,
+			id:                   "1",
 			cancel:               true,
 			serviceErr:           nil,
 			serviceBook:          model.Book{},
@@ -98,7 +98,7 @@ func TestGetBookByID(t *testing.T) {
 		},
 		{
 			name:                 "canceled in handler",
-			id:                   1,
+			id:                   "1",
 			deadlineContext:      true,
 			serviceErr:           nil,
 			serviceBook:          model.Book{},
@@ -110,11 +110,10 @@ func TestGetBookByID(t *testing.T) {
 		},
 		{
 			name:        "id is zero",
-			id:          0,
+			id:          "0",
 			serviceErr:  nil,
 			serviceBook: model.Book{},
-			wantId:      1,
-			wantBody:    `{"error":"неверное значение в пути"}`,
+			wantBody:    `{"error":"` + apperrors.ErrIncorrectPathValue.Error() + `"}`,
 			wantHeaders: map[string][]string{
 				"Content-Type": {"application/json"},
 			},
@@ -123,11 +122,35 @@ func TestGetBookByID(t *testing.T) {
 		},
 		{
 			name:        "id is negative",
-			id:          -1,
+			id:          "-1",
 			serviceErr:  nil,
 			serviceBook: model.Book{},
+			wantBody:    `{"error":"` + apperrors.ErrIncorrectPathValue.Error() + `"}`,
+			wantHeaders: map[string][]string{
+				"Content-Type": {"application/json"},
+			},
+			wantCode:             400,
+			wantServiceCallCount: 0,
+		},
+		{
+			name:        "unknown service err",
+			id:          "1",
+			serviceErr:  errors.New("unknown"),
+			serviceBook: model.Book{},
 			wantId:      1,
-			wantBody:    `{"error":"неверное значение в пути"}`,
+			wantBody:    `{"error":"unknown"}`,
+			wantHeaders: map[string][]string{
+				"Content-Type": {"application/json"},
+			},
+			wantCode:             500,
+			wantServiceCallCount: 1,
+		},
+		{
+			name:        "not number id",
+			id:          "1hgdkfrd",
+			serviceErr:  errors.New("unknown"),
+			serviceBook: model.Book{},
+			wantBody:    `{"error":"` + apperrors.ErrIncorrectPathValue.Error() + `"}`,
 			wantHeaders: map[string][]string{
 				"Content-Type": {"application/json"},
 			},
@@ -157,10 +180,10 @@ func TestGetBookByID(t *testing.T) {
 			req := httptest.NewRequestWithContext(
 				ctx,
 				http.MethodGet,
-				"http://localhost:8080/books/"+strconv.Itoa(tt.id),
+				"http://localhost:8080/books/"+tt.id,
 				nil,
 			)
-			req.SetPathValue("id", strconv.Itoa(tt.id))
+			req.SetPathValue("id", tt.id)
 
 			s := ServiceMock{
 				err:  tt.serviceErr,

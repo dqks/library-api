@@ -7,7 +7,6 @@ import (
 	"library-api/internal/handler"
 	"net/http"
 	"net/http/httptest"
-	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -16,7 +15,7 @@ import (
 func TestDeleteBookByID(t *testing.T) {
 	tests := []struct {
 		name                 string
-		id                   int
+		id                   string
 		deadlineContext      bool
 		cancel               bool
 		wantServiceCallCount int
@@ -24,10 +23,11 @@ func TestDeleteBookByID(t *testing.T) {
 		wantCode             int
 		wantBody             string
 		wantHeaders          http.Header
+		wantId               int
 	}{
 		{
 			name:       "success",
-			id:         1,
+			id:         "1",
 			serviceErr: nil,
 			wantCode:   200,
 			wantBody:   `{"success":true}`,
@@ -35,10 +35,11 @@ func TestDeleteBookByID(t *testing.T) {
 				"Content-Type": {"application/json"},
 			},
 			wantServiceCallCount: 1,
+			wantId:               1,
 		},
 		{
 			name:       "err, id is less than zero",
-			id:         -1,
+			id:         "-1",
 			serviceErr: nil,
 			wantCode:   400,
 			wantBody:   `{"error":"` + apperrors.ErrIncorrectPathValue.Error() + `"}`,
@@ -49,7 +50,18 @@ func TestDeleteBookByID(t *testing.T) {
 		},
 		{
 			name:       "err, id is zero",
-			id:         0,
+			id:         "0",
+			serviceErr: nil,
+			wantCode:   400,
+			wantBody:   `{"error":"` + apperrors.ErrIncorrectPathValue.Error() + `"}`,
+			wantHeaders: map[string][]string{
+				"Content-Type": {"application/json"},
+			},
+			wantServiceCallCount: 0,
+		},
+		{
+			name:       "err, id not number",
+			id:         "1hfdk",
 			serviceErr: nil,
 			wantCode:   400,
 			wantBody:   `{"error":"` + apperrors.ErrIncorrectPathValue.Error() + `"}`,
@@ -60,7 +72,7 @@ func TestDeleteBookByID(t *testing.T) {
 		},
 		{
 			name:       "err, not found",
-			id:         1,
+			id:         "1",
 			serviceErr: apperrors.ErrNotFound,
 			wantCode:   404,
 			wantBody:   `{"error":"` + apperrors.ErrNotFound.Error() + `"}`,
@@ -68,19 +80,21 @@ func TestDeleteBookByID(t *testing.T) {
 				"Content-Type": {"application/json"},
 			},
 			wantServiceCallCount: 1,
+			wantId:               1,
 		},
 		{
 			name:                 "err, context is canceled in service",
-			id:                   1,
+			id:                   "1",
 			serviceErr:           context.Canceled,
 			wantCode:             200,
 			wantBody:             ``,
 			wantHeaders:          map[string][]string{},
 			wantServiceCallCount: 1,
+			wantId:               1,
 		},
 		{
 			name:       "err, context deadline exceeded in service",
-			id:         1,
+			id:         "1",
 			serviceErr: context.DeadlineExceeded,
 			wantCode:   504,
 			wantBody:   `{"error":"` + context.DeadlineExceeded.Error() + `"}`,
@@ -88,36 +102,40 @@ func TestDeleteBookByID(t *testing.T) {
 				"Content-Type": {"application/json"},
 			},
 			wantServiceCallCount: 1,
+			wantId:               1,
 		},
 		{
 			name:                 "cancel in repository",
-			id:                   1,
+			id:                   "1",
 			serviceErr:           nil,
 			wantCode:             200,
 			cancel:               true,
 			wantBody:             ``,
 			wantHeaders:          map[string][]string{},
 			wantServiceCallCount: 0,
+			wantId:               1,
 		},
 		{
 			name:                 "deadline exceeded in repository",
-			id:                   1,
+			id:                   "1",
 			serviceErr:           nil,
 			wantCode:             504,
 			deadlineContext:      true,
+			wantId:               1,
 			wantBody:             ``,
 			wantHeaders:          map[string][]string{},
 			wantServiceCallCount: 0,
 		},
 		{
 			name:       "unknown error in service",
-			id:         1,
+			id:         "1",
 			serviceErr: errors.New("unknown error"),
 			wantCode:   500,
 			wantBody:   `{"error":"unknown error"}`,
 			wantHeaders: map[string][]string{
 				"Content-Type": {"application/json"},
 			},
+			wantId:               1,
 			wantServiceCallCount: 1,
 		},
 	}
@@ -139,10 +157,10 @@ func TestDeleteBookByID(t *testing.T) {
 			req := httptest.NewRequestWithContext(
 				ctx,
 				http.MethodDelete,
-				"http://localhost:8080/books/"+strconv.Itoa(tt.id),
+				"http://localhost:8080/books/"+tt.id,
 				nil,
 			)
-			req.SetPathValue("id", strconv.Itoa(tt.id))
+			req.SetPathValue("id", tt.id)
 
 			s := ServiceMock{
 				err: tt.serviceErr,
@@ -158,8 +176,8 @@ func TestDeleteBookByID(t *testing.T) {
 				t.Fatalf("expected context to be %v but got %v", ctx, s.ctx)
 			}
 
-			if s.id != tt.id && tt.wantServiceCallCount >= 1 {
-				t.Fatalf("expeceted to pass to service id %d but got %d", tt.id, s.id)
+			if s.id != tt.wantId && tt.wantServiceCallCount >= 1 {
+				t.Fatalf("expeceted to pass to service id %d but got %d", tt.wantId, s.id)
 			}
 
 			if rr.Code != tt.wantCode {

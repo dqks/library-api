@@ -2,6 +2,7 @@ package tests
 
 import (
 	"context"
+	"errors"
 	"library-api/internal/handler"
 	"library-api/internal/model"
 	"library-api/internal/service"
@@ -169,6 +170,16 @@ func TestGetBooks(t *testing.T) {
 				"Content-Type": {"application/json"},
 			},
 			wantBody: `{"error":"strconv.ParseBool: parsing \"truedfkgdyr\": invalid syntax"}`,
+		},
+		{
+			name:       "unknown service err",
+			serviceErr: errors.New("unknown"),
+			wantBody:   `{"error":"unknown"}`,
+			wantHeaders: map[string][]string{
+				"Content-Type": {"application/json"},
+			},
+			wantCode:             500,
+			wantServiceCallCount: 1,
 		},
 	}
 
