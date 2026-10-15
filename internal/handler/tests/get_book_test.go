@@ -137,95 +137,96 @@ func TestGetBookByID(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {})
-		var ctx context.Context
-		var cancel context.CancelFunc
+		t.Run(tt.name, func(t *testing.T) {
+			var ctx context.Context
+			var cancel context.CancelFunc
 
-		if tt.deadlineContext {
-			ctx, cancel = context.WithDeadline(context.Background(), time.Time{})
-			defer cancel()
-		} else {
-			ctx, cancel = context.WithCancel(context.Background())
-			defer cancel()
-		}
+			if tt.deadlineContext {
+				ctx, cancel = context.WithDeadline(context.Background(), time.Time{})
+				defer cancel()
+			} else {
+				ctx, cancel = context.WithCancel(context.Background())
+				defer cancel()
+			}
 
-		if tt.cancel {
-			cancel()
-		}
+			if tt.cancel {
+				cancel()
+			}
 
-		rr := httptest.NewRecorder()
-		req := httptest.NewRequestWithContext(
-			ctx,
-			http.MethodGet,
-			"http://localhost:8080/books/"+strconv.Itoa(tt.id),
-			nil,
-		)
-		req.SetPathValue("id", strconv.Itoa(tt.id))
-
-		s := ServiceMock{
-			err:  tt.serviceErr,
-			book: tt.serviceBook,
-		}
-
-		handler.GetBookByID(&s)(rr, req)
-
-		if tt.wantCode != rr.Code {
-			t.Errorf(
-				"expected code to be %d but got %d",
-				tt.wantCode,
-				rr.Code,
+			rr := httptest.NewRecorder()
+			req := httptest.NewRequestWithContext(
+				ctx,
+				http.MethodGet,
+				"http://localhost:8080/books/"+strconv.Itoa(tt.id),
+				nil,
 			)
-		}
+			req.SetPathValue("id", strconv.Itoa(tt.id))
 
-		if !compareHeaders(tt.wantHeaders, rr.Header()) {
-			t.Errorf(
-				"expected headers to be %v but got %v",
-				tt.wantHeaders,
-				rr.Header(),
-			)
-		}
+			s := ServiceMock{
+				err:  tt.serviceErr,
+				book: tt.serviceBook,
+			}
 
-		if s.callCount != tt.wantServiceCallCount {
-			t.Errorf(
-				"expected service to be called %d times but got %d",
-				tt.wantServiceCallCount,
-				s.callCount,
-			)
-		}
+			handler.GetBookByID(&s)(rr, req)
 
-		if ctx != s.ctx && tt.wantServiceCallCount >= 1 {
-			t.Error("expected context passed to service be equal to handlers's context")
-		}
-
-		if tt.wantId != s.id && tt.wantServiceCallCount >= 1 {
-			t.Errorf(
-				"expected id to be %d but got %d",
-				tt.wantId,
-				s.id,
-			)
-		}
-
-		// Ожидаем вернуть в ответе книгу которую вернул сервис
-		if tt.serviceErr == nil {
-			var responseBook model.Book
-			decoder := json.NewDecoder(strings.NewReader(tt.wantBody))
-			decoder.Decode(&responseBook)
-
-			if responseBook != tt.serviceBook {
+			if tt.wantCode != rr.Code {
 				t.Errorf(
-					"expected book from repository to be the same in the response\nwanted book %v\n actual book %v",
-					tt.serviceBook,
-					responseBook,
+					"expected code to be %d but got %d",
+					tt.wantCode,
+					rr.Code,
 				)
 			}
-		}
 
-		if strings.TrimSpace(tt.wantBody) != strings.TrimSpace(rr.Body.String()) {
-			t.Errorf(
-				"expected body to be %v\nbut got %v",
-				tt.wantBody,
-				rr.Body.String(),
-			)
-		}
+			if !compareHeaders(tt.wantHeaders, rr.Header()) {
+				t.Errorf(
+					"expected headers to be %v but got %v",
+					tt.wantHeaders,
+					rr.Header(),
+				)
+			}
+
+			if s.callCount != tt.wantServiceCallCount {
+				t.Errorf(
+					"expected service to be called %d times but got %d",
+					tt.wantServiceCallCount,
+					s.callCount,
+				)
+			}
+
+			if ctx != s.ctx && tt.wantServiceCallCount >= 1 {
+				t.Error("expected context passed to service be equal to handlers's context")
+			}
+
+			if tt.wantId != s.id && tt.wantServiceCallCount >= 1 {
+				t.Errorf(
+					"expected id to be %d but got %d",
+					tt.wantId,
+					s.id,
+				)
+			}
+
+			// Ожидаем вернуть в ответе книгу которую вернул сервис
+			if tt.serviceErr == nil {
+				var responseBook model.Book
+				decoder := json.NewDecoder(strings.NewReader(tt.wantBody))
+				decoder.Decode(&responseBook)
+
+				if responseBook != tt.serviceBook {
+					t.Errorf(
+						"expected book from repository to be the same in the response\nwanted book %v\n actual book %v",
+						tt.serviceBook,
+						responseBook,
+					)
+				}
+			}
+
+			if strings.TrimSpace(tt.wantBody) != strings.TrimSpace(rr.Body.String()) {
+				t.Errorf(
+					"expected body to be %v\nbut got %v",
+					tt.wantBody,
+					rr.Body.String(),
+				)
+			}
+		})
 	}
 }
