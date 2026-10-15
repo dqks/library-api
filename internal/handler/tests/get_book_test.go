@@ -232,8 +232,10 @@ func TestGetBookByID(t *testing.T) {
 			if tt.serviceErr == nil {
 				var responseBook model.Book
 				decoder := json.NewDecoder(strings.NewReader(tt.wantBody))
-				decoder.Decode(&responseBook)
-
+				err := decoder.Decode(&responseBook)
+				if err != nil {
+					t.Fatal("failed to decode body")
+				}
 				if responseBook != tt.serviceBook {
 					t.Errorf(
 						"expected book from repository to be the same in the response\nwanted book %v\n actual book %v",

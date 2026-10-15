@@ -53,6 +53,27 @@ func TestEditBookByID(t *testing.T) {
 			wantCode: 200,
 		},
 		{
+			name:       "success, partial body",
+			id:         "1",
+			body:       `{"title":"New title"}`,
+			serviceErr: nil,
+			serviceBook: model.Book{
+				ID:        1,
+				Title:     "New title",
+				Author:    "New Author",
+				Year:      2000,
+				Available: false,
+			},
+			wantServiceCallCount: 1,
+			wantId:               1,
+			wantErr:              nil,
+			wantBody:             `{"id":1,"title":"New title","author":"New Author","year":2000,"available":false}`,
+			wantHeaders: map[string][]string{
+				"Content-Type": {"application/json"},
+			},
+			wantCode: 200,
+		},
+		{
 			name:                 "err, id is zero",
 			id:                   "0",
 			body:                 `{"title":"New title","author":"New Author","year":2000,"available":false}`,
