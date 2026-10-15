@@ -13,7 +13,7 @@ type BookRepository struct {
 	afterLock  func()
 }
 
-func CreateRepo(nextID int, books []model.Book) *BookRepository {
+func Create(nextID int, books []model.Book) *BookRepository {
 	if nextID <= 0 {
 		return nil
 	}

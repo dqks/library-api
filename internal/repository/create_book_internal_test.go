@@ -10,7 +10,7 @@ import (
 )
 
 func createTestRepo() *BookRepository {
-	return CreateRepo(
+	return Create(
 		3,
 		[]model.Book{
 			{

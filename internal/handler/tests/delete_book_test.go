@@ -5,6 +5,7 @@ import (
 	"errors"
 	"library-api/internal/apperrors"
 	"library-api/internal/handler"
+	"library-api/internal/testutil"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -192,7 +193,7 @@ func TestDeleteBookByID(t *testing.T) {
 				)
 			}
 
-			if !compareHeaders(tt.wantHeaders, rr.Header()) {
+			if !testutil.CompareHeaders(tt.wantHeaders, rr.Header()) {
 				t.Fatalf(
 					"expected headers to be %v\nbut got %v",
 					tt.wantHeaders,

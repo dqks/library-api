@@ -18,7 +18,7 @@ import (
 func main() {
 	mux := http.NewServeMux()
 
-	repo := repository.CreateRepo(
+	repo := repository.Create(
 		1,
 		[]model.Book{},
 	)

@@ -8,6 +8,7 @@ import (
 	"library-api/internal/handler"
 	"library-api/internal/model"
 	"library-api/internal/service"
+	"library-api/internal/testutil"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -230,7 +231,7 @@ func TestCreateBook(t *testing.T) {
 				t.Fatalf("expected code %d but got %d", tt.wantCode, rr.Code)
 			}
 
-			if !compareHeaders(tt.wantHeader, rr.Header()) {
+			if !testutil.CompareHeaders(tt.wantHeader, rr.Header()) {
 				t.Fatalf(
 					"expected headers to be %v\nbut got %v",
 					tt.wantHeader,

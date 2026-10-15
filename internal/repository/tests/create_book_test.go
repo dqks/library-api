@@ -85,7 +85,7 @@ func TestCreateBook(t *testing.T) {
 				Available: &tt.available,
 			}
 
-			repo := repository.CreateRepo(
+			repo := repository.Create(
 				nextID,
 				testBooks,
 			)
@@ -175,7 +175,7 @@ func TestCreateBookConcurrent(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			repo := repository.CreateRepo(nextID, testBooks)
+			repo := repository.Create(nextID, testBooks)
 
 			if repo == nil {
 				t.Fatalf("failed to create test repo")

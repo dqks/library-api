@@ -67,7 +67,7 @@ func TestGetBookByID(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			repo := repository.CreateRepo(nextID, testBooks)
+			repo := repository.Create(nextID, testBooks)
 
 			if repo == nil {
 				t.Fatal("failed to create repository")

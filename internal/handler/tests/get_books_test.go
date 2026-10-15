@@ -6,6 +6,7 @@ import (
 	"library-api/internal/handler"
 	"library-api/internal/model"
 	"library-api/internal/service"
+	"library-api/internal/testutil"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -232,7 +233,7 @@ func TestGetBooks(t *testing.T) {
 				)
 			}
 
-			if !compareHeaders(tt.wantHeaders, rr.Header()) {
+			if !testutil.CompareHeaders(tt.wantHeaders, rr.Header()) {
 				t.Errorf(
 					"expected headers to be %v\nbut got %v",
 					tt.wantHeaders,

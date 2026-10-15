@@ -7,6 +7,7 @@ import (
 	"library-api/internal/apperrors"
 	"library-api/internal/handler"
 	"library-api/internal/model"
+	"library-api/internal/testutil"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -200,7 +201,7 @@ func TestGetBookByID(t *testing.T) {
 				)
 			}
 
-			if !compareHeaders(tt.wantHeaders, rr.Header()) {
+			if !testutil.CompareHeaders(tt.wantHeaders, rr.Header()) {
 				t.Errorf(
 					"expected headers to be %v but got %v",
 					tt.wantHeaders,

@@ -217,7 +217,7 @@ func TestCreateRepo(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			repo := CreateRepo(tt.nextID, tt.books)
+			repo := Create(tt.nextID, tt.books)
 
 			if repo != nil && tt.wantRepoNil || repo == nil && !tt.wantRepoNil {
 				if tt.wantRepoNil {
