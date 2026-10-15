@@ -28,11 +28,10 @@ func TestDeleteBookByIDConcurrentCancel(t *testing.T) {
 				t.Fatal("failed to create repository")
 			}
 			var err error
-			testChan := make(chan bool)
-			waitChan := make(chan bool)
+			testChan := make(chan struct{})
 
 			repo.beforeLock = func() {
-				testChan <- true
+				testChan <- struct{}{}
 			}
 
 			ctx, cancel := context.WithCancel(context.Background())
@@ -43,22 +42,16 @@ func TestDeleteBookByIDConcurrentCancel(t *testing.T) {
 
 			go func() {
 				defer wg.Done()
-				<-waitChan
-
+				repo.mutex.Lock()
 				go func() {
 					defer wg.Done()
 					err = repo.DeleteBookByID(ctx, tt.id)
 				}()
-
-				<-testChan
-				waitChan <- true
 			}()
 
 			go func() {
 				defer wg.Done()
-				repo.mutex.Lock()
-				waitChan <- true
-				<-waitChan
+				<-testChan
 				cancel()
 				repo.mutex.Unlock()
 			}()
@@ -70,6 +63,7 @@ func TestDeleteBookByIDConcurrentCancel(t *testing.T) {
 			}
 
 			ctxGet := context.WithoutCancel(context.Background())
+			repo.beforeLock = func() {}
 			books, err := repo.GetBooks(ctxGet, GetBooksPayload{})
 
 			if err != nil {

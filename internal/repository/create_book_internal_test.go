@@ -60,9 +60,9 @@ func TestCreateBookConcurrentCancel(t *testing.T) {
 			if repo == nil {
 				t.Fatalf("failed to create test repo")
 			}
-			testChan := make(chan bool, 1)
+			testChan := make(chan struct{})
 			repo.beforeLock = func() {
-				testChan <- true
+				testChan <- struct{}{}
 			}
 			var err error
 			ctx, cancel := context.WithCancel(tt.ctx)

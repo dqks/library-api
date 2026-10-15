@@ -57,9 +57,9 @@ func TestGetBooksEdited(t *testing.T) {
 				t.Fatal("failed to create repository")
 			}
 
-			waitChan := make(chan bool)
+			waitChan := make(chan struct{})
 			repo.afterLock = func() {
-				waitChan <- true
+				waitChan <- struct{}{}
 			}
 			var books []model.Book
 			var wg sync.WaitGroup
@@ -121,9 +121,9 @@ func TestGetBooksConcurrentCancel(t *testing.T) {
 
 			var err error
 			var books []model.Book
-			testChan := make(chan bool, 1)
+			testChan := make(chan struct{})
 			repo.beforeLock = func() {
-				testChan <- true
+				testChan <- struct{}{}
 			}
 			ctx, cancel := context.WithCancel(context.Background())
 			var wg sync.WaitGroup

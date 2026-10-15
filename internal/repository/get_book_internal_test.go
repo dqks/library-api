@@ -42,9 +42,9 @@ func TestGetBookByIDReaderWriter(t *testing.T) {
 				t.Fatal("failed to create repository")
 			}
 
-			testChan := make(chan bool)
+			testChan := make(chan struct{})
 			repo.afterLock = func() {
-				testChan <- true
+				testChan <- struct{}{}
 			}
 
 			var book model.Book

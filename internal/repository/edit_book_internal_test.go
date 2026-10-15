@@ -46,11 +46,10 @@ func TestEditBookConcurrentCancel(t *testing.T) {
 			var wg sync.WaitGroup
 			var err error
 			wg.Add(3)
-			testChan := make(chan bool)
-			waitChan := make(chan bool)
+			testChan := make(chan struct{})
 
 			repo.beforeLock = func() {
-				waitChan <- true
+				testChan <- struct{}{}
 			}
 
 			ctx, cancel := context.WithCancel(context.Background())
@@ -58,8 +57,8 @@ func TestEditBookConcurrentCancel(t *testing.T) {
 
 			go func() {
 				defer wg.Done()
+				repo.mutex.Lock()
 
-				<-testChan
 				go func() {
 					defer wg.Done()
 					_, err = repo.EditBookByID(ctx, tt.id, EditBookPayload{
@@ -69,16 +68,10 @@ func TestEditBookConcurrentCancel(t *testing.T) {
 						Available: &tt.available,
 					})
 				}()
-
-				<-waitChan
-
-				testChan <- true
 			}()
 
 			go func() {
 				defer wg.Done()
-				repo.mutex.Lock()
-				testChan <- true
 				<-testChan
 				cancel()
 				repo.mutex.Unlock()
