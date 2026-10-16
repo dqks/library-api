@@ -124,7 +124,7 @@ func TestDeleteBook(t *testing.T) {
 			service := service.Create(repo)
 
 			mux := http.NewServeMux()
-			mux.HandleFunc("DELETE /books/"+tt.id, handler.DeleteBookByID(service))
+			mux.HandleFunc("DELETE /books/{id}", handler.DeleteBookByID(service))
 			mux.HandleFunc("GET /books", handler.GetBooks(service))
 
 			// DELETE Request
@@ -150,8 +150,6 @@ func TestDeleteBook(t *testing.T) {
 				"/books/"+tt.id,
 				nil,
 			)
-
-			reqDel.SetPathValue("id", tt.id)
 
 			mux.ServeHTTP(rrDel, reqDel)
 

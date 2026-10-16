@@ -37,9 +37,9 @@ func TestLifecycleBook(t *testing.T) {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /books", handler.GetBooks(service))
 	mux.HandleFunc("POST /books", handler.CreateBook(service))
-	mux.HandleFunc("GET /books/3", handler.GetBookByID(service))
-	mux.HandleFunc("DELETE /books/3", handler.DeleteBookByID(service))
-	mux.HandleFunc("PUT /books/3", handler.EditBookByID(service))
+	mux.HandleFunc("GET /books/{id}", handler.GetBookByID(service))
+	mux.HandleFunc("DELETE /books/{id}", handler.DeleteBookByID(service))
+	mux.HandleFunc("PUT /books/{id}", handler.EditBookByID(service))
 
 	expectedHeaders := map[string][]string{
 		"Content-Type": {"application/json"},
@@ -55,7 +55,13 @@ func TestLifecycleBook(t *testing.T) {
 	ctx := context.WithoutCancel(context.Background())
 	createRr := httptest.NewRecorder()
 	var body bytes.Buffer
-	json.NewEncoder(&body).Encode(createBody)
+	encoder := json.NewEncoder(&body)
+	err := encoder.Encode(createBody)
+	if err != nil {
+		t.Fatal(
+			"failed to encode body",
+		)
+	}
 	createReq := httptest.NewRequestWithContext(
 		ctx,
 		http.MethodPost,
@@ -67,7 +73,7 @@ func TestLifecycleBook(t *testing.T) {
 
 	if createRr.Code != 201 {
 		t.Fatalf(
-			"expected code to be 200 but got %d",
+			"expected code to be 201 but got %d",
 			createRr.Code,
 		)
 	}
@@ -90,11 +96,17 @@ func TestLifecycleBook(t *testing.T) {
 		"/books/"+strconv.Itoa(createdBook.ID),
 		nil,
 	)
-	getBookReq.SetPathValue("id", strconv.Itoa(createdBook.ID))
 	mux.ServeHTTP(getBookRr, getBookReq)
 
 	var getBook model.Book
-	json.NewDecoder(getBookRr.Body).Decode(&getBook)
+	decoder := json.NewDecoder(getBookRr.Body)
+	err = decoder.Decode(&getBook)
+
+	if err != nil {
+		t.Fatal(
+			"failed to decode body",
+		)
+	}
 
 	if createdBook != getBook {
 		t.Fatalf(
@@ -104,8 +116,6 @@ func TestLifecycleBook(t *testing.T) {
 			getBook,
 		)
 	}
-
-	mux.ServeHTTP(createRr, createReq)
 
 	if getBookRr.Code != 200 {
 		t.Fatalf(
@@ -119,50 +129,6 @@ func TestLifecycleBook(t *testing.T) {
 			"expected headers to be %v\nbut got %v",
 			expectedHeaders,
 			getBookRr.Header(),
-		)
-	}
-
-	// Get books
-
-	getBooksRr := httptest.NewRecorder()
-	getBooksReq := httptest.NewRequestWithContext(
-		ctx,
-		http.MethodGet,
-		"/books",
-		nil,
-	)
-	mux.ServeHTTP(getBooksRr, getBooksReq)
-
-	var getBooks []model.Book
-	json.NewDecoder(getBooksRr.Body).Decode(&getBooks)
-	foundBook := false
-
-	for _, b := range getBooks {
-		if b == createdBook {
-			foundBook = true
-		}
-	}
-
-	if !foundBook {
-		t.Fatalf(
-			"expected to find book in list of all books %v\nbut didn't %v",
-			createdBook,
-			getBooks,
-		)
-	}
-
-	if getBooksRr.Code != 200 {
-		t.Fatalf(
-			"expected code to be 200 but got %d",
-			getBooksRr.Code,
-		)
-	}
-
-	if !testutil.CompareHeaders(expectedHeaders, getBooksRr.Header()) {
-		t.Fatalf(
-			"expected headers to be %v\nbut got %v",
-			expectedHeaders,
-			getBooksRr.Header(),
 		)
 	}
 
@@ -182,7 +148,13 @@ func TestLifecycleBook(t *testing.T) {
 	editReq.SetPathValue("id", strconv.Itoa(createdBook.ID))
 	mux.ServeHTTP(editRr, editReq)
 	var editedBook model.Book
-	json.NewDecoder(editRr.Body).Decode(&editedBook)
+	decoder = json.NewDecoder(editRr.Body)
+	err = decoder.Decode(&editedBook)
+	if err != nil {
+		t.Fatal(
+			"failed to decode body",
+		)
+	}
 
 	createdBook.Title = "edited title"
 	if editedBook != createdBook {
@@ -207,6 +179,62 @@ func TestLifecycleBook(t *testing.T) {
 		)
 	}
 
+	// Get books
+	getBooksRr := httptest.NewRecorder()
+	getBooksReq := httptest.NewRequestWithContext(
+		ctx,
+		http.MethodGet,
+		"/books",
+		nil,
+	)
+	mux.ServeHTTP(getBooksRr, getBooksReq)
+
+	var getBooks []model.Book
+	decoder = json.NewDecoder(getBooksRr.Body)
+	err = decoder.Decode(&getBooks)
+	if err != nil {
+		t.Fatal(
+			"failed to decode body",
+		)
+	}
+
+	index := -1
+	for i := range getBooks {
+		if getBooks[i] == createdBook {
+			index = i
+		}
+	}
+
+	if index == -1 {
+		t.Fatalf(
+			"expected to find book in list of all books %v\nbut didn't %v",
+			createdBook,
+			getBooks,
+		)
+	}
+
+	if getBooks[index] != createdBook {
+		t.Fatalf(
+			"expected edited book to be %v\nbut got %v",
+			createdBook, editedBook,
+		)
+	}
+
+	if getBooksRr.Code != 200 {
+		t.Fatalf(
+			"expected code to be 200 but got %d",
+			getBooksRr.Code,
+		)
+	}
+
+	if !testutil.CompareHeaders(expectedHeaders, getBooksRr.Header()) {
+		t.Fatalf(
+			"expected headers to be %v\nbut got %v",
+			expectedHeaders,
+			getBooksRr.Header(),
+		)
+	}
+
 	// Delete book
 	delRr := httptest.NewRecorder()
 	delReq := httptest.NewRequestWithContext(
@@ -215,15 +243,7 @@ func TestLifecycleBook(t *testing.T) {
 		"/books/"+strconv.Itoa(createdBook.ID),
 		nil,
 	)
-	delReq.SetPathValue("id", strconv.Itoa(createdBook.ID))
 	mux.ServeHTTP(delRr, delReq)
-
-	if delRr.Code != 200 {
-		t.Fatalf(
-			"expected code to be 200 but got %d",
-			delRr.Code,
-		)
-	}
 
 	if delRr.Code != 200 {
 		t.Fatalf(
@@ -241,7 +261,15 @@ func TestLifecycleBook(t *testing.T) {
 	}
 
 	// Get book by id
-	json.NewDecoder(createRr.Body).Decode(&createdBook)
+	decoder = json.NewDecoder(createRr.Body)
+	err = decoder.Decode(&createdBook)
+
+	if err != nil {
+		t.Fatal(
+			"failed to decode body",
+		)
+	}
+
 	getBookRr = httptest.NewRecorder()
 	getBookReq = httptest.NewRequestWithContext(
 		ctx,
@@ -249,7 +277,6 @@ func TestLifecycleBook(t *testing.T) {
 		"/books/"+strconv.Itoa(createdBook.ID),
 		nil,
 	)
-	getBookReq.SetPathValue("id", strconv.Itoa(createdBook.ID))
 	mux.ServeHTTP(getBookRr, getBookReq)
 
 	if getBookRr.Code != 404 {
@@ -259,11 +286,11 @@ func TestLifecycleBook(t *testing.T) {
 		)
 	}
 
-	if !testutil.CompareHeaders(expectedHeaders, delRr.Header()) {
+	if !testutil.CompareHeaders(expectedHeaders, getBookRr.Header()) {
 		t.Fatalf(
 			"expected headers to be %v\nbut got %v",
 			expectedHeaders,
-			delRr.Header(),
+			getBookRr.Header(),
 		)
 	}
 }

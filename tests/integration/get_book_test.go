@@ -133,7 +133,7 @@ func TestGetBook(t *testing.T) {
 			service := service.Create(repo)
 
 			mux := http.NewServeMux()
-			mux.HandleFunc("/books/"+tt.id, handler.GetBookByID(service))
+			mux.HandleFunc("GET /books/{id}", handler.GetBookByID(service))
 
 			rr := httptest.NewRecorder()
 			req := httptest.NewRequestWithContext(
@@ -142,7 +142,6 @@ func TestGetBook(t *testing.T) {
 				"/books/"+tt.id,
 				nil,
 			)
-			req.SetPathValue("id", tt.id)
 
 			mux.ServeHTTP(rr, req)
 

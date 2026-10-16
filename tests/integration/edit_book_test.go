@@ -164,8 +164,8 @@ func TestEditBook(t *testing.T) {
 			service := service.Create(repo)
 
 			mux := http.NewServeMux()
-			mux.HandleFunc("/books/"+tt.id, handler.EditBookByID(service))
-			mux.HandleFunc("/books", handler.GetBooks(service))
+			mux.HandleFunc("PUT /books/{id}", handler.EditBookByID(service))
+			mux.HandleFunc("GET /books", handler.GetBooks(service))
 
 			var ctxGet context.Context
 			var cancel context.CancelFunc
@@ -185,11 +185,10 @@ func TestEditBook(t *testing.T) {
 			rr := httptest.NewRecorder()
 			req := httptest.NewRequestWithContext(
 				ctxGet,
-				http.MethodDelete,
+				http.MethodPut,
 				"/books/"+tt.id,
 				strings.NewReader(tt.body),
 			)
-			req.SetPathValue("id", tt.id)
 
 			// PUT request
 			mux.ServeHTTP(rr, req)

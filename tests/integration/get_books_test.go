@@ -123,7 +123,7 @@ func TestGetBooks(t *testing.T) {
 			service := service.Create(repo)
 
 			mux := http.NewServeMux()
-			mux.HandleFunc("/books", handler.GetBooks(service))
+			mux.HandleFunc("GET /books", handler.GetBooks(service))
 
 			rr := httptest.NewRecorder()
 			req := httptest.NewRequestWithContext(
