@@ -22,117 +22,117 @@ func TestEditBook(t *testing.T) {
 		deadlineContext bool
 		id              string
 		body            string
-		// PUT request
-		wantPutBody   string
-		wantPutCode   int
-		wantPutHeader http.Header
+		// PATCH request
+		wantPatchBody   string
+		wantPatchCode   int
+		wantPatchHeader http.Header
 		// GET request
 		wantGetBody string
 	}{
 		{
-			name:        "success",
-			id:          "1",
-			body:        `{"title":"New edited title","author":"New edited author","year":2000,"available":false}`,
-			wantPutBody: `{"id":1,"title":"New edited title","author":"New edited author","year":2000,"available":false}`,
-			wantPutCode: 200,
-			wantPutHeader: map[string][]string{
+			name:          "success",
+			id:            "1",
+			body:          `{"title":"New edited title","author":"New edited author","year":2000,"available":false}`,
+			wantPatchBody: `{"id":1,"title":"New edited title","author":"New edited author","year":2000,"available":false}`,
+			wantPatchCode: 200,
+			wantPatchHeader: map[string][]string{
 				"Content-Type": {"application/json"},
 			},
 			wantGetBody: `[{"id":1,"title":"New edited title","author":"New edited author","year":2000,"available":false},{"id":2,"title":"New title","author":"New author","year":2000,"available":false}]`,
 		},
 		{
-			name:        "success, partial fields",
-			id:          "1",
-			body:        `{"title":"New edited title"}`,
-			wantPutBody: `{"id":1,"title":"New edited title","author":"George Orwell","year":2000,"available":false}`,
-			wantPutCode: 200,
-			wantPutHeader: map[string][]string{
+			name:          "success, partial fields",
+			id:            "1",
+			body:          `{"title":"New edited title"}`,
+			wantPatchBody: `{"id":1,"title":"New edited title","author":"George Orwell","year":2000,"available":false}`,
+			wantPatchCode: 200,
+			wantPatchHeader: map[string][]string{
 				"Content-Type": {"application/json"},
 			},
 			wantGetBody: `[{"id":1,"title":"New edited title","author":"George Orwell","year":2000,"available":false},{"id":2,"title":"New title","author":"New author","year":2000,"available":false}]`,
 		},
 		{
-			name:        "not found",
-			id:          "5",
-			body:        `{"title":"New edited title","author":"New edited author","year":2000,"available":false}`,
-			wantPutBody: `{"error":"` + apperrors.ErrNotFound.Error() + `"}`,
-			wantPutCode: 404,
-			wantPutHeader: map[string][]string{
+			name:          "not found",
+			id:            "5",
+			body:          `{"title":"New edited title","author":"New edited author","year":2000,"available":false}`,
+			wantPatchBody: `{"error":"` + apperrors.ErrNotFound.Error() + `"}`,
+			wantPatchCode: 404,
+			wantPatchHeader: map[string][]string{
 				"Content-Type": {"application/json"},
 			},
 			wantGetBody: `[{"id":1,"title":"1984","author":"George Orwell","year":2000,"available":false},{"id":2,"title":"New title","author":"New author","year":2000,"available":false}]`,
 		},
 		{
-			name:        "zero id",
-			id:          "0",
-			body:        `{"title":"New edited title","author":"New edited author","year":2000,"available":false}`,
-			wantPutBody: `{"error":"` + apperrors.ErrIncorrectPathValue.Error() + `"}`,
-			wantPutCode: 400,
-			wantPutHeader: map[string][]string{
+			name:          "zero id",
+			id:            "0",
+			body:          `{"title":"New edited title","author":"New edited author","year":2000,"available":false}`,
+			wantPatchBody: `{"error":"` + apperrors.ErrIncorrectPathValue.Error() + `"}`,
+			wantPatchCode: 400,
+			wantPatchHeader: map[string][]string{
 				"Content-Type": {"application/json"},
 			},
 			wantGetBody: `[{"id":1,"title":"1984","author":"George Orwell","year":2000,"available":false},{"id":2,"title":"New title","author":"New author","year":2000,"available":false}]`,
 		},
 		{
-			name:        "negative id",
-			id:          "-1",
-			body:        `{"title":"New edited title","author":"New edited author","year":2000,"available":false}`,
-			wantPutBody: `{"error":"` + apperrors.ErrIncorrectPathValue.Error() + `"}`,
-			wantPutCode: 400,
-			wantPutHeader: map[string][]string{
+			name:          "negative id",
+			id:            "-1",
+			body:          `{"title":"New edited title","author":"New edited author","year":2000,"available":false}`,
+			wantPatchBody: `{"error":"` + apperrors.ErrIncorrectPathValue.Error() + `"}`,
+			wantPatchCode: 400,
+			wantPatchHeader: map[string][]string{
 				"Content-Type": {"application/json"},
 			},
 			wantGetBody: `[{"id":1,"title":"1984","author":"George Orwell","year":2000,"available":false},{"id":2,"title":"New title","author":"New author","year":2000,"available":false}]`,
 		},
 		{
-			name:        "not number id",
-			id:          "1hofg",
-			body:        `{"title":"New edited title","author":"New edited author","year":2000,"available":false}`,
-			wantPutBody: `{"error":"` + apperrors.ErrIncorrectPathValue.Error() + `"}`,
-			wantPutCode: 400,
-			wantPutHeader: map[string][]string{
+			name:          "not number id",
+			id:            "1hofg",
+			body:          `{"title":"New edited title","author":"New edited author","year":2000,"available":false}`,
+			wantPatchBody: `{"error":"` + apperrors.ErrIncorrectPathValue.Error() + `"}`,
+			wantPatchCode: 400,
+			wantPatchHeader: map[string][]string{
 				"Content-Type": {"application/json"},
 			},
 			wantGetBody: `[{"id":1,"title":"1984","author":"George Orwell","year":2000,"available":false},{"id":2,"title":"New title","author":"New author","year":2000,"available":false}]`,
 		},
 		{
-			name:          "cancelled",
-			id:            "1",
-			body:          ``,
-			cancel:        true,
-			wantPutBody:   ``,
-			wantPutCode:   200,
-			wantPutHeader: map[string][]string{},
-			wantGetBody:   `[{"id":1,"title":"1984","author":"George Orwell","year":2000,"available":false},{"id":2,"title":"New title","author":"New author","year":2000,"available":false}]`,
+			name:            "cancelled",
+			id:              "1",
+			body:            ``,
+			cancel:          true,
+			wantPatchBody:   ``,
+			wantPatchCode:   200,
+			wantPatchHeader: map[string][]string{},
+			wantGetBody:     `[{"id":1,"title":"1984","author":"George Orwell","year":2000,"available":false},{"id":2,"title":"New title","author":"New author","year":2000,"available":false}]`,
 		},
 		{
 			name:            "deadline exceeded",
 			id:              "1",
 			body:            ``,
 			deadlineContext: true,
-			wantPutBody:     ``,
-			wantPutCode:     504,
-			wantPutHeader:   map[string][]string{},
+			wantPatchBody:   ``,
+			wantPatchCode:   504,
+			wantPatchHeader: map[string][]string{},
 			wantGetBody:     `[{"id":1,"title":"1984","author":"George Orwell","year":2000,"available":false},{"id":2,"title":"New title","author":"New author","year":2000,"available":false}]`,
 		},
 		{
-			name:        "bad json",
-			id:          "1",
-			body:        `{"title":"New edited title","author":"New edited author","year":2000,"available":`,
-			wantPutBody: `{"error":"unexpected EOF"}`,
-			wantPutCode: 400,
-			wantPutHeader: map[string][]string{
+			name:          "bad json",
+			id:            "1",
+			body:          `{"title":"New edited title","author":"New edited author","year":2000,"available":`,
+			wantPatchBody: `{"error":"unexpected EOF"}`,
+			wantPatchCode: 400,
+			wantPatchHeader: map[string][]string{
 				"Content-Type": {"application/json"},
 			},
 			wantGetBody: `[{"id":1,"title":"1984","author":"George Orwell","year":2000,"available":false},{"id":2,"title":"New title","author":"New author","year":2000,"available":false}]`,
 		},
 		{
-			name:        "additional field",
-			id:          "1",
-			body:        `{"title":"New edited title","author":"New edited author","year":2000,"available":false,"additional":false}`,
-			wantPutBody: `{"error":"json: unknown field \"additional\""}`,
-			wantPutCode: 400,
-			wantPutHeader: map[string][]string{
+			name:          "additional field",
+			id:            "1",
+			body:          `{"title":"New edited title","author":"New edited author","year":2000,"available":false,"additional":false}`,
+			wantPatchBody: `{"error":"json: unknown field \"additional\""}`,
+			wantPatchCode: 400,
+			wantPatchHeader: map[string][]string{
 				"Content-Type": {"application/json"},
 			},
 			wantGetBody: `[{"id":1,"title":"1984","author":"George Orwell","year":2000,"available":false},{"id":2,"title":"New title","author":"New author","year":2000,"available":false}]`,
@@ -193,26 +193,26 @@ func TestEditBook(t *testing.T) {
 			// PUT request
 			mux.ServeHTTP(rr, req)
 
-			if tt.wantPutCode != rr.Code {
+			if tt.wantPatchCode != rr.Code {
 				t.Errorf(
 					"expected code to be %d but got %d",
-					tt.wantPutCode,
+					tt.wantPatchCode,
 					rr.Code,
 				)
 			}
 
-			if !testutil.CompareHeaders(tt.wantPutHeader, rr.Header()) {
+			if !testutil.CompareHeaders(tt.wantPatchHeader, rr.Header()) {
 				t.Errorf(
 					"expected headers to be %v\nbut got %v",
-					tt.wantPutHeader,
+					tt.wantPatchHeader,
 					rr.Header(),
 				)
 			}
 
-			if strings.TrimSpace(tt.wantPutBody) != strings.TrimSpace(rr.Body.String()) {
+			if strings.TrimSpace(tt.wantPatchBody) != strings.TrimSpace(rr.Body.String()) {
 				t.Errorf(
 					"expected PUT body to be %v\nbut got %v",
-					tt.wantPutBody,
+					tt.wantPatchBody,
 					rr.Body.String(),
 				)
 			}

@@ -145,7 +145,6 @@ func TestLifecycleBook(t *testing.T) {
 		"/books/"+strconv.Itoa(createdBook.ID),
 		&editBodyJSON,
 	)
-	editReq.SetPathValue("id", strconv.Itoa(createdBook.ID))
 	mux.ServeHTTP(editRr, editReq)
 	var editedBook model.Book
 	decoder = json.NewDecoder(editRr.Body)
@@ -198,25 +197,18 @@ func TestLifecycleBook(t *testing.T) {
 		)
 	}
 
-	index := -1
+	foundBook := false
 	for i := range getBooks {
 		if getBooks[i] == createdBook {
-			index = i
+			foundBook = true
 		}
 	}
 
-	if index == -1 {
+	if !foundBook {
 		t.Fatalf(
 			"expected to find book in list of all books %v\nbut didn't %v",
 			createdBook,
 			getBooks,
-		)
-	}
-
-	if getBooks[index] != createdBook {
-		t.Fatalf(
-			"expected edited book to be %v\nbut got %v",
-			createdBook, editedBook,
 		)
 	}
 
