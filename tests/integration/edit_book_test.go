@@ -164,7 +164,7 @@ func TestEditBook(t *testing.T) {
 			service := service.Create(repo)
 
 			mux := http.NewServeMux()
-			mux.HandleFunc("PUT /books/{id}", handler.EditBookByID(service))
+			mux.HandleFunc("PATCH /books/{id}", handler.EditBookByID(service))
 			mux.HandleFunc("GET /books", handler.GetBooks(service))
 
 			var ctxGet context.Context
@@ -185,7 +185,7 @@ func TestEditBook(t *testing.T) {
 			rr := httptest.NewRecorder()
 			req := httptest.NewRequestWithContext(
 				ctxGet,
-				http.MethodPut,
+				http.MethodPatch,
 				"/books/"+tt.id,
 				strings.NewReader(tt.body),
 			)

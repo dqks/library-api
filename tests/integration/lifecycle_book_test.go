@@ -39,7 +39,7 @@ func TestLifecycleBook(t *testing.T) {
 	mux.HandleFunc("POST /books", handler.CreateBook(service))
 	mux.HandleFunc("GET /books/{id}", handler.GetBookByID(service))
 	mux.HandleFunc("DELETE /books/{id}", handler.DeleteBookByID(service))
-	mux.HandleFunc("PUT /books/{id}", handler.EditBookByID(service))
+	mux.HandleFunc("PATCH /books/{id}", handler.EditBookByID(service))
 
 	expectedHeaders := map[string][]string{
 		"Content-Type": {"application/json"},
@@ -141,7 +141,7 @@ func TestLifecycleBook(t *testing.T) {
 	editRr := httptest.NewRecorder()
 	editReq := httptest.NewRequestWithContext(
 		ctx,
-		http.MethodPut,
+		http.MethodPatch,
 		"/books/"+strconv.Itoa(createdBook.ID),
 		&editBodyJSON,
 	)
@@ -261,15 +261,6 @@ func TestLifecycleBook(t *testing.T) {
 	}
 
 	// Get book by id
-	decoder = json.NewDecoder(createRr.Body)
-	err = decoder.Decode(&createdBook)
-
-	if err != nil {
-		t.Fatal(
-			"failed to decode body",
-		)
-	}
-
 	getBookRr = httptest.NewRecorder()
 	getBookReq = httptest.NewRequestWithContext(
 		ctx,
