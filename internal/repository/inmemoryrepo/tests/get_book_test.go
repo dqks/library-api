@@ -5,7 +5,7 @@ import (
 	"errors"
 	"library-api/internal/apperrors"
 	"library-api/internal/model"
-	repository "library-api/internal/repository/inmemory"
+	repository "library-api/internal/repository/inmemoryrepo"
 	"testing"
 )
 

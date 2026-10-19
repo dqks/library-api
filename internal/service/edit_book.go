@@ -4,7 +4,7 @@ import (
 	"context"
 	"library-api/internal/apperrors"
 	"library-api/internal/model"
-	repository "library-api/internal/repository/inmemory"
+	"library-api/internal/repository"
 )
 
 type EditBookInput struct {

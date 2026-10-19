@@ -1,10 +1,11 @@
-package pg
+package pgrepo
 
 import (
 	"context"
 	"fmt"
 	"library-api/internal/model"
-	repository "library-api/internal/repository/inmemory"
+
+	repository "library-api/internal/repository"
 
 	"github.com/jackc/pgx/v5"
 )

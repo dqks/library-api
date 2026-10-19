@@ -1,9 +1,10 @@
-package repository
+package inmemoryrepository
 
 import (
 	"context"
 	"errors"
 	"library-api/internal/model"
+	"library-api/internal/repository"
 	"sync"
 	"testing"
 )
@@ -69,12 +70,12 @@ func TestGetBooksEdited(t *testing.T) {
 			go func() {
 				defer wg.Done()
 				<-waitChan
-				books, _ = repo.GetBooks(ctx, GetBooksPayload{})
+				books, _ = repo.GetBooks(ctx, repository.GetBooksPayload{})
 			}()
 
 			go func() {
 				defer wg.Done()
-				repo.CreateBook(ctx, CreateBookPayload{
+				repo.CreateBook(ctx, repository.CreateBookPayload{
 					Title:     &tt.title,
 					Author:    &tt.author,
 					Year:      &tt.year,
@@ -134,7 +135,7 @@ func TestGetBooksConcurrentCancel(t *testing.T) {
 				repo.mutex.Lock()
 				go func() {
 					defer wg.Done()
-					books, err = repo.GetBooks(ctx, GetBooksPayload{})
+					books, err = repo.GetBooks(ctx, repository.GetBooksPayload{})
 				}()
 			}()
 

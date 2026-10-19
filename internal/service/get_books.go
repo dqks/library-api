@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 	"library-api/internal/model"
-	repository "library-api/internal/repository/inmemory"
+	"library-api/internal/repository"
 )
 
 type GetBooksQueryParams struct {

@@ -1,15 +1,12 @@
-package repository
+package inmemoryrepository
 
 import (
 	"context"
 	"library-api/internal/model"
+	"library-api/internal/repository"
 )
 
-type GetBooksPayload struct {
-	Available *bool
-}
-
-func (r *BookRepository) GetBooks(ctx context.Context, params GetBooksPayload) ([]model.Book, error) {
+func (r *BookRepository) GetBooks(ctx context.Context, params repository.GetBooksPayload) ([]model.Book, error) {
 	select {
 	case <-ctx.Done():
 		return nil, ctx.Err()

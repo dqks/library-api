@@ -1,8 +1,9 @@
-package repository
+package inmemoryrepository
 
 import (
 	"context"
 	"errors"
+	"library-api/internal/repository"
 	"sync"
 	"testing"
 )
@@ -64,7 +65,7 @@ func TestDeleteBookByIDConcurrentCancel(t *testing.T) {
 
 			ctxGet := context.WithoutCancel(context.Background())
 			repo.beforeLock = func() {}
-			books, err := repo.GetBooks(ctxGet, GetBooksPayload{})
+			books, err := repo.GetBooks(ctxGet, repository.GetBooksPayload{})
 
 			if err != nil {
 				t.Fatal("failed to get books")

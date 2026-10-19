@@ -5,7 +5,7 @@ import (
 	"library-api/internal/apperrors"
 	"library-api/internal/handler"
 	"library-api/internal/model"
-	repository "library-api/internal/repository/inmemory"
+	inmemoryrepo "library-api/internal/repository/inmemoryrepo"
 	"library-api/internal/service"
 	"library-api/internal/testutil"
 	"net/http"
@@ -101,7 +101,7 @@ func TestDeleteBook(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			repo := repository.Create(
+			repo := inmemoryrepo.Create(
 				3,
 				[]model.Book{
 					{

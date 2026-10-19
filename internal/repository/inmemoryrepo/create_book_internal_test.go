@@ -1,9 +1,10 @@
-package repository
+package inmemoryrepository
 
 import (
 	"context"
 	"errors"
 	"library-api/internal/model"
+	"library-api/internal/repository"
 	"slices"
 	"sync"
 	"testing"
@@ -75,7 +76,7 @@ func TestCreateBookConcurrentCancel(t *testing.T) {
 				repo.mutex.Lock()
 				go func() {
 					defer wg.Done()
-					_, err = repo.CreateBook(ctx, CreateBookPayload{
+					_, err = repo.CreateBook(ctx, repository.CreateBookPayload{
 						Title:     &tt.book.Title,
 						Author:    &tt.book.Author,
 						Year:      &tt.book.Year,
@@ -102,7 +103,7 @@ func TestCreateBookConcurrentCancel(t *testing.T) {
 			}
 
 			ctxGet := context.WithoutCancel(context.Background())
-			books, err := repo.GetBooks(ctxGet, GetBooksPayload{})
+			books, err := repo.GetBooks(ctxGet, repository.GetBooksPayload{})
 
 			if err != nil {
 				t.Fatalf("failed to get books")

@@ -1,9 +1,10 @@
-package repository
+package inmemoryrepository
 
 import (
 	"context"
 	"errors"
 	"library-api/internal/model"
+	"library-api/internal/repository"
 	"sync"
 	"testing"
 )
@@ -61,7 +62,7 @@ func TestEditBookConcurrentCancel(t *testing.T) {
 
 				go func() {
 					defer wg.Done()
-					_, err = repo.EditBookByID(ctx, tt.id, EditBookPayload{
+					_, err = repo.EditBookByID(ctx, tt.id, repository.EditBookPayload{
 						Title:     &tt.title,
 						Author:    &tt.author,
 						Year:      &tt.year,

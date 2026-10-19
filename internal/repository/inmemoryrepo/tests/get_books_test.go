@@ -4,7 +4,8 @@ import (
 	"context"
 	"errors"
 	"library-api/internal/model"
-	repository "library-api/internal/repository/inmemory"
+	"library-api/internal/repository"
+	inmemoryrepo "library-api/internal/repository/inmemoryrepo"
 	"testing"
 )
 
@@ -183,7 +184,7 @@ func TestGetBooks(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			repo := repository.Create(
+			repo := inmemoryrepo.Create(
 				nextID,
 				testBooks,
 			)

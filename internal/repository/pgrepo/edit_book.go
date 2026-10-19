@@ -1,10 +1,10 @@
-package pg
+package pgrepo
 
 import (
 	"context"
 	"fmt"
 	"library-api/internal/model"
-	repository "library-api/internal/repository/inmemory"
+	repository "library-api/internal/repository"
 )
 
 func (r *BookRepository) EditBookByID(ctx context.Context, id int, p repository.EditBookPayload) (model.Book, error) {

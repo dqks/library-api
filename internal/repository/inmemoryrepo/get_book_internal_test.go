@@ -1,8 +1,9 @@
-package repository
+package inmemoryrepository
 
 import (
 	"context"
 	"library-api/internal/model"
+	"library-api/internal/repository"
 	"sync"
 	"testing"
 )
@@ -62,7 +63,7 @@ func TestGetBookByIDReaderWriter(t *testing.T) {
 				defer wg.Done()
 				go func() {
 					defer wg.Done()
-					repo.EditBookByID(ctx, tt.id, EditBookPayload{
+					repo.EditBookByID(ctx, tt.id, repository.EditBookPayload{
 						Title:     &tt.title,
 						Author:    &tt.author,
 						Year:      &tt.year,

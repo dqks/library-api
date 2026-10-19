@@ -4,7 +4,7 @@ import (
 	"context"
 	"library-api/internal/apperrors"
 	"library-api/internal/model"
-	repository "library-api/internal/repository/inmemory"
+	repository "library-api/internal/repository"
 	"library-api/internal/service"
 	"reflect"
 	"testing"

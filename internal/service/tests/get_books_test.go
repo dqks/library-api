@@ -3,7 +3,7 @@ package tests
 import (
 	"context"
 	"library-api/internal/model"
-	repository "library-api/internal/repository/inmemory"
+	repository "library-api/internal/repository"
 	"library-api/internal/service"
 	"reflect"
 	"testing"

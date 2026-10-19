@@ -1,18 +1,12 @@
-package repository
+package inmemoryrepository
 
 import (
 	"context"
 	"library-api/internal/model"
+	"library-api/internal/repository"
 )
 
-type CreateBookPayload struct {
-	Title     *string
-	Author    *string
-	Year      *uint16
-	Available *bool
-}
-
-func (r *BookRepository) CreateBook(ctx context.Context, payload CreateBookPayload) (model.Book, error) {
+func (r *BookRepository) CreateBook(ctx context.Context, payload repository.CreateBookPayload) (model.Book, error) {
 	select {
 	case <-ctx.Done():
 		return model.Book{}, ctx.Err()

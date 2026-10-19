@@ -5,10 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"library-api/internal/handler"
-	"library-api/internal/model"
-	repository "library-api/internal/repository/inmemory"
 
-	pgRepo "library-api/internal/repository/pg"
+	// repository "library-api/internal/repository/inmemory"
+
+	pgRepo "library-api/internal/repository/pgrepo"
 	"library-api/internal/service"
 	"log"
 	"net/http"
@@ -43,15 +43,15 @@ func main() {
 
 	mux := http.NewServeMux()
 
-	repo := repository.Create(
-		1,
-		[]model.Book{},
-	)
+	// repo := repository.Create(
+	// 	1,
+	// 	[]model.Book{},
+	// )
 
-	if repo == nil {
-		fmt.Println("произошла ошибка при запуске сервера - не получилось создать репозиторий")
-		return
-	}
+	// if repo == nil {
+	// 	fmt.Println("произошла ошибка при запуске сервера - не получилось создать репозиторий")
+	// 	return
+	// }
 
 	service := service.Create(pgRepo)
 
