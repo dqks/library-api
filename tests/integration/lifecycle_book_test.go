@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"library-api/internal/handler"
 	"library-api/internal/model"
-	"library-api/internal/repository"
+	repository "library-api/internal/repository/inmemory"
 	"library-api/internal/service"
 	"library-api/internal/testutil"
 	"net/http"

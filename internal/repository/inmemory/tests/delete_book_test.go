@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"library-api/internal/apperrors"
 	"library-api/internal/model"
-	"library-api/internal/repository"
+	repository "library-api/internal/repository/inmemory"
 	"sync"
 	"testing"
 )

@@ -6,16 +6,41 @@ import (
 	"fmt"
 	"library-api/internal/handler"
 	"library-api/internal/model"
-	"library-api/internal/repository"
+	repository "library-api/internal/repository/inmemory"
+
+	pgRepo "library-api/internal/repository/pg"
 	"library-api/internal/service"
+	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	ctx := context.Background()
+	if err := godotenv.Load("../../.env"); err != nil {
+		log.Fatal(err)
+
+	}
+	dsn := os.Getenv("DATABASE_URL")
+	pool, err := pgxpool.New(ctx, dsn)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if err := pool.Ping(ctx); err != nil {
+		pool.Close()
+		log.Fatal(err)
+	}
+
+	pgRepo := pgRepo.Create(pool)
+
 	mux := http.NewServeMux()
 
 	repo := repository.Create(
@@ -28,7 +53,7 @@ func main() {
 		return
 	}
 
-	service := service.Create(repo)
+	service := service.Create(pgRepo)
 
 	if service == nil {
 		fmt.Println("произошла ошибка при запуске сервера - не получилось создать сервис")
