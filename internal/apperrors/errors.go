@@ -41,7 +41,7 @@ func CheckErrors(errorsToCheck []error, err error) int {
 	errIndex := -1
 
 	for i := range errorsToCheck {
-		if errors.Is(errorsToCheck[i], err) {
+		if errors.Is(err, errorsToCheck[i]) {
 			errIndex = i
 		}
 	}

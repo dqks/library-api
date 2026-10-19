@@ -1,4 +1,4 @@
-package pgrepo
+package postgres
 
 import (
 	"context"
@@ -6,25 +6,34 @@ import (
 	"fmt"
 	"library-api/internal/apperrors"
 	"library-api/internal/model"
+	repository "library-api/internal/repository"
 
 	"github.com/jackc/pgx/v5"
 )
 
-func (r *BookRepository) GetBookByID(ctx context.Context, id int) (model.Book, error) {
+func (r *BookRepository) EditBookByID(ctx context.Context, id int, p repository.EditBookPayload) (model.Book, error) {
 	select {
 	case <-ctx.Done():
-		return model.Book{}, nil
+		return model.Book{}, ctx.Err()
 	default:
 		var book model.Book
 
 		err := r.pool.QueryRow(
 			ctx,
 			`
-			SELECT id, title, author, year, available
-			FROM books
+			UPDATE books
+			SET title = COALESCE($2, title),
+				author = COALESCE($3, author),
+				year = COALESCE($4, year),
+				available = COALESCE($5, available)
 			WHERE id = $1
+			RETURNING id, title, author, year, available;
 			`,
 			id,
+			p.Title,
+			p.Author,
+			p.Year,
+			p.Available,
 		).Scan(
 			&book.ID,
 			&book.Title,
@@ -37,9 +46,7 @@ func (r *BookRepository) GetBookByID(ctx context.Context, id int) (model.Book, e
 			if errors.Is(err, pgx.ErrNoRows) {
 				return model.Book{}, fmt.Errorf("%w", apperrors.ErrNotFound)
 			}
-
 			return model.Book{}, fmt.Errorf("%w", err)
-
 		}
 
 		return book, nil

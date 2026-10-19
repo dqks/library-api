@@ -1,4 +1,4 @@
-package pgrepo
+package postgres
 
 import (
 	"context"
@@ -63,6 +63,10 @@ func (r *BookRepository) GetBooks(ctx context.Context, p repository.GetBooksPayl
 			}
 
 			books = append(books, book)
+		}
+
+		if rows.Err() != nil {
+			return nil, fmt.Errorf("%w", rows.Err())
 		}
 
 		return books, nil

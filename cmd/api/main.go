@@ -5,10 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"library-api/internal/handler"
+	"library-api/internal/repository/postgres"
 
-	// repository "library-api/internal/repository/inmemory"
-
-	pgRepo "library-api/internal/repository/pgrepo"
 	"library-api/internal/service"
 	"log"
 	"net/http"
@@ -29,6 +27,7 @@ func main() {
 	}
 	dsn := os.Getenv("DATABASE_URL")
 	pool, err := pgxpool.New(ctx, dsn)
+	defer pool.Close()
 
 	if err != nil {
 		log.Fatal(err)
@@ -39,19 +38,9 @@ func main() {
 		log.Fatal(err)
 	}
 
-	pgRepo := pgRepo.Create(pool)
+	pgRepo := postgres.Create(pool)
 
 	mux := http.NewServeMux()
-
-	// repo := repository.Create(
-	// 	1,
-	// 	[]model.Book{},
-	// )
-
-	// if repo == nil {
-	// 	fmt.Println("произошла ошибка при запуске сервера - не получилось создать репозиторий")
-	// 	return
-	// }
 
 	service := service.Create(pgRepo)
 

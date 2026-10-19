@@ -1,9 +1,12 @@
-package pgrepo
+package postgres
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"library-api/internal/apperrors"
+
+	"github.com/jackc/pgx/v5"
 )
 
 func (r *BookRepository) DeleteBookByID(ctx context.Context, id int) error {
@@ -18,6 +21,9 @@ func (r *BookRepository) DeleteBookByID(ctx context.Context, id int) error {
 		)
 
 		if err != nil {
+			if errors.Is(err, pgx.ErrNoRows) {
+				return fmt.Errorf("%w", apperrors.ErrNotFound)
+			}
 			return fmt.Errorf("ошибка удаления книги: %w", err)
 		}
 
