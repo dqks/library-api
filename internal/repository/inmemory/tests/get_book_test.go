@@ -2,10 +2,10 @@ package inmemory_test
 
 import (
 	"context"
-	"errors"
 	"library-api/internal/apperrors"
 	"library-api/internal/model"
 	"library-api/internal/repository/inmemory"
+	"library-api/internal/testutil"
 	"testing"
 )
 
@@ -80,15 +80,15 @@ func TestGetBookByID(t *testing.T) {
 				cancel()
 			}
 
-			book, err := repo.GetBookByID(ctx, tt.id)
-
-			if !errors.Is(err, tt.wantErr) {
-				t.Fatalf("expected err %v but got %v", tt.wantErr, err)
+			fields := testutil.GetBookFields{
+				ID:       tt.id,
+				Ctx:      ctx,
+				Repo:     repo,
+				WantErr:  tt.wantErr,
+				WantBook: tt.wantBook,
 			}
 
-			if book != tt.wantBook {
-				t.Fatalf("expected book %v but got %v", tt.wantBook, book)
-			}
+			testutil.CheckGetBook(t, &fields)
 		})
 	}
 }

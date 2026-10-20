@@ -2,10 +2,10 @@ package inmemory_test
 
 import (
 	"context"
-	"errors"
 	"library-api/internal/model"
 	"library-api/internal/repository"
 	"library-api/internal/repository/inmemory"
+	"library-api/internal/testutil"
 	"sync"
 	"testing"
 )
@@ -79,13 +79,6 @@ func TestCreateBook(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			payload := repository.CreateBookPayload{
-				Title:     &tt.title,
-				Author:    &tt.author,
-				Year:      &tt.year,
-				Available: &tt.available,
-			}
-
 			repo := inmemory.Create(
 				nextID,
 				testBooks,
@@ -102,32 +95,20 @@ func TestCreateBook(t *testing.T) {
 				cancel()
 			}
 
-			book, err := repo.CreateBook(ctx, payload)
-
-			if !errors.Is(err, tt.wantError) {
-				t.Fatalf("got error %v but expected %v", err, tt.wantError)
+			fields := testutil.CreateFields{
+				Title:        tt.title,
+				Author:       tt.author,
+				Year:         tt.year,
+				Available:    tt.available,
+				Ctx:          ctx,
+				Repo:         repo,
+				WantError:    tt.wantError,
+				WantBook:     tt.wantBook,
+				WantToAppear: tt.wantToAppear,
+				WantLen:      tt.wantLen,
 			}
 
-			if book != tt.wantBook {
-				t.Fatalf("got %v but expected %v", book, tt.wantBook)
-			}
-
-			ctxGet := context.WithoutCancel(context.Background())
-
-			books, err := repo.GetBooks(ctxGet, repository.GetBooksPayload{})
-
-			if err != nil {
-				t.Fatalf("failed to get books")
-			}
-
-			if (books[len(books)-1] != tt.wantBook && tt.wantToAppear) ||
-				(books[len(books)-1] == tt.wantBook && !tt.wantToAppear) {
-				t.Fatalf("new book %v didn't appear on book list", book)
-			}
-
-			if len(books) != tt.wantLen {
-				t.Fatalf("got len %d but expected %d", len(books), tt.wantLen)
-			}
+			testutil.CheckCreateBook(t, &fields)
 		})
 	}
 }

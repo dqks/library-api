@@ -34,7 +34,9 @@ func (r *BookRepository) GetBookByID(ctx context.Context, id int) (model.Book, e
 		)
 
 		if err != nil {
-			if errors.Is(err, pgx.ErrNoRows) {
+			if errors.Is(err, context.Canceled) {
+				return model.Book{}, ctx.Err()
+			} else if errors.Is(err, pgx.ErrNoRows) {
 				return model.Book{}, fmt.Errorf("%w", apperrors.ErrNotFound)
 			}
 

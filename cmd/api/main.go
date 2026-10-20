@@ -4,37 +4,23 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"library-api/internal/database"
 	"library-api/internal/handler"
 	"library-api/internal/repository/postgres"
+	"log"
 
 	"library-api/internal/service"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
-
-	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/joho/godotenv"
 )
 
 func main() {
-	ctx := context.Background()
-	if err := godotenv.Load("../../.env"); err != nil {
-		log.Fatal(err)
-
-	}
-	dsn := os.Getenv("DATABASE_URL")
-	pool, err := pgxpool.New(ctx, dsn)
-	defer pool.Close()
+	pool, err := database.CreatePool("../../.env", "DATABASE_URL")
 
 	if err != nil {
-		log.Fatal(err)
-	}
-
-	if err := pool.Ping(ctx); err != nil {
-		pool.Close()
 		log.Fatal(err)
 	}
 

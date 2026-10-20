@@ -1,1 +1,1 @@
-CREATE TABLE books;
+DROP TABLE books;

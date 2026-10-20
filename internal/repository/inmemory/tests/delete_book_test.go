@@ -2,12 +2,11 @@ package inmemory_test
 
 import (
 	"context"
-	"errors"
-	"fmt"
 	"library-api/internal/apperrors"
 	"library-api/internal/model"
 	"library-api/internal/repository"
 	"library-api/internal/repository/inmemory"
+	"library-api/internal/testutil"
 	"sync"
 	"testing"
 )
@@ -80,51 +79,16 @@ func TestDeleteBookByID(t *testing.T) {
 				cancel()
 			}
 
-			err = repo.DeleteBookByID(ctx, tt.id)
-
-			if !errors.Is(err, tt.wantErr) {
-				t.Fatalf("expected err %v but got %v", tt.wantErr, err)
+			fields := testutil.DeleteBookFields{
+				ID:          tt.id,
+				Ctx:         ctx,
+				Cancel:      tt.cancel,
+				BooksBefore: booksBefore,
+				Repo:        repo,
+				WantErr:     tt.wantErr,
 			}
 
-			booksAfter, err := repo.GetBooks(ctxGet, repository.GetBooksPayload{})
-			if err != nil {
-				t.Fatal("failed to get books")
-			}
-
-			if tt.wantErr != nil {
-				for i := 0; i < len(booksAfter); i++ {
-					if booksAfter[i] != booksBefore[i] {
-						t.Fatalf("got changes in books after delete")
-					}
-				}
-
-				fmt.Println(booksBefore)
-				fmt.Println(booksAfter)
-
-				if len(booksAfter) != len(booksBefore) {
-					t.Fatalf(
-						"got len of books %d but before delete it was %d",
-						len(booksAfter),
-						len(booksBefore),
-					)
-				}
-			}
-
-			if tt.wantErr == nil && !tt.cancel {
-				if len(booksAfter) != len(booksBefore)-1 {
-					t.Fatalf(
-						"got len of books %d but before delete it was %d",
-						len(booksAfter),
-						len(booksBefore),
-					)
-				}
-
-				for _, b := range booksAfter {
-					if b.ID == tt.id {
-						t.Fatalf("expected to delete book %v but got it in books", b)
-					}
-				}
-			}
+			testutil.CheckDeleteBook(t, &fields)
 		})
 	}
 }
