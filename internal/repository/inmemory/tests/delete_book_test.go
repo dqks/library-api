@@ -1,4 +1,4 @@
-package repository_test
+package inmemory_test
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	"library-api/internal/apperrors"
 	"library-api/internal/model"
 	"library-api/internal/repository"
-	inmemoryrepo "library-api/internal/repository/inmemoryrepo"
+	"library-api/internal/repository/inmemory"
 	"sync"
 	"testing"
 )
@@ -60,7 +60,7 @@ func TestDeleteBookByID(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			repo := inmemoryrepo.Create(nextID, testBooks)
+			repo := inmemory.Create(nextID, testBooks)
 
 			if repo == nil {
 				t.Fatal("failed to create repository")
@@ -203,7 +203,7 @@ func TestDeleteBookByIDMultiple(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			repo := inmemoryrepo.Create(
+			repo := inmemory.Create(
 				nextID,
 				testBooks,
 			)

@@ -1,11 +1,11 @@
-package repository_test
+package inmemory_test
 
 import (
 	"context"
 	"errors"
 	"library-api/internal/model"
 	"library-api/internal/repository"
-	inmemoryrepo "library-api/internal/repository/inmemoryrepo"
+	"library-api/internal/repository/inmemory"
 	"testing"
 )
 
@@ -184,7 +184,7 @@ func TestGetBooks(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			repo := inmemoryrepo.Create(
+			repo := inmemory.Create(
 				nextID,
 				testBooks,
 			)

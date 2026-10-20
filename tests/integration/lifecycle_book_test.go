@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"library-api/internal/handler"
 	"library-api/internal/model"
-	inmemoryrepo "library-api/internal/repository/inmemoryrepo"
+	"library-api/internal/repository/inmemory"
 	"library-api/internal/service"
 	"library-api/internal/testutil"
 	"net/http"
@@ -16,7 +16,7 @@ import (
 )
 
 func TestLifecycleBook(t *testing.T) {
-	repo := inmemoryrepo.Create(3, []model.Book{
+	repo := inmemory.Create(3, []model.Book{
 		{
 			ID:        1,
 			Title:     "Peace and war",

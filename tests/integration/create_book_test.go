@@ -5,7 +5,7 @@ import (
 	"library-api/internal/apperrors"
 	"library-api/internal/handler"
 	"library-api/internal/model"
-	inmemoryrepo "library-api/internal/repository/inmemoryrepo"
+	"library-api/internal/repository/inmemory"
 	"library-api/internal/service"
 	"library-api/internal/testutil"
 	"net/http"
@@ -91,7 +91,7 @@ func TestCreateBook(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			repo := inmemoryrepo.Create(
+			repo := inmemory.Create(
 				2, []model.Book{
 					{
 						ID:        1,

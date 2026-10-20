@@ -5,7 +5,7 @@ import (
 	"library-api/internal/apperrors"
 	"library-api/internal/handler"
 	"library-api/internal/model"
-	inmemoryrepo "library-api/internal/repository/inmemoryrepo"
+	inmemoryrepo "library-api/internal/repository/inmemory"
 	"library-api/internal/service"
 	"library-api/internal/testutil"
 	"net/http"

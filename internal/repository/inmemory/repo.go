@@ -1,4 +1,4 @@
-package inmemoryrepository
+package inmemory
 
 import (
 	"library-api/internal/model"

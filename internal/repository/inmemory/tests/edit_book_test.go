@@ -1,4 +1,4 @@
-package repository_test
+package inmemory_test
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 	"library-api/internal/apperrors"
 	"library-api/internal/model"
 	"library-api/internal/repository"
-	inmemoryrepo "library-api/internal/repository/inmemoryrepo"
+	"library-api/internal/repository/inmemory"
 	"slices"
 	"sync"
 	"testing"
@@ -190,7 +190,7 @@ func TestEditBookByID(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			repo := inmemoryrepo.Create(nextID, testBooks)
+			repo := inmemory.Create(nextID, testBooks)
 
 			if repo == nil {
 				t.Fatal("failed to create repository")
@@ -311,7 +311,7 @@ func TestEditBookByIDConcurrent(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			repo := inmemoryrepo.Create(nextID, testBooks)
+			repo := inmemory.Create(nextID, testBooks)
 
 			if repo == nil {
 				t.Fatal("failed to create repo")

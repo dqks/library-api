@@ -1,11 +1,11 @@
-package repository_test
+package inmemory_test
 
 import (
 	"context"
 	"errors"
 	"library-api/internal/apperrors"
 	"library-api/internal/model"
-	repository "library-api/internal/repository/inmemoryrepo"
+	"library-api/internal/repository/inmemory"
 	"testing"
 )
 
@@ -67,7 +67,7 @@ func TestGetBookByID(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			repo := repository.Create(nextID, testBooks)
+			repo := inmemory.Create(nextID, testBooks)
 
 			if repo == nil {
 				t.Fatal("failed to create repository")

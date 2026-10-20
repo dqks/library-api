@@ -4,7 +4,7 @@ import (
 	"context"
 	"library-api/internal/handler"
 	"library-api/internal/model"
-	inmemoryrepo "library-api/internal/repository/inmemoryrepo"
+	"library-api/internal/repository/inmemory"
 	"library-api/internal/service"
 	"library-api/internal/testutil"
 	"net/http"
@@ -102,7 +102,7 @@ func TestGetBooks(t *testing.T) {
 				cancel()
 			}
 
-			repo := inmemoryrepo.Create(3,
+			repo := inmemory.Create(3,
 				[]model.Book{
 					{
 						ID:        1,
