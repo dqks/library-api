@@ -2,12 +2,11 @@ package inmemory_test
 
 import (
 	"context"
-	"errors"
 	"library-api/internal/apperrors"
 	"library-api/internal/model"
 	"library-api/internal/repository"
 	"library-api/internal/repository/inmemory"
-	"slices"
+	"library-api/internal/testutil"
 	"sync"
 	"testing"
 )
@@ -230,49 +229,19 @@ func TestEditBookByID(t *testing.T) {
 
 			book, err := repo.EditBookByID(ctx, tt.id, payload)
 
-			if !errors.Is(err, tt.wantErr) {
-				t.Fatalf("expected err %v but got %v", tt.wantErr, err)
+			fields := testutil.EditFields{
+				Err:            err,
+				Book:           book,
+				CtxGet:         ctxGet,
+				Repo:           repo,
+				Cancel:         tt.cancel,
+				BooksBefore:    booksBefore,
+				WantRepoChange: tt.wantRepoChange,
+				WantErr:        tt.wantErr,
+				WantBook:       tt.wantBook,
 			}
 
-			if book != tt.wantBook {
-				t.Fatalf("expected book %v but got %v", tt.wantBook, book)
-			}
-
-			booksAfter, err := repo.GetBooks(ctxGet, repository.GetBooksPayload{})
-
-			if err != nil {
-				t.Fatal("failed to get books")
-			}
-
-			if len(booksAfter) != len(booksBefore) {
-				t.Fatal("got repo unexpectedly changed")
-			}
-
-			for i := range booksAfter {
-				if booksAfter[i] != booksBefore[i] && !tt.wantRepoChange {
-					t.Fatalf(
-						"got book %v changed unexpectedly %v",
-						booksBefore[i],
-						booksAfter[i],
-					)
-				} else if tt.wantRepoChange &&
-					booksAfter[i] != booksBefore[i] &&
-					((tt.wantBook.ID != booksAfter[i].ID) || (tt.wantBook.ID != booksBefore[i].ID)) {
-					t.Fatalf(
-						"got book %v changed unexpectedly %v",
-						booksBefore[i],
-						booksAfter[i],
-					)
-				}
-			}
-
-			if !tt.cancel && tt.wantErr == nil {
-				index := slices.Contains(booksAfter, book)
-
-				if !index {
-					t.Fatalf("failed to find book in repository %v", book)
-				}
-			}
+			testutil.CheckEdit(t, &fields)
 		})
 	}
 }

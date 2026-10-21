@@ -2,10 +2,10 @@ package inmemory_test
 
 import (
 	"context"
-	"errors"
 	"library-api/internal/model"
 	"library-api/internal/repository"
 	"library-api/internal/repository/inmemory"
+	"library-api/internal/testutil"
 	"testing"
 )
 
@@ -208,37 +208,18 @@ func TestGetBooks(t *testing.T) {
 
 			books, err := repo.GetBooks(ctx, payload)
 
-			if !errors.Is(err, tt.wantErr) {
-				t.Fatalf("expected err %v but got %v", tt.wantErr, err)
+			fields := testutil.GetBooksFields{
+				Err:       err,
+				Books:     books,
+				Cancel:    tt.cancel,
+				Payload:   payload,
+				Ctx:       ctx,
+				Repo:      repo,
+				WantErr:   tt.wantErr,
+				WantBooks: tt.wantBooks,
 			}
 
-			if len(books) != len(tt.wantBooks) {
-				t.Fatalf("expected len of books %d but got %d", len(tt.wantBooks), len(books))
-			}
-
-			for i := range tt.wantBooks {
-				if books[i] != tt.wantBooks[i] {
-					t.Fatalf("expected books %v \n but got %v", tt.wantBooks, books)
-				}
-			}
-
-			for i := range tt.wantBooks {
-				books[i].ID = books[i].ID + 1
-			}
-
-			if !tt.cancel {
-				booksAfter, err := repo.GetBooks(ctx, payload)
-
-				if err != nil {
-					t.Fatalf("failed to get books")
-				}
-
-				for i := range tt.wantBooks {
-					if books[i] == booksAfter[i] {
-						t.Fatal("repo chnaged expectedly")
-					}
-				}
-			}
+			testutil.CheckGetBooks(t, &fields)
 		})
 	}
 }

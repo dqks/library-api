@@ -43,7 +43,7 @@ func SeedBooks(t *testing.T, pool *pgxpool.Pool) (pgconn.CommandTag, error) {
 		VALUES 
 			(1, 'Title 1', 'Author 1', 2000, true),
 			(2, 'Title 2', 'Author 2', 2000, true),
-			(3, 'Title 3', 'Author 3', 2000, true),
+			(3, 'Title 3', 'Author 3', 2000, false),
 			(4, 'Title 4', 'Author 4', 2000, true),
 			(5, 'Title 5', 'Author 5', 2000, true);
 		`,
