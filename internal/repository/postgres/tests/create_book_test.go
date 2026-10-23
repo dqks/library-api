@@ -22,6 +22,19 @@ func TestCreateBook(t *testing.T) {
 		wantLen      int
 	}{
 		{
+			name:         "canceled",
+			ctx:          context.Background(),
+			title:        "New book",
+			author:       "New author",
+			year:         2025,
+			available:    true,
+			wantError:    context.Canceled,
+			wantBook:     model.Book{},
+			wantToAppear: false,
+			cancel:       true,
+			wantLen:      5,
+		},
+		{
 			name:      "success",
 			ctx:       context.Background(),
 			title:     "New book",
@@ -39,19 +52,6 @@ func TestCreateBook(t *testing.T) {
 			wantToAppear: true,
 			cancel:       false,
 			wantLen:      6,
-		},
-		{
-			name:         "canceled",
-			ctx:          context.Background(),
-			title:        "New book",
-			author:       "New author",
-			year:         2025,
-			available:    true,
-			wantError:    context.Canceled,
-			wantBook:     model.Book{},
-			wantToAppear: false,
-			cancel:       true,
-			wantLen:      5,
 		},
 	}
 

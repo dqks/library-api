@@ -11,7 +11,7 @@ import (
 )
 
 func CreatePostgresTestRepo(t *testing.T) (*postgres.BookRepository, *pgxpool.Pool) {
-	dsn, err := database.GetDsn("../../../../.env", "DATABASE_URL")
+	dsn, err := database.GetDsn("../../../../.env", "DATABASE_TEST_URL")
 
 	if err != nil {
 		t.Fatalf("failed to get dsn %v", err)
@@ -35,7 +35,7 @@ func ClearBooks(ctx context.Context, pool *pgxpool.Pool) (pgconn.CommandTag, err
 	)
 }
 
-func SeedBooks(t *testing.T, pool *pgxpool.Pool) pgconn.CommandTag {
+func SeedBooks(t *testing.T, pool *pgxpool.Pool) {
 	ctx := context.Background()
 
 	_, err := ClearBooks(ctx, pool)
@@ -44,7 +44,7 @@ func SeedBooks(t *testing.T, pool *pgxpool.Pool) pgconn.CommandTag {
 		t.Fatalf("failed to clear books %v", err)
 	}
 
-	tag, err := pool.Exec(
+	_, err = pool.Exec(
 		ctx,
 		`
 		INSERT INTO books (id, title, author, year, available)
@@ -61,7 +61,7 @@ func SeedBooks(t *testing.T, pool *pgxpool.Pool) pgconn.CommandTag {
 		t.Fatalf("failed to seed into books %v", err)
 	}
 
-	tag, err = pool.Exec(
+	_, err = pool.Exec(
 		ctx,
 		`
 		SELECT setval('books_id_seq', (SELECT COALESCE(MAX(id), 0) + 1 FROM books), false);
@@ -71,6 +71,4 @@ func SeedBooks(t *testing.T, pool *pgxpool.Pool) pgconn.CommandTag {
 	if err != nil {
 		t.Fatalf("failed to set id counter %v", err)
 	}
-
-	return tag
 }
