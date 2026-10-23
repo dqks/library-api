@@ -1,78 +1,115 @@
 package database_tests
 
 import (
+	"errors"
 	"library-api/internal/apperrors"
 	"library-api/internal/database"
 	"os"
+	"path/filepath"
 	"testing"
 )
 
+// в тестах мы не должны ссылаться на глобальный .env
+// а также при изменении переменных окружения должны возвращать их в
+// значение до тестов
 func TestGetDsn(t *testing.T) {
+	envVar := "TEST_GET_DSN"
+	badEnvVar := "BAD_NAME"
+
 	tests := []struct {
 		name       string
-		envPath    string
 		envVar     string
 		loadGlobal bool
+		badPath    bool
 		wantDsn    string
 		wantErr    error
 	}{
 		{
-			name:    "success local env",
-			envPath: "../../../.env",
-			envVar:  "TEST_GET_DSN",
-			wantDsn: "testdsn",
-			wantErr: nil,
-		},
-		{
 			name:       "success global env",
-			envPath:    "../../../.env",
-			envVar:     "TEST_GET_DSN",
+			envVar:     envVar,
 			loadGlobal: true,
-			wantDsn:    "testdsn",
+			wantDsn:    "testdsn_global",
 			wantErr:    nil,
 		},
 		{
+			name:    "success local env",
+			envVar:  envVar,
+			wantDsn: "testdsn_local",
+			wantErr: nil,
+		},
+		{
 			name:       "success global env, bad path",
-			envPath:    "../.env",
-			envVar:     "TEST_GET_DSN",
+			envVar:     envVar,
+			badPath:    true,
 			loadGlobal: true,
-			wantDsn:    "testdsn",
+			wantDsn:    "testdsn_global",
 			wantErr:    nil,
 		},
 		{
 			name:    "err, bad path",
-			envPath: "",
-			envVar:  "TEST_GET_DSN",
+			badPath: true,
+			envVar:  envVar,
 			wantDsn: "",
 			wantErr: apperrors.ErrBadEnvVariablePath,
 		},
 		{
 			name:    "err, bad name",
-			envPath: "../../../.env",
-			envVar:  "BAD_NAME",
+			envVar:  badEnvVar,
 			wantDsn: "",
 			wantErr: apperrors.ErrBadEnvVariableName,
 		},
 	}
 
+	val, exists := os.LookupEnv(envVar)
+	badVal, badExists := os.LookupEnv(badEnvVar)
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Cleanup(func() {
-				os.Unsetenv("TEST_GET_DSN")
+				if exists {
+					os.Setenv(envVar, val)
+				} else {
+					os.Unsetenv(envVar)
+				}
+
+				if badExists {
+					os.Setenv(badEnvVar, badVal)
+				} else {
+					os.Unsetenv(badEnvVar)
+				}
 			})
 
 			if tt.loadGlobal {
-				os.Setenv("TEST_GET_DSN", "testdsn")
+				t.Setenv(envVar, "testdsn_global")
+			} else {
+				os.Unsetenv(envVar)
 			}
 
-			dsn, err := database.GetDsn(tt.envPath, tt.envVar)
+			if badExists {
+				os.Unsetenv(badEnvVar)
+			}
 
-			if err != tt.wantErr {
+			path := t.TempDir()
+			envPath := filepath.Join(path, "config.env")
+			err := os.WriteFile(
+				envPath,
+				[]byte("TEST_GET_DSN=testdsn_local"), 0644,
+			)
+			if err != nil {
+				t.Fatalf("failed to write in config.env %v", err)
+			}
+
+			if tt.badPath {
+				envPath = ""
+			}
+
+			dsn, err := database.GetDsn(envPath, tt.envVar)
+			if !errors.Is(err, tt.wantErr) {
 				t.Errorf("expected err to be %v but got %v", tt.wantErr, err)
 			}
 
 			if dsn != tt.wantDsn {
-				t.Errorf("expected dsn to be %v but bot %v", tt.wantDsn, dsn)
+				t.Errorf("expected dsn to be %v but got %v", tt.wantDsn, dsn)
 			}
 		})
 	}
