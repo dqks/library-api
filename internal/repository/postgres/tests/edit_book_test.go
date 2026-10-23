@@ -97,7 +97,7 @@ func TestEditBookByID(t *testing.T) {
 			id:           1,
 			title:        "",
 			author:       "",
-			year:         2000,
+			year:         1900,
 			available:    false,
 			titleNil:     true,
 			authorNil:    true,
@@ -107,7 +107,7 @@ func TestEditBookByID(t *testing.T) {
 				ID:        1,
 				Title:     "Title 1",
 				Author:    "Author 1",
-				Year:      uint16(2000),
+				Year:      uint16(1900),
 				Available: true,
 			},
 			wantErr:        nil,
@@ -173,7 +173,11 @@ func TestEditBookByID(t *testing.T) {
 			SeedBooks(t, pool)
 
 			ctx, cancel := context.WithCancel(context.Background())
-			defer cancel()
+
+			t.Cleanup(func() {
+				pool.Close()
+				cancel()
+			})
 
 			if tt.cancel {
 				cancel()

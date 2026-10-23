@@ -47,8 +47,8 @@ func CheckGetBooks(t *testing.T, f *GetBooksFields) {
 		}
 
 		for i := range f.WantBooks {
-			if f.Books[i] == booksAfter[i] {
-				t.Fatal("repo chnaged expectedly")
+			if f.WantBooks[i] != booksAfter[i] {
+				t.Fatal("repo changed expectedly")
 			}
 		}
 	}

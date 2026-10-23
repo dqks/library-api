@@ -42,7 +42,11 @@ func TestDeleteBook(t *testing.T) {
 			SeedBooks(t, pool)
 
 			ctx, cancel := context.WithCancel(context.Background())
-			defer cancel()
+
+			t.Cleanup(func() {
+				pool.Close()
+				cancel()
+			})
 
 			if tt.cancel {
 				cancel()

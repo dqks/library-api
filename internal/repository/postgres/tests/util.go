@@ -11,7 +11,15 @@ import (
 )
 
 func CreatePostgresTestRepo(t *testing.T) (*postgres.BookRepository, *pgxpool.Pool) {
-	pool, err := database.CreatePool("../../../../.env", "DATABASE_TEST_URL")
+	dsn, err := database.GetDsn("../../../../.env", "DATABASE_URL")
+
+	if err != nil {
+		t.Fatalf("failed to get dsn %v", err)
+	}
+
+	ctx := context.Background()
+
+	pool, err := database.CreatePool(ctx, dsn)
 
 	if err != nil {
 		t.Fatalf("failed to create repository %v", err)
@@ -27,7 +35,7 @@ func ClearBooks(ctx context.Context, pool *pgxpool.Pool) (pgconn.CommandTag, err
 	)
 }
 
-func SeedBooks(t *testing.T, pool *pgxpool.Pool) (pgconn.CommandTag, error) {
+func SeedBooks(t *testing.T, pool *pgxpool.Pool) pgconn.CommandTag {
 	ctx := context.Background()
 
 	_, err := ClearBooks(ctx, pool)
@@ -64,5 +72,5 @@ func SeedBooks(t *testing.T, pool *pgxpool.Pool) (pgconn.CommandTag, error) {
 		t.Fatalf("failed to set id counter %v", err)
 	}
 
-	return tag, err
+	return tag
 }

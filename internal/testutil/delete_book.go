@@ -31,18 +31,18 @@ func CheckDeleteBook(t *testing.T, f *DeleteBookFields) {
 	}
 
 	if f.WantErr != nil {
-		for i := 0; i < len(booksAfter); i++ {
-			if booksAfter[i] != f.BooksBefore[i] {
-				t.Fatalf("got changes in books after delete")
-			}
-		}
-
 		if len(booksAfter) != len(f.BooksBefore) {
 			t.Fatalf(
 				"got len of books %d but before delete it was %d",
 				len(booksAfter),
 				len(f.BooksBefore),
 			)
+		}
+
+		for i := 0; i < len(booksAfter); i++ {
+			if booksAfter[i] != f.BooksBefore[i] {
+				t.Fatalf("got changes in books after delete")
+			}
 		}
 	}
 

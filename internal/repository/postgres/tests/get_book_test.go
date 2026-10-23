@@ -58,6 +58,11 @@ func TestGetBookByID(t *testing.T) {
 				cancel()
 			})
 
+			t.Cleanup(func() {
+				pool.Close()
+				cancel()
+			})
+
 			if tt.cancel {
 				cancel()
 			}

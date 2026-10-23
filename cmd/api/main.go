@@ -18,7 +18,15 @@ import (
 )
 
 func main() {
-	pool, err := database.CreatePool("../../.env", "DATABASE_URL")
+	dsn, err := database.GetDsn("../../.env", "DATABASE_URL")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	ctx := context.Background()
+
+	pool, err := database.CreatePool(ctx, dsn)
 
 	if err != nil {
 		log.Fatal(err)
