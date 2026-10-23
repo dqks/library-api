@@ -16,11 +16,11 @@ func GetDsn(envPath, envVar string) (string, error) {
 		// Если путь неправильный .env то возвращаем и глобальный есть
 		// то возвращаем его
 		if dsnGlobalEnv != "" {
-			return "", apperrors.ErrBadEnvVariable
+			return dsnGlobalEnv, apperrors.ErrBadEnvVariable
 		}
 
-		// Если путь неправильный .env то возвращаем и глобальный есть
-		// то возвращаем его
+		// Если путь неправильный .env и глобального нет
+		// то возвращаем ошибку
 		return "", err
 	}
 
@@ -31,9 +31,12 @@ func GetDsn(envPath, envVar string) (string, error) {
 	// иначе возвращаем .env
 	if (dsnGlobalEnv != "" && dsnInnerEnv != "") || (dsnGlobalEnv != "" && dsnInnerEnv == "") {
 		return dsnGlobalEnv, nil
-	} else {
+	} else if dsnInnerEnv != "" && dsnGlobalEnv == "" {
 		return dsnInnerEnv, nil
 	}
+
+	return "", apperrors.ErrBadEnvVariable
+
 }
 
 func CreatePool(ctx context.Context, dsn string) (*pgxpool.Pool, error) {
