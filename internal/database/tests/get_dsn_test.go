@@ -17,12 +17,13 @@ func TestGetDsn(t *testing.T) {
 	badEnvVar := "BAD_NAME"
 
 	tests := []struct {
-		name       string
-		envVar     string
-		loadGlobal bool
-		badPath    bool
-		wantDsn    string
-		wantErr    error
+		name        string
+		envVar      string
+		loadGlobal  bool
+		badPath     bool
+		globalEmpty bool
+		wantDsn     string
+		wantErr     error
 	}{
 		{
 			name:       "success global env",
@@ -50,13 +51,21 @@ func TestGetDsn(t *testing.T) {
 			badPath: true,
 			envVar:  envVar,
 			wantDsn: "",
-			wantErr: apperrors.ErrBadEnvVariablePath,
+			wantErr: apperrors.ErrInvalidFileLoad,
 		},
 		{
 			name:    "err, bad name",
 			envVar:  badEnvVar,
 			wantDsn: "",
 			wantErr: apperrors.ErrBadEnvVariableName,
+		},
+		{
+			name:        "empty global",
+			envVar:      envVar,
+			loadGlobal:  true,
+			globalEmpty: true,
+			wantDsn:     "",
+			wantErr:     apperrors.ErrBadEnvironmentConfiguration,
 		},
 	}
 
@@ -80,7 +89,11 @@ func TestGetDsn(t *testing.T) {
 			})
 
 			if tt.loadGlobal {
-				t.Setenv(envVar, "testdsn_global")
+				if tt.globalEmpty {
+					t.Setenv(envVar, "")
+				} else {
+					t.Setenv(envVar, "testdsn_global")
+				}
 			} else {
 				os.Unsetenv(envVar)
 			}

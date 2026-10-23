@@ -6,13 +6,14 @@ import (
 )
 
 var (
-	ErrRequiredFields     = errors.New("отсутствуют обязательные поля")
-	ErrInternal           = errors.New("произошла внутренняя ошибка")
-	ErrNotFound           = errors.New("не найдено")
-	ErrIncorrectPathValue = errors.New("неверное значение в пути")
-	ErrInvalidValues      = errors.New("невалидные данные")
-	ErrBadEnvVariableName = errors.New("неверное нужная переменная не найдена или она пуста")
-	ErrBadEnvVariablePath = errors.New("неверный путь .env переменной")
+	ErrRequiredFields              = errors.New("отсутствуют обязательные поля")
+	ErrInternal                    = errors.New("произошла внутренняя ошибка")
+	ErrNotFound                    = errors.New("не найдено")
+	ErrIncorrectPathValue          = errors.New("неверное значение в пути")
+	ErrInvalidValues               = errors.New("невалидные данные")
+	ErrBadEnvVariableName          = errors.New("нужная переменная не найдена или она пуста")
+	ErrInvalidFileLoad             = errors.New("не удалось загрузить .env файл")
+	ErrBadEnvironmentConfiguration = errors.New("плохая настройка переменных окружение")
 )
 
 var (

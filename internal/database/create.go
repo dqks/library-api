@@ -10,7 +10,11 @@ import (
 )
 
 func GetDsn(envPath, envVar string) (string, error) {
-	dsnGlobalEnv := os.Getenv(envVar)
+	dsnGlobalEnv, exists := os.LookupEnv(envVar)
+	if exists && dsnGlobalEnv == "" {
+		return "", apperrors.ErrBadEnvironmentConfiguration
+	}
+
 	if err := godotenv.Load(envPath); err != nil {
 		// Если путь неправильный .env то возвращаем и глобальный есть
 		// то возвращаем его
@@ -20,7 +24,7 @@ func GetDsn(envPath, envVar string) (string, error) {
 
 		// Если путь неправильный .env и глобального нет
 		// то возвращаем ошибку
-		return "", apperrors.ErrBadEnvVariablePath
+		return "", apperrors.ErrInvalidFileLoad
 	}
 
 	dsnInnerEnv := os.Getenv(envVar)
