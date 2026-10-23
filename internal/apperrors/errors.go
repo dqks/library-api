@@ -11,7 +11,8 @@ var (
 	ErrNotFound           = errors.New("не найдено")
 	ErrIncorrectPathValue = errors.New("неверное значение в пути")
 	ErrInvalidValues      = errors.New("невалидные данные")
-	ErrBadEnvVariable     = errors.New("неверное имя или путь .env переменной")
+	ErrBadEnvVariableName = errors.New("неверное имя .env переменной")
+	ErrBadEnvVariablePath = errors.New("неверный путь .env переменной")
 )
 
 var (
