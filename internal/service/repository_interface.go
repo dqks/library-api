@@ -17,4 +17,5 @@ type BookRepository interface {
 type UserRepository interface {
 	BookRepository
 	CreateUser(ctx context.Context, payload repository.CreateUserPayload) (model.User, error)
+	GetUser(ctx context.Context, id int) (model.User, error)
 }

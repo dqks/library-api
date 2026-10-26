@@ -21,7 +21,7 @@ func GetUser(s UserService) func(w http.ResponseWriter, r *http.Request) {
 		default:
 			id, err := strconv.Atoi(r.PathValue("id"))
 
-			if err != nil {
+			if err != nil || id <= 0 {
 				w.Header().Add("Content-Type", "application/json")
 				w.WriteHeader(apperrors.ErrIncorrectPathValueCode)
 				encoder := json.NewEncoder(w)
@@ -30,7 +30,9 @@ func GetUser(s UserService) func(w http.ResponseWriter, r *http.Request) {
 				}
 			}
 
-			fmt.Println(id)
+			user, err := s.GetUser(ctx, id)
+
+			fmt.Println(user, id)
 		}
 	}
 }
