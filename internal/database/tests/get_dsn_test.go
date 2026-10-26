@@ -67,6 +67,12 @@ func TestGetDsn(t *testing.T) {
 			wantDsn:     "",
 			wantErr:     apperrors.ErrBadEnvironmentConfiguration,
 		},
+		{
+			name:    "err, empty global, empty .env",
+			envVar:  badEnvVar,
+			wantDsn: "",
+			wantErr: apperrors.ErrBadEnvVariableName,
+		},
 	}
 
 	val, exists := os.LookupEnv(envVar)

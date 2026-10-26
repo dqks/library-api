@@ -40,7 +40,7 @@ func TestDeleteBook(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			repo, pool := CreatePostgresTestRepo(t)
 
-			err := database.UpMigrations(pool)
+			err := database.ApplyMigrations(pool, true)
 			if err != nil {
 				t.Fatalf("ошибка применения миграций: %v", err)
 			}
@@ -50,7 +50,7 @@ func TestDeleteBook(t *testing.T) {
 			ctx, cancel := context.WithCancel(context.Background())
 
 			t.Cleanup(func() {
-				err := database.DownMigrations(pool)
+				err := database.ApplyMigrations(pool, false)
 				if err != nil {
 					t.Errorf("ошибка применения миграций: %v", err)
 				}
@@ -79,7 +79,6 @@ func TestDeleteBook(t *testing.T) {
 			}
 
 			testutil.CheckDeleteBook(t, &fields)
-
 		})
 	}
 }

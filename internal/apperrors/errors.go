@@ -13,7 +13,8 @@ var (
 	ErrInvalidValues               = errors.New("невалидные данные")
 	ErrBadEnvVariableName          = errors.New("нужная переменная окружения пуста")
 	ErrInvalidFileLoad             = errors.New("не удалось загрузить .env файл")
-	ErrBadEnvironmentConfiguration = errors.New("плохая настройка переменных окружение")
+	ErrBadEnvironmentConfiguration = errors.New("плохая настройка переменных окружения")
+	ErrMigrationApply              = errors.New("ошибка применения миграций")
 )
 
 var (

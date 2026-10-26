@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"fmt"
 	"library-api/internal/apperrors"
 	"os"
 
@@ -24,7 +25,7 @@ func GetDsn(envPath, envVar string) (string, error) {
 
 		// Если путь неправильный .env и глобального нет
 		// то возвращаем ошибку
-		return "", apperrors.ErrInvalidFileLoad
+		return "", fmt.Errorf("%w: %v", apperrors.ErrInvalidFileLoad, err)
 	}
 
 	dsnInnerEnv := os.Getenv(envVar)
