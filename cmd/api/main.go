@@ -36,18 +36,26 @@ func main() {
 
 	mux := http.NewServeMux()
 
-	service := service.Create(pgRepo)
+	bookService := service.CreateBookService(pgRepo)
 
-	if service == nil {
+	if bookService == nil {
 		fmt.Println("произошла ошибка при запуске сервера - не получилось создать сервис")
 		return
 	}
 
-	mux.HandleFunc("POST /books", handler.CreateBook(service))
-	mux.HandleFunc("GET /books", handler.GetBooks(service))
-	mux.HandleFunc("GET /books/{id}", handler.GetBookByID(service))
-	mux.HandleFunc("PATCH /books/{id}", handler.EditBookByID(service))
-	mux.HandleFunc("DELETE /books/{id}", handler.DeleteBookByID(service))
+	userService := service.CreateUserService(pgRepo)
+
+	if userService == nil {
+		fmt.Println("произошла ошибка при запуске сервера - не получилось создать сервис")
+		return
+	}
+
+	mux.HandleFunc("POST /books", handler.CreateBook(bookService))
+	mux.HandleFunc("GET /books", handler.GetBooks(bookService))
+	mux.HandleFunc("GET /books/{id}", handler.GetBookByID(bookService))
+	mux.HandleFunc("PATCH /books/{id}", handler.EditBookByID(bookService))
+	mux.HandleFunc("DELETE /books/{id}", handler.DeleteBookByID(bookService))
+	mux.HandleFunc("POST /users", handler.CreateUser(userService))
 
 	server := &http.Server{
 		Addr:    ":8080",

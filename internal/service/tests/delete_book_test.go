@@ -58,7 +58,7 @@ func TestDeleteBookByID(t *testing.T) {
 				err: tt.repositoryErr,
 			}
 
-			s := service.Create(repo)
+			s := service.CreateBookService(repo)
 
 			err := s.DeleteBookByID(ctx, tt.id)
 

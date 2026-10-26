@@ -194,7 +194,7 @@ func TestCreateBook(t *testing.T) {
 				err:  tt.repositoryErr,
 			}
 
-			s := service.Create(&repo)
+			s := service.CreateBookService(&repo)
 
 			input := service.CreateBookInput{}
 

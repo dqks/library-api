@@ -121,7 +121,7 @@ func TestDeleteBook(t *testing.T) {
 				},
 			)
 
-			service := service.Create(repo)
+			service := service.CreateBookService(repo)
 
 			mux := http.NewServeMux()
 			mux.HandleFunc("DELETE /books/{id}", handler.DeleteBookByID(service))

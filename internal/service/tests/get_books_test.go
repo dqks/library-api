@@ -145,7 +145,7 @@ func TestGetBooks(t *testing.T) {
 				err:   tt.repositoryErr,
 			}
 
-			s := service.Create(repo)
+			s := service.CreateBookService(repo)
 
 			params := service.GetBooksQueryParams{}
 

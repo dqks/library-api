@@ -72,7 +72,7 @@ func TestGetBook(t *testing.T) {
 				book: tt.repositoryBook,
 			}
 
-			s := service.Create(repo)
+			s := service.CreateBookService(repo)
 
 			book, err := s.GetBookByID(ctx, tt.id)
 

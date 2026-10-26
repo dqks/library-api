@@ -13,7 +13,8 @@ func (r *BookRepository) CreateBook(ctx context.Context, p repository.CreateBook
 		return model.Book{}, ctx.Err()
 	default:
 		var book model.Book
-		err := r.pool.QueryRow(ctx,
+		err := r.pool.QueryRow(
+			ctx,
 			`
 			INSERT INTO books (title, author, available, year)
 			VALUES ($1, $2, $3, $4)

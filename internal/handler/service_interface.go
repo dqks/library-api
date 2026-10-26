@@ -14,10 +14,14 @@ import (
 // "мне похуй что вы мне дадите, мне главное дать структуру с методами ..."
 // а service возвращает конкретную реализацию
 
-type Service interface {
+type BookService interface {
 	CreateBook(ctx context.Context, req service.CreateBookInput) (model.Book, error)
 	DeleteBookByID(ctx context.Context, id int) error
 	EditBookByID(ctx context.Context, id int, req service.EditBookInput) (model.Book, error)
 	GetBookByID(ctx context.Context, id int) (model.Book, error)
 	GetBooks(ctx context.Context, params service.GetBooksQueryParams) ([]model.Book, error)
+}
+
+type UserService interface {
+	CreateUser(ctx context.Context, input service.CreateUserInput) (model.User, error)
 }

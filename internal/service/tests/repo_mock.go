@@ -47,3 +47,7 @@ func (r *MockRepo) GetBooks(ctx context.Context, p repository.GetBooksPayload) (
 	r.getBooksPayload = p
 	return r.books, r.err
 }
+
+func (r *MockRepo) CreateUser(ctx context.Context, p repository.CreateUserPayload) (model.User, error) {
+	return model.User{}, nil
+}

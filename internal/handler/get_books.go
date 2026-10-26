@@ -6,13 +6,14 @@ import (
 	"errors"
 	"fmt"
 	"library-api/internal/apperrors"
+	"library-api/internal/handler/dto"
 	"library-api/internal/model"
 	"library-api/internal/service"
 	"net/http"
 	"strconv"
 )
 
-func GetBooks(s Service) func(w http.ResponseWriter, r *http.Request) {
+func GetBooks(s BookService) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		select {
@@ -60,7 +61,7 @@ func GetBooks(s Service) func(w http.ResponseWriter, r *http.Request) {
 			}
 
 			w.Header().Set("Content-Type", "application/json")
-			err = encoder.Encode(BookDomainListToDTO(books))
+			err = encoder.Encode(dto.BookDomainListToDTO(books))
 			if err != nil {
 				fmt.Println(err.Error())
 				return

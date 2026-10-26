@@ -15,7 +15,7 @@ type CreateFields struct {
 	Year         uint16
 	Available    bool
 	Ctx          context.Context
-	Repo         service.Repository
+	Repo         service.BookRepository
 	WantError    error
 	WantBook     model.Book
 	WantToAppear bool

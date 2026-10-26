@@ -17,3 +17,7 @@ type CreateBookPayload struct {
 	Year      *uint16
 	Available *bool
 }
+
+type CreateUserPayload struct {
+	Name *string
+}

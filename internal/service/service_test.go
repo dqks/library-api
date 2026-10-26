@@ -9,7 +9,7 @@ import (
 func TestCreate(t *testing.T) {
 	tests := []struct {
 		name        string
-		repo        Repository
+		repo        BookRepository
 		serviceNil  bool
 		wantService bookService
 	}{
@@ -31,7 +31,7 @@ func TestCreate(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			service := Create(tt.repo)
+			service := CreateBookService(tt.repo)
 
 			if tt.serviceNil {
 				if service != nil {

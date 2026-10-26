@@ -161,7 +161,7 @@ func TestEditBook(t *testing.T) {
 				},
 			)
 
-			service := service.Create(repo)
+			service := service.CreateBookService(repo)
 
 			mux := http.NewServeMux()
 			mux.HandleFunc("PATCH /books/{id}", handler.EditBookByID(service))

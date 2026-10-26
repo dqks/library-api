@@ -15,7 +15,7 @@ type GetBooksFields struct {
 	Cancel    bool
 	Payload   repository.GetBooksPayload
 	Ctx       context.Context
-	Repo      service.Repository
+	Repo      service.BookRepository
 	WantErr   error
 	WantBooks []model.Book
 }

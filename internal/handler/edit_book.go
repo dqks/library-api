@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"library-api/internal/apperrors"
+	"library-api/internal/handler/dto"
 	"library-api/internal/service"
 	"net/http"
 	"strconv"
@@ -18,7 +19,7 @@ type EditBookBody struct {
 	Available *bool   `json:"available"`
 }
 
-func EditBookByID(s Service) func(w http.ResponseWriter, r *http.Request) {
+func EditBookByID(s BookService) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		select {
@@ -78,7 +79,7 @@ func EditBookByID(s Service) func(w http.ResponseWriter, r *http.Request) {
 
 			w.Header().Add("Content-Type", "application/json")
 			encoder := json.NewEncoder(w)
-			err = encoder.Encode(BookModelToDTO(&newBook))
+			err = encoder.Encode(dto.BookModelToDTO(&newBook))
 			if err != nil {
 				fmt.Println(err.Error())
 				return

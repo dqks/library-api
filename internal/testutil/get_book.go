@@ -11,7 +11,7 @@ import (
 type GetBookFields struct {
 	ID       int
 	Ctx      context.Context
-	Repo     service.Repository
+	Repo     service.BookRepository
 	WantErr  error
 	WantBook model.Book
 }

@@ -49,22 +49,26 @@ func TestGetBookByID(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			repo, pool := CreatePostgresTestRepo(t)
+			t.Cleanup(func() {
+				pool.Close()
+			})
 
-			err := database.ApplyMigrations(pool, true)
+			err := database.UpMigrations(pool)
 			if err != nil {
 				t.Fatalf("ошибка применения миграций: %v", err)
 			}
 
-			SeedBooks(t, pool)
-
-			ctx, cancel := context.WithCancel(context.Background())
-
 			t.Cleanup(func() {
-				err := database.ApplyMigrations(pool, false)
+				err := database.DownMigrations(pool)
 				if err != nil {
 					t.Errorf("ошибка применения миграций: %v", err)
 				}
-				pool.Close()
+			})
+
+			SeedBooks(t, pool)
+
+			ctx, cancel := context.WithCancel(context.Background())
+			t.Cleanup(func() {
 				cancel()
 			})
 

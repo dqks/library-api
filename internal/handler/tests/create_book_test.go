@@ -17,6 +17,9 @@ import (
 	"time"
 )
 
+type CreateBookServiceMock struct {
+}
+
 func TestCreateBook(t *testing.T) {
 	tests := []struct {
 		name             string

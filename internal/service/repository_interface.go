@@ -6,7 +6,7 @@ import (
 	repository "library-api/internal/repository"
 )
 
-type Repository interface {
+type BookRepository interface {
 	CreateBook(ctx context.Context, payload repository.CreateBookPayload) (model.Book, error)
 	DeleteBookByID(ctx context.Context, id int) error
 	EditBookByID(ctx context.Context, id int, p repository.EditBookPayload) (model.Book, error)
@@ -14,14 +14,7 @@ type Repository interface {
 	GetBooks(ctx context.Context, params repository.GetBooksPayload) ([]model.Book, error)
 }
 
-type bookService struct {
-	repo Repository
-}
-
-func Create(repo Repository) *bookService {
-	if repo == nil {
-		return nil
-	}
-
-	return &bookService{repo: repo}
+type UserRepository interface {
+	BookRepository
+	CreateUser(ctx context.Context, payload repository.CreateUserPayload) (model.User, error)
 }

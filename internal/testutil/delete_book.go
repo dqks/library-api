@@ -14,7 +14,7 @@ type DeleteBookFields struct {
 	Ctx         context.Context
 	Cancel      bool
 	BooksBefore []model.Book
-	Repo        service.Repository
+	Repo        service.BookRepository
 	WantErr     error
 }
 

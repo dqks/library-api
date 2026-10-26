@@ -14,7 +14,7 @@ type EditFields struct {
 	Err            error
 	Book           model.Book
 	CtxGet         context.Context
-	Repo           service.Repository
+	Repo           service.BookRepository
 	Cancel         bool
 	BooksBefore    []model.Book
 	WantRepoChange bool

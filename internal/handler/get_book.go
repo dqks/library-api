@@ -6,11 +6,12 @@ import (
 	"errors"
 	"fmt"
 	"library-api/internal/apperrors"
+	"library-api/internal/handler/dto"
 	"net/http"
 	"strconv"
 )
 
-func GetBookByID(s Service) func(w http.ResponseWriter, r *http.Request) {
+func GetBookByID(s BookService) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		select {
@@ -51,7 +52,7 @@ func GetBookByID(s Service) func(w http.ResponseWriter, r *http.Request) {
 
 			w.Header().Add("Content-Type", "application/json")
 			encoder := json.NewEncoder(w)
-			err = encoder.Encode(BookModelToDTO(&book))
+			err = encoder.Encode(dto.BookModelToDTO(&book))
 			if err != nil {
 				fmt.Println(err.Error())
 				return
