@@ -25,14 +25,10 @@ func CreateUser(s UserService) func(w http.ResponseWriter, req *http.Request) {
 			}
 		default:
 			var body CreateUserBody
-			decoder := json.NewDecoder(r.Body)
-			if err := decoder.Decode(&body); err != nil {
-				w.Header().Set("Content-Type", "application/json")
-				w.WriteHeader(apperrors.ErrInvalidValuesCode)
-				encoder := json.NewEncoder(w)
-				if err = encoder.Encode(apperrors.BaseError{Error: err.Error()}); err != nil {
-					fmt.Println(apperrors.ErrInternal.Error())
-				}
+
+			err := DecodeBody(r.Body, &body, w)
+
+			if err != nil {
 				return
 			}
 
@@ -41,25 +37,7 @@ func CreateUser(s UserService) func(w http.ResponseWriter, req *http.Request) {
 			})
 
 			if err != nil {
-				code := apperrors.CheckErrors(
-					[]error{
-						context.Canceled,
-						context.DeadlineExceeded,
-						apperrors.ErrInvalidValues,
-					},
-					err,
-				)
-
-				if code == -1 {
-					return
-				}
-
-				w.Header().Set("Content-Type", "application/json")
-				w.WriteHeader(code)
-				encoder := json.NewEncoder(w)
-				if err := encoder.Encode(apperrors.BaseError{Error: err.Error()}); err != nil {
-					fmt.Println(apperrors.ErrInternal.Error())
-				}
+				ProcessServiceErr(w, err)
 				return
 			}
 

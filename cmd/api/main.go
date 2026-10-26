@@ -56,6 +56,7 @@ func main() {
 	mux.HandleFunc("PATCH /books/{id}", handler.EditBookByID(bookService))
 	mux.HandleFunc("DELETE /books/{id}", handler.DeleteBookByID(bookService))
 	mux.HandleFunc("POST /users", handler.CreateUser(userService))
+	mux.HandleFunc("GET /users/{id}", handler.GetUser(userService))
 
 	server := &http.Server{
 		Addr:    ":8080",
