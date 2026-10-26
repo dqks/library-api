@@ -7,4 +7,4 @@ CREATE TABLE books (
 	CONSTRAINT ck_title_not_empty CHECK (TRIM(title) <> ''),
 	CONSTRAINT ck_author_not_empty CHECK (TRIM(author) <> ''),
 	CONSTRAINT ck_year_not_greater_than_current CHECK (year <= EXTRACT(YEAR FROM CURRENT_DATE))
-)
+);	

@@ -3,6 +3,7 @@ package postgres_tests
 import (
 	"context"
 	"library-api/internal/apperrors"
+	"library-api/internal/database"
 	"library-api/internal/repository"
 	"library-api/internal/testutil"
 	"testing"
@@ -39,11 +40,20 @@ func TestDeleteBook(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			repo, pool := CreatePostgresTestRepo(t)
 
+			err := database.UpMigrations(pool)
+			if err != nil {
+				t.Fatalf("ошибка применения миграций: %v", err)
+			}
+
 			SeedBooks(t, pool)
 
 			ctx, cancel := context.WithCancel(context.Background())
 
 			t.Cleanup(func() {
+				err := database.DownMigrations(pool)
+				if err != nil {
+					t.Errorf("ошибка применения миграций: %v", err)
+				}
 				pool.Close()
 				cancel()
 			})
