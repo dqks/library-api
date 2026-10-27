@@ -1,20 +1,15 @@
 package handler
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"library-api/internal/apperrors"
 	"net/http"
 )
 
-func ProcessServiceErr(w http.ResponseWriter, err error) {
+func ProcessServiceErr(w http.ResponseWriter, err error, errors []error) {
 	code := apperrors.CheckErrors(
-		[]error{
-			context.Canceled,
-			context.DeadlineExceeded,
-			apperrors.ErrInvalidValues,
-		},
+		errors,
 		err,
 	)
 

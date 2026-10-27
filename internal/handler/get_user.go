@@ -6,8 +6,8 @@ import (
 	"errors"
 	"fmt"
 	"library-api/internal/apperrors"
+	"library-api/internal/handler/dto"
 	"net/http"
-	"strconv"
 )
 
 func GetUser(s UserService) func(w http.ResponseWriter, r *http.Request) {
@@ -19,20 +19,30 @@ func GetUser(s UserService) func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(apperrors.ErrDeadlineExceededCode)
 			}
 		default:
-			id, err := strconv.Atoi(r.PathValue("id"))
+			id, err := ValidatePathID(w, r.PathValue("id"))
 
-			if err != nil || id <= 0 {
-				w.Header().Add("Content-Type", "application/json")
-				w.WriteHeader(apperrors.ErrIncorrectPathValueCode)
-				encoder := json.NewEncoder(w)
-				if err := encoder.Encode(apperrors.BaseError{Error: err.Error()}); err != nil {
-					fmt.Println(err)
-				}
+			if err != nil {
+				return
 			}
 
 			user, err := s.GetUser(ctx, id)
 
-			fmt.Println(user, id)
+			if err != nil {
+				errors := []error{
+					context.Canceled,
+					context.DeadlineExceeded,
+					apperrors.ErrNotFound,
+				}
+				ProcessServiceErr(w, err, errors)
+				return
+			}
+
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(200)
+			encoder := json.NewEncoder(w)
+			if encoder.Encode(dto.UserModelToDTO(&user)); err != nil {
+				fmt.Println(err)
+			}
 		}
 	}
 }

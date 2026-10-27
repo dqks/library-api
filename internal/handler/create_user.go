@@ -37,7 +37,12 @@ func CreateUser(s UserService) func(w http.ResponseWriter, req *http.Request) {
 			})
 
 			if err != nil {
-				ProcessServiceErr(w, err)
+				errors := []error{
+					context.Canceled,
+					context.DeadlineExceeded,
+					apperrors.ErrInvalidValues,
+				}
+				ProcessServiceErr(w, err, errors)
 				return
 			}
 
