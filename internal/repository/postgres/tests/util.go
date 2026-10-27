@@ -72,3 +72,48 @@ func SeedBooks(t *testing.T, pool *pgxpool.Pool) {
 		t.Fatalf("failed to set id counter %v", err)
 	}
 }
+
+func ClearUsers(ctx context.Context, pool *pgxpool.Pool) (pgconn.CommandTag, error) {
+	return pool.Exec(
+		ctx,
+		"DELETE FROM users;",
+	)
+}
+
+func SeedUsers(t *testing.T, pool *pgxpool.Pool) {
+	ctx := context.Background()
+
+	_, err := ClearUsers(ctx, pool)
+
+	if err != nil {
+		t.Fatalf("failed to clear users %v", err)
+	}
+
+	_, err = pool.Exec(
+		ctx,
+		`
+		INSERT INTO users (id, name)
+		VALUES 
+			(1, 'user 1'),
+			(2, 'user 2'),
+			(3, 'user 3'),
+			(4, 'user 4'),
+			(5, 'user 5')
+		`,
+	)
+
+	if err != nil {
+		t.Fatalf("failed to seed into users %v", err)
+	}
+
+	_, err = pool.Exec(
+		ctx,
+		`
+		SELECT setval('users_id_seq', (SELECT COALESCE(MAX(id), 0) + 1 FROM users), false);
+		`,
+	)
+
+	if err != nil {
+		t.Fatalf("failed to set id counter %v", err)
+	}
+}

@@ -8,7 +8,7 @@ import (
 type LoanRepository interface {
 	GetBookByID(ctx context.Context, id int) (model.Book, error)
 	GetUser(ctx context.Context, id int) (model.User, error)
-	LoanBook(ctx context.Context, bookID, userID int) error
+	LoanBook(ctx context.Context, bookID, userID int) (int, error)
 }
 
 type loanService struct {

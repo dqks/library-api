@@ -26,6 +26,8 @@ func (s *loanService) LoanBook(ctx context.Context, bookID, userID int) error {
 			return err
 		}
 
-		return s.repo.LoanBook(ctx, bookID, userID)
+		_, err = s.repo.LoanBook(ctx, bookID, userID)
+
+		return err
 	}
 }
