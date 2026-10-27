@@ -50,6 +50,13 @@ func main() {
 		return
 	}
 
+	loanService := service.CreateLoanService(pgRepo)
+
+	if loanService == nil {
+		fmt.Println("произошла ошибка при запуске сервера - не получилось создать сервис")
+		return
+	}
+
 	mux.HandleFunc("POST /books", handler.CreateBook(bookService))
 	mux.HandleFunc("GET /books", handler.GetBooks(bookService))
 	mux.HandleFunc("GET /books/{id}", handler.GetBookByID(bookService))
@@ -57,6 +64,7 @@ func main() {
 	mux.HandleFunc("DELETE /books/{id}", handler.DeleteBookByID(bookService))
 	mux.HandleFunc("POST /users", handler.CreateUser(userService))
 	mux.HandleFunc("GET /users/{id}", handler.GetUser(userService))
+	mux.HandleFunc("POST /loans/{bookId}/{userId}", handler.LoanBook(loanService))
 
 	server := &http.Server{
 		Addr:    ":8080",

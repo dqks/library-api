@@ -26,3 +26,7 @@ type UserService interface {
 	CreateUser(ctx context.Context, input service.CreateUserInput) (model.User, error)
 	GetUser(ctx context.Context, id int) (model.User, error)
 }
+
+type LoanService interface {
+	LoanBook(ctx context.Context, bookID, userID int) error
+}

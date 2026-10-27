@@ -15,6 +15,7 @@ var (
 	ErrInvalidFileLoad             = errors.New("не удалось загрузить .env файл")
 	ErrBadEnvironmentConfiguration = errors.New("плохая настройка переменных окружения")
 	ErrMigrationApply              = errors.New("ошибка применения миграций")
+	ErrBookUnavailable             = errors.New("выбранная книга недоступна")
 )
 
 var (
