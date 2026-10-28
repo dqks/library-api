@@ -39,6 +39,18 @@ func TestLoanBook(t *testing.T) {
 			wantServiceCallCount: 1,
 		},
 		{
+			name:    "book unavailable",
+			userID:  "1",
+			bookID:  "1",
+			loanErr: apperrors.ErrBookUnavailable,
+			wantHeader: map[string][]string{
+				"Content-Type": {"application/json"},
+			},
+			wantBody:             `{"error":"` + apperrors.ErrBookUnavailable.Error() + `"}`,
+			wantCode:             400,
+			wantServiceCallCount: 1,
+		},
+		{
 			name:     "canceled",
 			cancel:   true,
 			userID:   "1",
@@ -122,7 +134,7 @@ func TestLoanBook(t *testing.T) {
 			wantCode: 400,
 		},
 		{
-			name:    "err, negative bookID",
+			name:    "err, negative userID",
 			userID:  "-1",
 			bookID:  "1",
 			loanErr: nil,

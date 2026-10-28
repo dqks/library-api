@@ -24,6 +24,7 @@ var (
 	ErrNotFoundCode           = 404
 	ErrIncorrectPathValueCode = 400
 	ErrInvalidValuesCode      = 400
+	ErrBookUnavailableCode    = 400
 	ErrDeadlineExceededCode   = 504
 	ErrCanceledCode           = -1
 )
@@ -40,6 +41,7 @@ var errorMap = map[error]int{
 	ErrInvalidValues:         ErrInvalidValuesCode,
 	context.DeadlineExceeded: ErrDeadlineExceededCode,
 	context.Canceled:         ErrCanceledCode,
+	ErrBookUnavailable:       ErrBookUnavailableCode,
 }
 
 func CheckErrors(errorsToCheck []error, err error) int {

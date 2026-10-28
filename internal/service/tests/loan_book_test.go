@@ -34,6 +34,11 @@ func TestLoanBook(t *testing.T) {
 			wantErr: nil,
 		},
 		{
+			name:    "canceled",
+			cancel:  true,
+			wantErr: context.Canceled,
+		},
+		{
 			name:    "err, book not found",
 			bookID:  1,
 			bookErr: apperrors.ErrNotFound,

@@ -32,7 +32,7 @@ func TestLoanBook(t *testing.T) {
 			name:    "book not found",
 			bookID:  1000,
 			userID:  1,
-			wantErr: apperrors.ErrNotFound,
+			wantErr: apperrors.ErrBookUnavailable,
 		},
 		{
 			name:    "user not found",
@@ -92,7 +92,7 @@ func TestLoanBook(t *testing.T) {
 
 			// Зафиксировали, что если пользователь не найден,
 			// то все равно у книги available будет false
-			if tt.wantErr == nil || tt.userID == 1000 {
+			if tt.wantErr == nil {
 				ctxQuery := context.Background()
 				book, err := repo.GetBookByID(ctxQuery, tt.bookID)
 
@@ -103,11 +103,20 @@ func TestLoanBook(t *testing.T) {
 					)
 				}
 
-				if book.Available != false {
-					t.Fatalf(
-						"expected book's available field to be false but got %v",
-						book.Available,
-					)
+				if tt.userID == 1000 {
+					if book.Available != true {
+						t.Fatalf(
+							"expected book's available field to be true but got %v",
+							book.Available,
+						)
+					}
+				} else {
+					if book.Available != false {
+						t.Fatalf(
+							"expected book's available field to be false but got %v",
+							book.Available,
+						)
+					}
 				}
 			}
 
