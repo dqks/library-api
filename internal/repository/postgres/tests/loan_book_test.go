@@ -14,7 +14,7 @@ type Loan struct {
 }
 
 func TestLoanBook(t *testing.T) {
-	// ID 1000 === not found
+	// ID 1000 == not found
 	tests := []struct {
 		name    string
 		bookID  int

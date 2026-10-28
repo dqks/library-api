@@ -63,8 +63,8 @@ func TestDeleteBookByID(t *testing.T) {
 			err := s.DeleteBookByID(ctx, tt.id)
 
 			if tt.getInRepo && repo.gotInside {
-				if repo.id != tt.id {
-					t.Fatalf("expected to call repository with id %d but got %d", tt.id, repo.id)
+				if repo.bookID != tt.id {
+					t.Fatalf("expected to call repository with id %d but got %d", tt.id, repo.bookID)
 				}
 			} else if tt.getInRepo && !repo.gotInside {
 				t.Fatalf("expected to get in repository but didn't")

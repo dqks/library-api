@@ -12,6 +12,8 @@ type ServiceMock struct {
 	err         error
 	callCount   int
 	id          int
+	bookID      int
+	userID      int
 	createInput service.CreateBookInput
 	editInput   service.EditBookInput
 	getParams   service.GetBooksQueryParams
@@ -52,4 +54,12 @@ func (s *ServiceMock) GetBooks(ctx context.Context, params service.GetBooksQuery
 	s.ctx = ctx
 	s.getParams = params
 	return s.books, s.err
+}
+
+func (s *ServiceMock) LoanBook(ctx context.Context, bookID, userID int) error {
+	s.callCount++
+	s.ctx = ctx
+	s.userID = userID
+	s.bookID = bookID
+	return s.err
 }

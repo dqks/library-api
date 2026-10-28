@@ -40,7 +40,7 @@ func GetUser(s UserService) func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(200)
 			encoder := json.NewEncoder(w)
-			if encoder.Encode(dto.UserModelToDTO(&user)); err != nil {
+			if err = encoder.Encode(dto.UserModelToDTO(&user)); err != nil {
 				fmt.Println(err)
 			}
 		}

@@ -7,14 +7,27 @@ import (
 )
 
 type MockRepo struct {
-	book              model.Book
-	err               error
-	books             []model.Book
-	id                int
-	gotInside         bool
+	//return values
+	book  model.Book
+	err   error
+	books []model.Book
+	user  model.User
+	//args
+	bookID     int
+	userID     int
+	getBookID  int
+	getUserID  int
+	loanBookID int
+	loanUserID int
+	//logic
+	gotInside bool
+	// payloads
 	getBooksPayload   repository.GetBooksPayload
 	editBookPayload   repository.EditBookPayload
 	createBookPayload repository.CreateBookPayload
+	//errs
+	getUserErr  error
+	loanBookErr error
 }
 
 func (r *MockRepo) CreateBook(ctx context.Context, p repository.CreateBookPayload) (model.Book, error) {
@@ -25,20 +38,14 @@ func (r *MockRepo) CreateBook(ctx context.Context, p repository.CreateBookPayloa
 
 func (r *MockRepo) DeleteBookByID(ctx context.Context, id int) error {
 	r.gotInside = true
-	r.id = id
+	r.bookID = id
 	return r.err
 }
 
 func (r *MockRepo) EditBookByID(ctx context.Context, id int, p repository.EditBookPayload) (model.Book, error) {
 	r.gotInside = true
-	r.id = id
+	r.bookID = id
 	r.editBookPayload = p
-	return r.book, r.err
-}
-
-func (r *MockRepo) GetBookByID(ctx context.Context, id int) (model.Book, error) {
-	r.gotInside = true
-	r.id = id
 	return r.book, r.err
 }
 
@@ -50,4 +57,23 @@ func (r *MockRepo) GetBooks(ctx context.Context, p repository.GetBooksPayload) (
 
 func (r *MockRepo) CreateUser(ctx context.Context, p repository.CreateUserPayload) (model.User, error) {
 	return model.User{}, nil
+}
+
+func (r *MockRepo) GetBookByID(ctx context.Context, id int) (model.Book, error) {
+	r.gotInside = true
+	r.getBookID = id
+	return r.book, r.err
+}
+
+func (r *MockRepo) GetUser(ctx context.Context, id int) (model.User, error) {
+	r.gotInside = true
+	r.getUserID = id
+	return r.user, r.getUserErr
+}
+
+func (r *MockRepo) LoanBook(ctx context.Context, bookID, userID int) (int, error) {
+	r.gotInside = true
+	r.loanUserID = userID
+	r.loanBookID = bookID
+	return 1, r.loanBookErr
 }
