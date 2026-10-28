@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"library-api/internal/apperrors"
-	"library-api/internal/model"
 	"library-api/internal/service"
 	"testing"
 )
@@ -17,20 +16,15 @@ func TestLoanBook(t *testing.T) {
 		userID int
 		cancel bool
 		//repo set up
-		book        model.Book
-		bookErr     error
 		userErr     error
 		loanBookErr error
 		// result
 		wantErr error
 	}{
 		{
-			name:   "success",
-			bookID: 1,
-			userID: 1,
-			book: model.Book{
-				Available: true,
-			},
+			name:    "success",
+			bookID:  1,
+			userID:  1,
 			wantErr: nil,
 		},
 		{
@@ -39,33 +33,15 @@ func TestLoanBook(t *testing.T) {
 			wantErr: context.Canceled,
 		},
 		{
-			name:    "err, book not found",
+			name:    "err, user not found",
 			bookID:  1,
-			bookErr: apperrors.ErrNotFound,
-			wantErr: apperrors.ErrNotFound,
-		},
-		{
-			name:    "err, book not available",
-			bookID:  1,
-			book:    model.Book{},
-			wantErr: apperrors.ErrBookUnavailable,
-		},
-		{
-			name:   "err, user not found",
-			bookID: 1,
-			book: model.Book{
-				Available: true,
-			},
 			userID:  1,
 			userErr: apperrors.ErrNotFound,
 			wantErr: apperrors.ErrNotFound,
 		},
 		{
-			name:   "err, loan error",
-			bookID: 1,
-			book: model.Book{
-				Available: true,
-			},
+			name:        "err, loan error",
+			bookID:      1,
 			userID:      1,
 			loanBookErr: apperrors.ErrInternal,
 			wantErr:     apperrors.ErrInternal,
@@ -75,9 +51,7 @@ func TestLoanBook(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			repo := &MockRepo{
-				err:         tt.bookErr,
 				getUserErr:  tt.userErr,
-				book:        tt.book,
 				loanBookErr: tt.loanBookErr,
 			}
 			service := service.CreateLoanService(repo)
@@ -99,14 +73,6 @@ func TestLoanBook(t *testing.T) {
 				)
 			}
 
-			if repo.getBookID != tt.bookID {
-				t.Errorf(
-					"expected getBookID to be %d but got %d",
-					tt.bookID,
-					repo.bookID,
-				)
-			}
-
 			if repo.getUserID != tt.userID {
 				t.Errorf(
 					"expected getUserID to be %d but got %d",
@@ -115,7 +81,7 @@ func TestLoanBook(t *testing.T) {
 				)
 			}
 
-			if repo.getUserErr == nil && repo.err == nil && tt.book.Available {
+			if repo.getUserErr == nil && repo.err == nil {
 				if repo.loanBookID != tt.bookID {
 					t.Errorf(
 						"expected loanBookID to be %d but got %d",
@@ -124,7 +90,7 @@ func TestLoanBook(t *testing.T) {
 					)
 				}
 
-				if repo.loanUserID != tt.userID && repo.getUserErr == nil && repo.err == nil && tt.book.Available {
+				if repo.loanUserID != tt.userID && repo.getUserErr == nil && repo.err == nil {
 					t.Errorf(
 						"expected loanUserID to be %d but got %d",
 						tt.userID,

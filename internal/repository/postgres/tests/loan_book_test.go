@@ -90,9 +90,7 @@ func TestLoanBook(t *testing.T) {
 				)
 			}
 
-			// Зафиксировали, что если пользователь не найден,
-			// то все равно у книги available будет false
-			if tt.wantErr == nil {
+			if tt.bookID != 1000 {
 				ctxQuery := context.Background()
 				book, err := repo.GetBookByID(ctxQuery, tt.bookID)
 

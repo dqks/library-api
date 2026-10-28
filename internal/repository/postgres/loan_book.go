@@ -26,6 +26,10 @@ func (r *BookRepository) LoanBook(ctx context.Context, bookID, userID int) (int,
 				bookID,
 			)
 
+			if err != nil {
+				return err
+			}
+
 			if tag.RowsAffected() == 0 {
 				return apperrors.ErrBookUnavailable
 			}
