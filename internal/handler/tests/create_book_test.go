@@ -257,11 +257,11 @@ func TestCreateBook(t *testing.T) {
 				if err != nil {
 					t.Fatal("failed to decode expected input")
 				}
-				if !reflect.DeepEqual(expectedInput, s.createInput) {
+				if !reflect.DeepEqual(expectedInput, s.createBookInput) {
 					t.Fatalf(
 						"expected to call service with input %v\nbut got %v",
 						expectedInput,
-						s.createInput,
+						s.createBookInput,
 					)
 				}
 			}

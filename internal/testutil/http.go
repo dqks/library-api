@@ -1,6 +1,10 @@
 package testutil
 
-import "net/http"
+import (
+	"context"
+	"net/http"
+	"time"
+)
 
 func CompareHeaders(m1, m2 http.Header) bool {
 	if len(m1) != len(m2) {
@@ -24,4 +28,12 @@ func CompareHeaders(m1, m2 http.Header) bool {
 		}
 	}
 	return true
+}
+
+func GetNeededCtx(deadlineContext bool) (context.Context, context.CancelFunc) {
+	if deadlineContext {
+		return context.WithDeadline(context.Background(), time.Time{})
+	}
+	return context.WithCancel(context.Background())
+
 }

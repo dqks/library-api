@@ -11,6 +11,7 @@ import (
 
 func DecodeBody(requestBody io.ReadCloser, body interface{}, w http.ResponseWriter) error {
 	decoder := json.NewDecoder(requestBody)
+	decoder.DisallowUnknownFields()
 	if err := decoder.Decode(&body); err != nil {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(apperrors.ErrInvalidValuesCode)

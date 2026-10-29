@@ -11,7 +11,10 @@ type User struct {
 }
 
 func ValidateUserFields(name *string) error {
-	if name == nil || len(strings.TrimSpace(*name)) == 0 {
+	if name == nil ||
+		len(strings.TrimSpace(*name)) == 0 ||
+		len(strings.TrimSpace(*name)) < 3 ||
+		len(strings.TrimSpace(*name)) > 25 {
 		return apperrors.ErrInvalidValues
 	}
 	return nil

@@ -25,6 +25,7 @@ type MockRepo struct {
 	getBooksPayload   repository.GetBooksPayload
 	editBookPayload   repository.EditBookPayload
 	createBookPayload repository.CreateBookPayload
+	createUserPayload repository.CreateUserPayload
 	//errs
 	getUserErr  error
 	loanBookErr error
@@ -56,7 +57,9 @@ func (r *MockRepo) GetBooks(ctx context.Context, p repository.GetBooksPayload) (
 }
 
 func (r *MockRepo) CreateUser(ctx context.Context, p repository.CreateUserPayload) (model.User, error) {
-	return model.User{}, nil
+	r.gotInside = true
+	r.createUserPayload = p
+	return r.user, r.err
 }
 
 func (r *MockRepo) GetBookByID(ctx context.Context, id int) (model.Book, error) {

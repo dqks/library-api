@@ -7,23 +7,25 @@ import (
 )
 
 type ServiceMock struct {
-	book        model.Book
-	books       []model.Book
-	err         error
-	callCount   int
-	id          int
-	bookID      int
-	userID      int
-	createInput service.CreateBookInput
-	editInput   service.EditBookInput
-	getParams   service.GetBooksQueryParams
-	ctx         context.Context
+	book            model.Book
+	user            model.User
+	books           []model.Book
+	err             error
+	callCount       int
+	id              int
+	bookID          int
+	userID          int
+	createBookInput service.CreateBookInput
+	createUserInput service.CreateUserInput
+	editInput       service.EditBookInput
+	getParams       service.GetBooksQueryParams
+	ctx             context.Context
 }
 
 func (s *ServiceMock) CreateBook(ctx context.Context, req service.CreateBookInput) (model.Book, error) {
 	s.callCount++
 	s.ctx = ctx
-	s.createInput = req
+	s.createBookInput = req
 	return s.book, s.err
 }
 
@@ -62,4 +64,18 @@ func (s *ServiceMock) LoanBook(ctx context.Context, bookID, userID int) error {
 	s.userID = userID
 	s.bookID = bookID
 	return s.err
+}
+
+func (s *ServiceMock) CreateUser(ctx context.Context, input service.CreateUserInput) (model.User, error) {
+	s.callCount++
+	s.ctx = ctx
+	s.createUserInput = input
+	return s.user, s.err
+}
+
+func (s *ServiceMock) GetUser(ctx context.Context, id int) (model.User, error) {
+	s.callCount++
+	s.ctx = ctx
+	s.id = id
+	return s.user, s.err
 }

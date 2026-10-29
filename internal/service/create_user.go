@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"library-api/internal/apperrors"
 	"library-api/internal/model"
 	"library-api/internal/repository"
 )
@@ -17,7 +16,7 @@ func (s *userService) CreateUser(ctx context.Context, input CreateUserInput) (mo
 		return model.User{}, ctx.Err()
 	default:
 		if err := model.ValidateUserFields(input.Name); err != nil {
-			return model.User{}, apperrors.ErrInvalidValues
+			return model.User{}, err
 		}
 
 		return s.repo.CreateUser(ctx, repository.CreateUserPayload{Name: input.Name})
