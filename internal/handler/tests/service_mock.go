@@ -79,3 +79,8 @@ func (s *ServiceMock) GetUser(ctx context.Context, id int) (model.User, error) {
 	s.id = id
 	return s.user, s.err
 }
+
+func (s *ServiceMock) ReturnBook(ctx context.Context, loanID int, returnDate *string) error {
+	s.callCount++
+	return nil
+}

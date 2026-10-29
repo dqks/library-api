@@ -80,3 +80,8 @@ func (r *MockRepo) LoanBook(ctx context.Context, bookID, userID int) (int, error
 	r.loanBookID = bookID
 	return 1, r.loanBookErr
 }
+
+func (r *MockRepo) ReturnBook(ctx context.Context, loanID int, returnDate *string) error {
+	r.gotInside = true
+	return nil
+}

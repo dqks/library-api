@@ -29,4 +29,5 @@ type UserService interface {
 
 type LoanService interface {
 	LoanBook(ctx context.Context, bookID, userID int) error
+	ReturnBook(ctx context.Context, loanID int, returnDate *string) error
 }
