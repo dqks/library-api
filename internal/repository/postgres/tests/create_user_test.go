@@ -83,12 +83,12 @@ func TestCreateUser(t *testing.T) {
 
 			err := database.UpMigrations(pool)
 			if err != nil {
-				t.Fatalf("failed to apply migrations")
+				t.Fatalf("failed to apply up migrations %v", err)
 			}
 			t.Cleanup(func() {
 				err := database.DownMigrations(pool)
 				if err != nil {
-					t.Errorf("failed to apply migrations")
+					t.Errorf("failed to apply down migrations %v", err)
 				}
 			})
 
