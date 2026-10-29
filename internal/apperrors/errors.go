@@ -16,6 +16,7 @@ var (
 	ErrBadEnvironmentConfiguration = errors.New("плохая настройка переменных окружения")
 	ErrMigrationApply              = errors.New("ошибка применения миграций")
 	ErrBookUnavailable             = errors.New("выбранная книга недоступна")
+	ErrUserCreate                  = errors.New("ошибка при создании пользователя")
 )
 
 var (
@@ -25,6 +26,7 @@ var (
 	ErrIncorrectPathValueCode = 400
 	ErrInvalidValuesCode      = 400
 	ErrBookUnavailableCode    = 400
+	ErrUserCreateCode         = 400
 	ErrDeadlineExceededCode   = 504
 	ErrCanceledCode           = -1
 )
@@ -42,6 +44,7 @@ var errorMap = map[error]int{
 	context.DeadlineExceeded: ErrDeadlineExceededCode,
 	context.Canceled:         ErrCanceledCode,
 	ErrBookUnavailable:       ErrBookUnavailableCode,
+	ErrUserCreate:            ErrUserCreateCode,
 }
 
 func CheckErrors(errorsToCheck []error, err error) int {

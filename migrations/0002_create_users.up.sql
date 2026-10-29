@@ -1,4 +1,5 @@
 CREATE TABLE users (
 	id SERIAL PRIMARY KEY,
-	name TEXT NOT NULL
+	name TEXT NOT NULL CHECK (TRIM(name) <> '')
+	CONSTRAINT ck_name_length CHECK (LENGTH(TRIM(name)) BETWEEN 3 AND 25)
 );	

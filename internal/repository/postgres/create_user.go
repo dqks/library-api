@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"fmt"
+	"library-api/internal/apperrors"
 	"library-api/internal/model"
 	repository "library-api/internal/repository"
 )
@@ -28,7 +29,8 @@ func (r *BookRepository) CreateUser(ctx context.Context, payload repository.Crea
 
 		if err != nil {
 			return model.User{}, fmt.Errorf(
-				"ошибка создания пользователя: %w",
+				"%w: %v",
+				apperrors.ErrUserCreate,
 				err,
 			)
 		}
