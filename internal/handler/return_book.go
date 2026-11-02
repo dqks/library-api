@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"library-api/internal/apperrors"
 	"net/http"
 )
@@ -32,16 +33,23 @@ func ReturnBook(s LoanService) func(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
+			if r.Body == nil {
+				fmt.Println("nil")
+			}
+
 			var body ReturnBookBody
 			decoder := json.NewDecoder(r.Body)
+			decoder.DisallowUnknownFields()
 			if err = decoder.Decode(&body); err != nil {
-				w.Header().Add("Content-Type", "application/json")
-				w.WriteHeader(400)
-				encoder := json.NewEncoder(w)
-				if encodeErr := encoder.Encode(apperrors.BaseError{Error: err.Error()}); encodeErr != nil {
-					fmt.Println(encodeErr.Error())
+				if !errors.Is(err, io.EOF) {
+					w.Header().Add("Content-Type", "application/json")
+					w.WriteHeader(400)
+					encoder := json.NewEncoder(w)
+					if encodeErr := encoder.Encode(apperrors.BaseError{Error: err.Error()}); encodeErr != nil {
+						fmt.Println(encodeErr.Error())
+					}
+					return
 				}
-				return
 			}
 
 			err = s.ReturnBook(r.Context(), loanID, body.ReturnDate)

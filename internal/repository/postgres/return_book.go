@@ -7,6 +7,7 @@ import (
 	"library-api/internal/apperrors"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -40,9 +41,6 @@ func (r *BookRepository) ReturnBook(ctx context.Context, loanID int, returnDate 
 				&loan.ReturnDate,
 			)
 
-			fmt.Println(loan)
-			fmt.Println(loan.ReturnDate.Valid)
-
 			if err != nil {
 				if errors.Is(err, pgx.ErrNoRows) {
 					return fmt.Errorf("%w", apperrors.ErrNotFound)
@@ -50,12 +48,61 @@ func (r *BookRepository) ReturnBook(ctx context.Context, loanID int, returnDate 
 				return err
 			}
 
-			// var date string = *returnDate
-			// if returnDate == nil {
-			// 	date = "CURRENT_DATE"
-			// }
+			if loan.ReturnDate.Valid {
+				return fmt.Errorf("%w: книгу уже вернули", apperrors.ErrReturnBook)
+			}
+
+			var tag pgconn.CommandTag
+
+			if returnDate != nil {
+				tag, err = tx.Exec(
+					ctx,
+					`
+					UPDATE loans SET return_date = $1 WHERE id = $2
+					`,
+					returnDate,
+					loanID,
+				)
+
+			} else {
+				tag, err = tx.Exec(
+					ctx,
+					`
+					UPDATE loans SET return_date = CURRENT_DATE WHERE id = $1
+					`,
+					loanID,
+				)
+			}
+
+			if err != nil {
+				return err
+			}
+
+			if tag.RowsAffected() == 0 {
+				return apperrors.ErrNotFound
+			}
+
+			tag, err = tx.Exec(
+				ctx,
+				`
+				UPDATE books SET available = true WHERE id = $1
+				`,
+				loan.BookID,
+			)
+
+			if err != nil {
+				return err
+			}
+
+			if tag.RowsAffected() == 0 {
+				return apperrors.ErrNotFound
+			}
+
 			return nil
 		})
-		return err
+		if err != nil {
+			return err
+		}
+		return nil
 	}
 }

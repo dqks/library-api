@@ -14,14 +14,14 @@ type BookRepository interface {
 	GetBooks(ctx context.Context, params repository.GetBooksPayload) ([]model.Book, error)
 }
 
-type bookService struct {
-	repo BookRepository
+type BookService struct {
+	Repo BookRepository
 }
 
-func CreateBookService(repo BookRepository) *bookService {
+func CreateBookService(repo BookRepository) *BookService {
 	if repo == nil {
 		return nil
 	}
 
-	return &bookService{repo: repo}
+	return &BookService{Repo: repo}
 }

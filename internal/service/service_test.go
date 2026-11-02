@@ -1,7 +1,7 @@
-package service
+package service_test
 
 import (
-	"library-api/internal/service/tests"
+	"library-api/internal/service"
 	"reflect"
 	"testing"
 )
@@ -9,21 +9,21 @@ import (
 func TestCreate(t *testing.T) {
 	tests := []struct {
 		name        string
-		repo        BookRepository
+		repo        service.BookRepository
 		serviceNil  bool
-		wantService bookService
+		wantService service.BookService
 	}{
 		{
 			name:        "success, service nil",
 			repo:        nil,
 			serviceNil:  true,
-			wantService: bookService{},
+			wantService: service.BookService{},
 		},
 		{
 			name: "success",
-			repo: &tests.MockRepo{},
-			wantService: bookService{
-				repo: &tests.MockRepo{},
+			repo: &MockRepo{},
+			wantService: service.BookService{
+				Repo: &MockRepo{},
 			},
 		},
 	}
@@ -31,7 +31,7 @@ func TestCreate(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			service := CreateBookService(tt.repo)
+			service := service.CreateBookService(tt.repo)
 
 			if tt.serviceNil {
 				if service != nil {

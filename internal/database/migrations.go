@@ -12,9 +12,9 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func UpMigrations(pool *pgxpool.Pool) error {
-	dirName := "../../../../migrations"
-	files, err := os.ReadDir(dirName)
+func UpMigrations(pool *pgxpool.Pool, migrationsPath string) error {
+	// dirName := "../../../../migrations"
+	files, err := os.ReadDir(migrationsPath)
 
 	if err != nil {
 		return fmt.Errorf("%w: %v", apperrors.ErrMigrationApply, err)
@@ -29,7 +29,7 @@ func UpMigrations(pool *pgxpool.Pool) error {
 	}
 
 	for i := range filesToRead {
-		file, err := os.ReadFile(dirName + "/" + filesToRead[i])
+		file, err := os.ReadFile(migrationsPath + "/" + filesToRead[i])
 
 		if err != nil {
 			return fmt.Errorf("%w: %v", apperrors.ErrMigrationApply, err)
@@ -48,9 +48,9 @@ func UpMigrations(pool *pgxpool.Pool) error {
 	return nil
 }
 
-func DownMigrations(pool *pgxpool.Pool) error {
-	dirName := "../../../../migrations"
-	files, err := os.ReadDir(dirName)
+func DownMigrations(pool *pgxpool.Pool, migrationsPath string) error {
+	// dirName := "../../../../migrations"
+	files, err := os.ReadDir(migrationsPath)
 
 	if err != nil {
 		return fmt.Errorf("%w: %v", apperrors.ErrMigrationApply, err)
@@ -69,7 +69,7 @@ func DownMigrations(pool *pgxpool.Pool) error {
 	})
 
 	for i := range filesToRead {
-		file, err := os.ReadFile(dirName + "/" + filesToRead[i])
+		file, err := os.ReadFile(migrationsPath + "/" + filesToRead[i])
 
 		if err != nil {
 			return fmt.Errorf("%w: %v", apperrors.ErrMigrationApply, err)

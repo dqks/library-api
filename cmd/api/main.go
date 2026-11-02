@@ -66,6 +66,7 @@ func main() {
 	mux.HandleFunc("GET /users/{id}", handler.GetUser(userService))
 	mux.HandleFunc("POST /loans/{bookId}/{userId}", handler.LoanBook(loanService))
 	mux.HandleFunc("PATCH /loans/{loanId}", handler.ReturnBook(loanService))
+	mux.HandleFunc("GET /loans/{id}", handler.GetLoan(loanService))
 
 	server := &http.Server{
 		Addr:    ":8080",
@@ -75,16 +76,9 @@ func main() {
 	shutDownSignal := make(chan os.Signal, 1)
 	signal.Notify(shutDownSignal, os.Interrupt, syscall.SIGTERM)
 	go func() {
-		fmt.Println("Сервер запущен на порту 8080")
-		if err := server.ListenAndServe(); err != nil {
-			if errors.Is(err, http.ErrServerClosed) {
-				fmt.Println("Сервер закрылся штатно")
-			} else {
-				fmt.Println(err.Error())
-				time.Sleep(10 * time.Second)
-				os.Exit(1)
-			}
-			return
+		fmt.Println("Сервер будет запущен на порту 8080")
+		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Fatal(err.Error())
 		}
 	}()
 

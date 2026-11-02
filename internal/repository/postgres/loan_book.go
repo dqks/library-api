@@ -4,19 +4,35 @@ import (
 	"context"
 	"fmt"
 	"library-api/internal/apperrors"
+	"library-api/internal/model"
 
 	"github.com/jackc/pgx/v5"
 )
 
-func (r *BookRepository) LoanBook(ctx context.Context, bookID, userID int) (int, error) {
+func (r *BookRepository) LoanBook(ctx context.Context, bookID, userID int) (model.Loan, error) {
 	select {
 	case <-ctx.Done():
-		return -1, ctx.Err()
+		return model.Loan{}, ctx.Err()
 	default:
-		id := -1
-
+		var loan model.Loan
 		err := pgx.BeginFunc(ctx, r.pool, func(tx pgx.Tx) error {
-			// PostgreSQL защищает UPDATE операции он concurrency
+			id := -1
+
+			err := tx.QueryRow(
+				ctx,
+				`
+				SELECT id FROM books WHERE id = $1 FOR UPDATE
+				`,
+				bookID,
+			).Scan(
+				&id,
+			)
+
+			if id == -1 {
+				return apperrors.ErrNotFound
+			}
+
+			// PostgreSQL защищает UPDATE операции от concurrency
 			tag, err := tx.Exec(
 				ctx,
 				`
@@ -39,19 +55,21 @@ func (r *BookRepository) LoanBook(ctx context.Context, bookID, userID int) (int,
 				`
 				INSERT INTO loans (book_id, user_id)
 				VALUES ($1, $2)
-				RETURNING id
+				RETURNING id, loan_date, return_date
 				`,
 				bookID,
 				userID,
 			).Scan(
-				&id,
+				&loan.ID,
+				&loan.LoanDate,
+				&loan.ReturnDate,
 			)
 
 			if err != nil {
 				return fmt.Errorf("%w: %v", apperrors.ErrInternal, err)
 			}
 
-			if id == -1 {
+			if loan.ID == 0 {
 				return apperrors.ErrInternal
 			}
 
@@ -59,9 +77,9 @@ func (r *BookRepository) LoanBook(ctx context.Context, bookID, userID int) (int,
 		})
 
 		if err != nil {
-			return -1, err
+			return model.Loan{}, err
 		}
 
-		return id, nil
+		return loan, nil
 	}
 }

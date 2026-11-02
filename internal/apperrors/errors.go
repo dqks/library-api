@@ -17,6 +17,7 @@ var (
 	ErrMigrationApply              = errors.New("ошибка применения миграций")
 	ErrBookUnavailable             = errors.New("выбранная книга недоступна")
 	ErrUserCreate                  = errors.New("ошибка при создании пользователя")
+	ErrReturnBook                  = errors.New("ошибка при возврате книги")
 )
 
 var (
@@ -27,6 +28,7 @@ var (
 	ErrInvalidValuesCode      = 400
 	ErrBookUnavailableCode    = 400
 	ErrUserCreateCode         = 400
+	ErrReturnBookCode         = 400
 	ErrDeadlineExceededCode   = 504
 	ErrCanceledCode           = -1
 )
@@ -45,6 +47,7 @@ var errorMap = map[error]int{
 	context.Canceled:         ErrCanceledCode,
 	ErrBookUnavailable:       ErrBookUnavailableCode,
 	ErrUserCreate:            ErrUserCreateCode,
+	ErrReturnBook:            ErrReturnBookCode,
 }
 
 func CheckErrors(errorsToCheck []error, err error) int {

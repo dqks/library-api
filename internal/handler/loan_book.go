@@ -7,10 +7,12 @@ import (
 	"fmt"
 	"library-api/internal/apperrors"
 	"net/http"
+	"time"
 )
 
-type loanBookResponse struct {
-	Success bool `json:"success"`
+type LoanBookResponse struct {
+	ID       int    `json:"id"`
+	LoanDate string `json:"loan_date"`
 }
 
 func LoanBook(s LoanService) func(w http.ResponseWriter, r *http.Request) {
@@ -32,7 +34,7 @@ func LoanBook(s LoanService) func(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			err = s.LoanBook(ctx, bookID, userID)
+			loan, err := s.LoanBook(ctx, bookID, userID)
 
 			if err != nil {
 				errors := []error{
@@ -48,7 +50,12 @@ func LoanBook(s LoanService) func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(201)
 			encoder := json.NewEncoder(w)
-			if err := encoder.Encode(loanBookResponse{Success: true}); err != nil {
+			response := LoanBookResponse{
+				ID:       loan.ID,
+				LoanDate: loan.LoanDate.Format(time.DateOnly),
+			}
+
+			if err := encoder.Encode(response); err != nil {
 				fmt.Println(apperrors.ErrInternal.Error())
 			}
 		}

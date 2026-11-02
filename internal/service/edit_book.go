@@ -14,7 +14,7 @@ type EditBookInput struct {
 	Available *bool
 }
 
-func (s *bookService) EditBookByID(ctx context.Context, id int, req EditBookInput) (model.Book, error) {
+func (s *BookService) EditBookByID(ctx context.Context, id int, req EditBookInput) (model.Book, error) {
 	select {
 	case <-ctx.Done():
 		return model.Book{}, ctx.Err()
@@ -27,7 +27,7 @@ func (s *bookService) EditBookByID(ctx context.Context, id int, req EditBookInpu
 			return model.Book{}, err
 		}
 
-		return s.repo.EditBookByID(ctx, id, repository.EditBookPayload{
+		return s.Repo.EditBookByID(ctx, id, repository.EditBookPayload{
 			Title:     req.Title,
 			Author:    req.Author,
 			Year:      req.Year,

@@ -2,21 +2,22 @@ package service
 
 import (
 	"context"
+	"library-api/internal/model"
 )
 
-func (s *loanService) LoanBook(ctx context.Context, bookID, userID int) error {
+func (s *loanService) LoanBook(ctx context.Context, bookID, userID int) (model.Loan, error) {
 	select {
 	case <-ctx.Done():
-		return ctx.Err()
+		return model.Loan{}, ctx.Err()
 	default:
 		_, err := s.repo.GetUser(ctx, userID)
 
 		if err != nil {
-			return err
+			return model.Loan{}, err
 		}
 
-		_, err = s.repo.LoanBook(ctx, bookID, userID)
+		loan, err := s.repo.LoanBook(ctx, bookID, userID)
 
-		return err
+		return loan, err
 	}
 }
