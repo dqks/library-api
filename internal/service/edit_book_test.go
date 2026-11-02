@@ -318,8 +318,8 @@ func TestEditBookByID(t *testing.T) {
 			book, err := s.EditBookByID(ctx, tt.id, input)
 
 			if tt.getInRepo && repo.gotInside {
-				if tt.id != repo.bookID {
-					t.Fatalf("expected to call repository with id %d but got %d", tt.id, repo.bookID)
+				if tt.id != repo.getBookByID {
+					t.Fatalf("expected to call repository with id %d but got %d", tt.id, repo.getBookByID)
 				}
 
 				expectedPayload := repository.EditBookPayload{}

@@ -13,12 +13,11 @@ type MockRepo struct {
 	books []model.Book
 	user  model.User
 	//args
-	bookID     int
-	userID     int
-	getBookID  int
-	getUserID  int
-	loanBookID int
-	loanUserID int
+	getBookByID int
+	userID      int
+	getUserID   int
+	loanBookID  int
+	loanUserID  int
 	//logic
 	gotInside bool
 	// payloads
@@ -39,13 +38,13 @@ func (r *MockRepo) CreateBook(ctx context.Context, p repository.CreateBookPayloa
 
 func (r *MockRepo) DeleteBookByID(ctx context.Context, id int) error {
 	r.gotInside = true
-	r.bookID = id
+	r.getBookByID = id
 	return r.err
 }
 
 func (r *MockRepo) EditBookByID(ctx context.Context, id int, p repository.EditBookPayload) (model.Book, error) {
 	r.gotInside = true
-	r.bookID = id
+	r.getBookByID = id
 	r.editBookPayload = p
 	return r.book, r.err
 }
@@ -64,7 +63,7 @@ func (r *MockRepo) CreateUser(ctx context.Context, p repository.CreateUserPayloa
 
 func (r *MockRepo) GetBookByID(ctx context.Context, id int) (model.Book, error) {
 	r.gotInside = true
-	r.getBookID = id
+	r.getBookByID = id
 	return r.book, r.err
 }
 

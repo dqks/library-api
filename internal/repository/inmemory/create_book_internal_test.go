@@ -103,6 +103,7 @@ func TestCreateBookConcurrentCancel(t *testing.T) {
 			}
 
 			ctxGet := context.WithoutCancel(context.Background())
+			repo.beforeLock = func() {}
 			books, err := repo.GetBooks(ctxGet, repository.GetBooksPayload{})
 
 			if err != nil {
