@@ -6,6 +6,7 @@ import (
 	"library-api/internal/apperrors"
 	"library-api/internal/model"
 	"library-api/internal/testutil"
+	"sync"
 	"testing"
 )
 
@@ -52,8 +53,21 @@ func TestLoanBook(t *testing.T) {
 				pool.Close()
 			})
 
-			testutil.SeedBooks(t, pool)
-			testutil.SeedUsers(t, pool)
+			var wg sync.WaitGroup
+
+			wg.Add(1)
+			go func() {
+				testutil.SeedBooks(t, pool)
+				wg.Done()
+			}()
+			wg.Wait()
+
+			wg.Add(1)
+			go func() {
+				testutil.SeedUsers(t, pool)
+				wg.Done()
+			}()
+			wg.Wait()
 
 			ctx, cancel := context.WithCancel(context.Background())
 			t.Cleanup(func() {
