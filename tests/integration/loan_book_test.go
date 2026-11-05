@@ -12,6 +12,7 @@ import (
 	"net/http/httptest"
 	"strconv"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 )
@@ -195,9 +196,28 @@ func TestLoanBook(t *testing.T) {
 			serviceBook := service.CreateBookService(repo)
 			serviceLoan := service.CreateLoanService(repo)
 
-			testutil.SeedBooks(t, pool)
-			testutil.SeedUsers(t, pool)
-			testutil.SeedLoans(t, pool)
+			var wg sync.WaitGroup
+
+			wg.Add(1)
+			go func() {
+				testutil.SeedBooks(t, pool)
+				wg.Done()
+			}()
+			wg.Wait()
+
+			wg.Add(1)
+			func() {
+				testutil.SeedUsers(t, pool)
+				wg.Done()
+			}()
+			wg.Wait()
+
+			wg.Add(1)
+			go func() {
+				testutil.SeedLoans(t, pool)
+				wg.Done()
+			}()
+			wg.Wait()
 
 			mux := http.NewServeMux()
 			mux.HandleFunc("POST /loans/{bookId}/{userId}", handler.LoanBook(serviceLoan))
