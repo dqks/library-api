@@ -1,0 +1,1 @@
+ALTER TABLE loans DROP due_date;

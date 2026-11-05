@@ -42,6 +42,7 @@ func LoanBook(s LoanService) func(w http.ResponseWriter, r *http.Request) {
 					context.DeadlineExceeded,
 					apperrors.ErrNotFound,
 					apperrors.ErrBookUnavailable,
+					apperrors.ErrUserLoanLimit,
 				}
 				ProcessServiceErr(w, err, errors)
 				return

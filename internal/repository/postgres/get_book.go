@@ -3,7 +3,6 @@ package postgres
 import (
 	"context"
 	"errors"
-	"fmt"
 	"library-api/internal/apperrors"
 	"library-api/internal/model"
 
@@ -35,7 +34,7 @@ func (r *BookRepository) GetBookByID(ctx context.Context, id int) (model.Book, e
 
 		if err != nil {
 			if errors.Is(err, pgx.ErrNoRows) {
-				return model.Book{}, fmt.Errorf("%w", apperrors.ErrNotFound)
+				return model.Book{}, apperrors.ErrNotFound
 			}
 			return model.Book{}, err
 		}

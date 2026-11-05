@@ -18,6 +18,7 @@ var (
 	ErrBookUnavailable             = errors.New("выбранная книга недоступна")
 	ErrUserCreate                  = errors.New("ошибка при создании пользователя")
 	ErrReturnBook                  = errors.New("ошибка при возврате книги")
+	ErrUserLoanLimit               = errors.New("один пользователь может взять максимум 5 книг")
 )
 
 var (

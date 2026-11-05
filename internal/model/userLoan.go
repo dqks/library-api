@@ -1,10 +1,15 @@
 package model
 
-import "time"
+import (
+	"time"
+)
 
 type UserLoan struct {
-	LoanID     int
+	UserID     int
 	Username   string
+	LoanID     int
 	LoanDate   time.Time
 	ReturnDate *time.Time
+	DueDate    time.Time
+	Book       Book
 }

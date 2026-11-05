@@ -17,19 +17,33 @@ func (r *BookRepository) LoanBook(ctx context.Context, bookID, userID int) (mode
 		var loan model.Loan
 		err := pgx.BeginFunc(ctx, r.pool, func(tx pgx.Tx) error {
 			id := -1
-
 			err := tx.QueryRow(
 				ctx,
 				`
-				SELECT id FROM books WHERE id = $1 FOR UPDATE
+				SELECT id FROM books WHERE id = $1 FOR UPDATE;
 				`,
 				bookID,
 			).Scan(
 				&id,
 			)
-
 			if id == -1 {
 				return apperrors.ErrNotFound
+			}
+
+			userLoanCount := 0
+			err = tx.QueryRow(
+				ctx,
+				`
+				SELECT COUNT(*) FROM loans
+				WHERE user_id = $1 AND return_date IS NULL
+				GROUP BY user_id;
+				`,
+				userID,
+			).Scan(
+				&userLoanCount,
+			)
+			if userLoanCount >= 5 {
+				return apperrors.ErrUserLoanLimit
 			}
 
 			// PostgreSQL защищает UPDATE операции от concurrency
@@ -37,7 +51,7 @@ func (r *BookRepository) LoanBook(ctx context.Context, bookID, userID int) (mode
 				ctx,
 				`
 				UPDATE books SET available = false
-				WHERE available = true AND id = $1
+				WHERE available = true AND id = $1;
 				`,
 				bookID,
 			)

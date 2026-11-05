@@ -1,48 +1,58 @@
 package dto
 
 import (
-	"fmt"
 	"library-api/internal/model"
 	"time"
 )
 
-type UserLoanDTO struct {
+type innerLoan struct {
 	LoanID     int     `json:"loan_id"`
-	Username   string  `json:"user_name"`
 	LoanDate   string  `json:"loan_date"`
+	DueDate    string  `json:"due_date"`
 	ReturnDate *string `json:"return_date"`
+	Book       BookDTO `json:"book"`
 }
 
-func UserLoanModelToDTO(ul *model.UserLoan) *UserLoanDTO {
-	if ul.ReturnDate == nil {
-		return &UserLoanDTO{
-			LoanID:     ul.LoanID,
-			Username:   ul.Username,
-			LoanDate:   ul.LoanDate.Format(time.DateOnly),
-			ReturnDate: nil,
-		}
-	}
-	fmt.Println("before	returnDate := ul.ReturnDate.Format(time.DateOnly)")
-	returnDate := ul.ReturnDate.Format(time.DateOnly)
-	fmt.Println("after	returnDate := ul.ReturnDate.Format(time.DateOnly)")
-	return &UserLoanDTO{
-		LoanID:     ul.LoanID,
-		Username:   ul.Username,
-		LoanDate:   ul.LoanDate.Format(time.DateOnly),
-		ReturnDate: &returnDate,
-	}
+type UserLoanDTO struct {
+	UserID   int         `json:"user_id"`
+	Username string      `json:"user_name"`
+	Loans    []innerLoan `json:"loans"`
 }
 
-func UserLoansModelToDTO(ul []model.UserLoan) []UserLoanDTO {
+func UserLoansModelToDTO(ul []model.UserLoan) UserLoanDTO {
 	if ul == nil {
-		fmt.Println("ul == nil")
-		return nil
+		return UserLoanDTO{}
 	}
 
-	ulDTO := make([]UserLoanDTO, 0, len(ul))
+	var ulDTO UserLoanDTO
+	ulDTO.UserID = ul[0].UserID
+	ulDTO.Username = ul[0].Username
+
 	for i := range ul {
-		ulDTO = append(ulDTO, *UserLoanModelToDTO(&ul[i]))
+		var loan innerLoan
+		if ul[i].ReturnDate == nil {
+			loan = innerLoan{
+				LoanID:     ul[i].LoanID,
+				LoanDate:   ul[i].LoanDate.Format(time.DateOnly),
+				DueDate:    ul[i].DueDate.Format(time.DateOnly),
+				ReturnDate: nil,
+				Book: BookDTO{
+					ID:        ul[i].Book.ID,
+					Title:     ul[i].Book.Title,
+					Author:    ul[i].Book.Author,
+					Year:      ul[i].Book.Year,
+					Available: ul[i].Book.Available,
+				},
+			}
+		} else {
+			returnDate := ul[i].ReturnDate.Format(time.DateOnly)
+			loan = innerLoan{
+				LoanID:     ul[i].LoanID,
+				LoanDate:   ul[i].LoanDate.Format(time.DateOnly),
+				ReturnDate: &returnDate,
+			}
+		}
+		ulDTO.Loans = append(ulDTO.Loans, loan)
 	}
-
 	return ulDTO
 }

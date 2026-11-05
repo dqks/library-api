@@ -27,6 +27,19 @@ func GetUserLoans(s LoanService) func(w http.ResponseWriter, req *http.Request) 
 
 			userLoans, err := s.GetUserLoans(ctx, userId)
 
+			if err != nil {
+				ProcessServiceErr(
+					w,
+					err,
+					[]error{
+						context.Canceled,
+						context.DeadlineExceeded,
+						apperrors.ErrNotFound,
+					},
+				)
+				return
+			}
+
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(200)
 			encoder := json.NewEncoder(w)
