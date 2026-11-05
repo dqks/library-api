@@ -13,6 +13,51 @@ jobs:
         # Запускаем на временной виртуальной Ubuntu-машине
         runs-on: ubuntu-latest
 
+        services:
+            # Поднимаем отдельный Docker-контейнер
+            postgres:
+                # Контейнер использует обпраз postgres: 17
+                image: postgres:17
+
+                # Переменные, которые принимают Docker-образ PostgreSQL
+                # Они говорят контейнеру
+                env:
+                    # Создать пользователя postgres
+                    POSTGRES_USER: postgres
+                    # С паролем postgres
+                    POSTGRES_PASSWORD: postgres
+                    # И создать БД library-test
+                    POSTGRES_DB: library-test
+                
+                # Указываем порт
+                ports: 
+                    # порт runner : порт контейнера
+                    # Благодаря этому мы можем подключаться к БД через localhost: 5432
+                    - 5432:5432
+                
+                # Настройки Docker healthcheck
+                options: >-
+                    # PostgreSQL нужно время на инициализацию
+                    # Поэтому используется команда ниже
+                    # pg_isready гоорит готов ли сервер принимать соединения
+                    # -U postgres = пользователь postgres
+                    # -d library-test = бд library-test
+                    --health-cmd "pg_isready -U postgres -d library-test"
+                    POSTGRES_PASSWORD: postgres
+                    # Запускаем проверку готовности кажые 5 сек
+                    --health-interval 5s
+                    # На каждую проверку готовности даем 5 сек
+                    --health-timeout 5s
+                    # Всего 10 попыток
+                    --health-retries 15
+        
+        # Настройка переменной окружения для CI job
+        # чтобы Go мог получить через os.Getenv() значение перепменной
+        env: 
+            DATABASE_TEST_URL:
+                postgres://postgres:postgres@localhost:5432/library-test?sslmode=disable    
+                    
+
         steps:
             # Скачиваем текущий проект
             - name: Checkout
@@ -24,6 +69,20 @@ jobs:
               with: 
                 go-version-file: go.mod
                 cache: true
+
+              # Устанавливаем migrate для запуска миграций
+            - name: Install migrate
+              run: | 
+                go install -tags "postgres" github.com/golang-migrate/migrate/v4/cmd/migrate@v4.19.1
+
+              # Запускаем миграции
+              # "$DATABASE_TEST_URL" это использование env переменной
+            - name: Apply migrations
+              run: |
+                migrate \
+                    -path ./migrations \
+                    -database "$DATABASE_TEST_URL" \
+                    up
 
             # Проверяем на потенциальные ошибки
             - name: Vet
