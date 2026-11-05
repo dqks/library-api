@@ -25,11 +25,14 @@ jobs:
                 go-version-file: go.mod
                 cache: true
 
+            # Проверяем на потенциальные ошибки
             - name: Vet
-              run: go vet ./..
+              run: go vet ./...
 
+            # Запускаем тесты
             - name: Test
-              run: go test ./..
+              run: go test ./...
 
+            # Запускаем билд
             - name: Build
-              run: go build ./..
+              run: go build ./...
