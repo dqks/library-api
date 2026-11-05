@@ -1,0 +1,35 @@
+name: Go CI
+
+# Запустить actions при коммите или создании/обновлении PR
+on: 
+    push:
+    pull_request:
+
+permissions: 
+    contents: read
+
+jobs:
+    test:
+        # Запускаем на временной виртуальной Ubuntu-машине
+        runs-on: ubuntu-latest
+
+        steps:
+            # Скачиваем текущий проект
+            - name: Checkout
+              uses: actions/setup@v7
+
+            # Скачиваем нужную версию Go ориентируясь на go.mod
+            - name: Setup Go
+              uses: actions/setup-go@v7
+              with: 
+                go-version-file: go.mod
+                cache: true
+
+            - name: Vet
+              run: go vet ./..
+
+            - name: Test
+              run: go test ./..
+
+            - name: Build
+              run: go build ./..
