@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"library-api/internal/apperrors"
-	"library-api/internal/database"
 	"library-api/internal/model"
 	"library-api/internal/testutil"
 	"testing"
@@ -51,18 +50,6 @@ func TestLoanBook(t *testing.T) {
 
 			t.Cleanup(func() {
 				pool.Close()
-			})
-
-			err := database.UpMigrations(pool, migrationsPath)
-			if err != nil {
-				t.Fatalf("migration's apply error: %v", err)
-			}
-
-			t.Cleanup(func() {
-				err := database.DownMigrations(pool, migrationsPath)
-				if err != nil {
-					t.Errorf("migration's apply error: %v", err)
-				}
 			})
 
 			testutil.SeedBooks(t, pool)

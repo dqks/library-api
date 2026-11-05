@@ -33,10 +33,6 @@ func ReturnBook(s LoanService) func(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			if r.Body == nil {
-				fmt.Println("nil")
-			}
-
 			var body ReturnBookBody
 			decoder := json.NewDecoder(r.Body)
 			decoder.DisallowUnknownFields()

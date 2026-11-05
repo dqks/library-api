@@ -18,6 +18,7 @@ func GetUser(s UserService) func(w http.ResponseWriter, r *http.Request) {
 			if errors.Is(ctx.Err(), context.DeadlineExceeded) {
 				w.WriteHeader(apperrors.ErrDeadlineExceededCode)
 			}
+			fmt.Println(ctx.Err())
 		default:
 			id, err := ValidatePathID(w, r.PathValue("id"))
 

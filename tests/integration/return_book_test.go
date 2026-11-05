@@ -3,7 +3,6 @@ package integration
 import (
 	"context"
 	"library-api/internal/apperrors"
-	"library-api/internal/database"
 	"library-api/internal/handler"
 	"library-api/internal/service"
 	"library-api/internal/testutil"
@@ -103,17 +102,6 @@ func TestReturnBook(t *testing.T) {
 			})
 			serviceLoan := service.CreateLoanService(repo)
 			serviceBooks := service.CreateBookService(repo)
-
-			err := database.UpMigrations(pool, "../../migrations")
-			if err != nil {
-				t.Fatalf("ошибка применения миграций %v", err)
-			}
-			t.Cleanup(func() {
-				err := database.DownMigrations(pool, "../../migrations")
-				if err != nil {
-					t.Errorf("ошибка применения миграций %v", err)
-				}
-			})
 
 			testutil.SeedBooks(t, pool)
 			testutil.SeedUsers(t, pool)

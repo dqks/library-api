@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"library-api/internal/apperrors"
 	"library-api/internal/handler"
 	"library-api/internal/model"
@@ -233,7 +232,6 @@ func TestGetBookByID(t *testing.T) {
 			// Ожидаем вернуть в ответе книгу которую вернул сервис
 			if tt.serviceErr == nil && !tt.cancel && !tt.deadlineContext {
 				var responseBook model.Book
-				fmt.Print(tt.wantBody)
 				decoder := json.NewDecoder(strings.NewReader(tt.wantBody))
 				err := decoder.Decode(&responseBook)
 				if err != nil {

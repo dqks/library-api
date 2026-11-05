@@ -3,7 +3,7 @@ package service_test
 import (
 	"context"
 	"library-api/internal/model"
-	repository "library-api/internal/repository"
+	"library-api/internal/repository"
 )
 
 type MockRepo struct {

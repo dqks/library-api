@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"library-api/internal/apperrors"
-	"library-api/internal/database"
 	"library-api/internal/model"
 	"library-api/internal/repository"
 	"library-api/internal/testutil"
@@ -80,17 +79,6 @@ func TestCreateUser(t *testing.T) {
 			repo, pool := testutil.CreatePostgresTestRepo(t, envPath)
 			t.Cleanup(func() {
 				pool.Close()
-			})
-
-			err := database.UpMigrations(pool, migrationsPath)
-			if err != nil {
-				t.Fatalf("failed to apply up migrations %v", err)
-			}
-			t.Cleanup(func() {
-				err := database.DownMigrations(pool, migrationsPath)
-				if err != nil {
-					t.Errorf("failed to apply down migrations %v", err)
-				}
 			})
 
 			testutil.SeedUsers(t, pool)

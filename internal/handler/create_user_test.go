@@ -60,7 +60,7 @@ func TestCreateUser(t *testing.T) {
 			body: `{"name":143}`,
 			//assetions
 			wantServiceCallCount: 0,
-			wantBody:             `{"error":"json: cannot unmarshal number into Go struct field .name of type string"}`,
+			wantBody:             `{"error":"json: cannot unmarshal number into Go struct field CreateUserBody.name of type string"}`,
 			wantCode:             400,
 			wantHeaders: map[string][]string{
 				"Content-Type": {"application/json"},

@@ -3,7 +3,6 @@ package postgres_test
 import (
 	"context"
 	"library-api/internal/apperrors"
-	"library-api/internal/database"
 	"library-api/internal/model"
 	"library-api/internal/testutil"
 	"testing"
@@ -51,18 +50,6 @@ func TestGetBookByID(t *testing.T) {
 			repo, pool := testutil.CreatePostgresTestRepo(t, envPath)
 			t.Cleanup(func() {
 				pool.Close()
-			})
-
-			err := database.UpMigrations(pool, migrationsPath)
-			if err != nil {
-				t.Fatalf("ошибка применения миграций: %v", err)
-			}
-
-			t.Cleanup(func() {
-				err := database.DownMigrations(pool, migrationsPath)
-				if err != nil {
-					t.Errorf("ошибка применения миграций: %v", err)
-				}
 			})
 
 			testutil.SeedBooks(t, pool)
