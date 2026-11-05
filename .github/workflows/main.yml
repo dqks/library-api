@@ -36,19 +36,18 @@ jobs:
                     - 5432:5432
                 
                 # Настройки Docker healthcheck
+                # PostgreSQL нужно время на инициализацию
+                # Поэтому используется команда ниже
+                # pg_isready говорит готов ли сервер принимать соединения
+                # -U postgres = пользователь postgres
+                # -d library-test = бд library-test
+                # Запускаем проверку готовности кажые 5 сек
+                # На каждую проверку готовности даем 5 сек
+                # Всего 10 попыток
                 options: >-
-                    # PostgreSQL нужно время на инициализацию
-                    # Поэтому используется команда ниже
-                    # pg_isready гоорит готов ли сервер принимать соединения
-                    # -U postgres = пользователь postgres
-                    # -d library-test = бд library-test
                     --health-cmd "pg_isready -U postgres -d library-test"
-                    POSTGRES_PASSWORD: postgres
-                    # Запускаем проверку готовности кажые 5 сек
                     --health-interval 5s
-                    # На каждую проверку готовности даем 5 сек
                     --health-timeout 5s
-                    # Всего 10 попыток
                     --health-retries 15
         
         # Настройка переменной окружения для CI job
