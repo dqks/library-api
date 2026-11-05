@@ -16,7 +16,7 @@ jobs:
         services:
             # Поднимаем отдельный Docker-контейнер
             postgres:
-                # Контейнер использует обпраз postgres: 17
+                # Контейнер использует образ postgres: 17
                 image: postgres:17
 
                 # Переменные, которые принимают Docker-образ PostgreSQL
