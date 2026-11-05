@@ -6,7 +6,6 @@ import (
 	"library-api/internal/apperrors"
 	"library-api/internal/model"
 	"library-api/internal/testutil"
-	"sync"
 	"testing"
 )
 
@@ -53,21 +52,24 @@ func TestLoanBook(t *testing.T) {
 				pool.Close()
 			})
 
-			var wg sync.WaitGroup
+			testutil.SeedBooks(t, pool)
+			testutil.SeedUsers(t, pool)
 
-			wg.Add(1)
-			go func() {
-				testutil.SeedBooks(t, pool)
-				wg.Done()
-			}()
-			wg.Wait()
-
-			wg.Add(1)
-			go func() {
-				testutil.SeedUsers(t, pool)
-				wg.Done()
-			}()
-			wg.Wait()
+			t.Cleanup(func() {
+				ctx := context.Background()
+				_, err := testutil.ClearBooks(ctx, pool)
+				if err != nil {
+					t.Errorf("failed to clear books %v", err)
+				}
+				_, err = testutil.ClearUsers(ctx, pool)
+				if err != nil {
+					t.Errorf("failed to clear users %v", err)
+				}
+				_, err = testutil.ClearLoans(ctx, pool)
+				if err != nil {
+					t.Errorf("failed to clear loans %v", err)
+				}
+			})
 
 			ctx, cancel := context.WithCancel(context.Background())
 			t.Cleanup(func() {

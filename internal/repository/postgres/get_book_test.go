@@ -54,6 +54,14 @@ func TestGetBookByID(t *testing.T) {
 
 			testutil.SeedBooks(t, pool)
 
+			t.Cleanup(func() {
+				ctx := context.Background()
+				_, err := testutil.ClearBooks(ctx, pool)
+				if err != nil {
+					t.Errorf("failed to clear books %v", err)
+				}
+			})
+
 			ctx, cancel := context.WithCancel(context.Background())
 			t.Cleanup(func() {
 				cancel()

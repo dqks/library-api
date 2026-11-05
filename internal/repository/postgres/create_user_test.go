@@ -82,6 +82,13 @@ func TestCreateUser(t *testing.T) {
 			})
 
 			testutil.SeedUsers(t, pool)
+			t.Cleanup(func() {
+				ctx := context.Background()
+				_, err := testutil.ClearUsers(ctx, pool)
+				if err != nil {
+					t.Errorf("failed to clear users %v", err)
+				}
+			})
 
 			var ctx context.Context
 			var cancel context.CancelFunc

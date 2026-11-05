@@ -107,6 +107,22 @@ func TestReturnBook(t *testing.T) {
 			testutil.SeedUsers(t, pool)
 			testutil.SeedLoans(t, pool)
 
+			t.Cleanup(func() {
+				ctx := context.Background()
+				_, err := testutil.ClearLoans(ctx, pool)
+				if err != nil {
+					t.Errorf("failed to clear loans %v", err)
+				}
+				_, err = testutil.ClearBooks(ctx, pool)
+				if err != nil {
+					t.Errorf("failed to clear books %v", err)
+				}
+				_, err = testutil.ClearUsers(ctx, pool)
+				if err != nil {
+					t.Errorf("failed to clear users %v", err)
+				}
+			})
+
 			mux := http.NewServeMux()
 			mux.HandleFunc("POST /loans/{loanId}", handler.ReturnBook(serviceLoan))
 			mux.HandleFunc("GET /books/{id}", handler.GetBookByID(serviceBooks))
