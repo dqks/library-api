@@ -67,6 +67,7 @@ func main() {
 	mux.HandleFunc("POST /loans/{bookId}/{userId}", handler.LoanBook(loanService))
 	mux.HandleFunc("PATCH /loans/{loanId}", handler.ReturnBook(loanService))
 	mux.HandleFunc("GET /loans/{id}", handler.GetLoan(loanService))
+	mux.HandleFunc("GET /users/{userId}/loans", handler.GetUserLoans(loanService))
 
 	server := &http.Server{
 		Addr:    ":8080",

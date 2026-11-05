@@ -88,3 +88,7 @@ func (r *MockRepo) ReturnBook(ctx context.Context, loanID int, returnDate *strin
 func (r *MockRepo) GetLoan(ctx context.Context, id int) (model.Loan, error) {
 	return model.Loan{}, nil
 }
+
+func (r *MockRepo) GetUserLoans(ctx context.Context, userID int) ([]model.UserLoan, error) {
+	return nil, nil
+}

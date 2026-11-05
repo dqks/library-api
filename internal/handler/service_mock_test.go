@@ -96,3 +96,8 @@ func (s *ServiceMock) GetLoan(ctx context.Context, id int) (model.Loan, error) {
 	s.callCount++
 	return model.Loan{}, nil
 }
+
+func (s *ServiceMock) GetUserLoans(ctx context.Context, userID int) ([]model.UserLoan, error) {
+	s.callCount++
+	return nil, nil
+}

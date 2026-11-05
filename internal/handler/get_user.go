@@ -20,7 +20,7 @@ func GetUser(s UserService) func(w http.ResponseWriter, r *http.Request) {
 			}
 			fmt.Println(ctx.Err())
 		default:
-			id, err := ValidatePathID(w, r.PathValue("id"))
+			id, err := GetPathID(w, r.PathValue("id"))
 
 			if err != nil {
 				return

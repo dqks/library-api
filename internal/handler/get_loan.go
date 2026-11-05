@@ -21,7 +21,7 @@ func GetLoan(s LoanService) func(w http.ResponseWriter, req *http.Request) {
 			fmt.Println(ctx.Err())
 
 		default:
-			id, err := ValidatePathID(w, req.PathValue("id"))
+			id, err := GetPathID(w, req.PathValue("id"))
 
 			if err != nil {
 				return
