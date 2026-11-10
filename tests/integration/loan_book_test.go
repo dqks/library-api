@@ -43,11 +43,11 @@ func TestLoanBook(t *testing.T) {
 			wantLoanHeader: map[string][]string{
 				"Content-Type": {"application/json"},
 			},
-			wantLoanBody: `{"id":3,"loan_date":"2026-11-02"}`,
+			wantLoanBody: `{"id":3,"loan_date":"` + time.Now().Format(time.DateOnly) + `"}`,
 			// asserts get book
 			wantGetBookBody: `{"id":1,"title":"Title 1","author":"Author 1","year":2000,"available":false}`,
 			//assert get loan
-			wantGetLoanBody: `{"id":3,"book_id":1,"user_id":1,"loan_date":"2026-11-02","return_date":null}`,
+			wantGetLoanBody: `{"id":3,"book_id":1,"user_id":1,"loan_date":"` + time.Now().Format(time.DateOnly) + `","return_date":null}`,
 		},
 		{
 			name:   "err, book not found",
