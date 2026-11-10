@@ -24,7 +24,7 @@ func DecodeBody(requestBody io.ReadCloser, body interface{}, w http.ResponseWrit
 	return nil
 }
 
-func ValidatePathID(w http.ResponseWriter, pathID string) (int, error) {
+func GetPathID(w http.ResponseWriter, pathID string) (int, error) {
 	id, err := strconv.Atoi(pathID)
 	if err != nil || id <= 0 {
 		w.Header().Add("Content-Type", "application/json")

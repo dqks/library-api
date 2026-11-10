@@ -3,7 +3,7 @@ package service_test
 import (
 	"context"
 	"library-api/internal/model"
-	repository "library-api/internal/repository"
+	"library-api/internal/repository"
 )
 
 type MockRepo struct {
@@ -87,4 +87,8 @@ func (r *MockRepo) ReturnBook(ctx context.Context, loanID int, returnDate *strin
 
 func (r *MockRepo) GetLoan(ctx context.Context, id int) (model.Loan, error) {
 	return model.Loan{}, nil
+}
+
+func (r *MockRepo) GetUserLoans(ctx context.Context, userID int) ([]model.UserLoan, error) {
+	return nil, nil
 }

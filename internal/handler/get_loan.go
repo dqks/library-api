@@ -18,8 +18,10 @@ func GetLoan(s LoanService) func(w http.ResponseWriter, req *http.Request) {
 			if errors.Is(ctx.Err(), context.DeadlineExceeded) {
 				w.WriteHeader(apperrors.ErrDeadlineExceededCode)
 			}
+			fmt.Println(ctx.Err())
+
 		default:
-			id, err := ValidatePathID(w, req.PathValue("id"))
+			id, err := GetPathID(w, req.PathValue("id"))
 
 			if err != nil {
 				return

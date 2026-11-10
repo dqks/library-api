@@ -192,25 +192,28 @@ func TestLoanBook(t *testing.T) {
 				pool.Close()
 			})
 
-			err = database.UpMigrations(pool, "../../migrations")
-
-			if err != nil {
-				t.Fatalf("ошибка применения миграций: %v", err)
-			}
-
-			t.Cleanup(func() {
-				err := database.DownMigrations(pool, "../../migrations")
-				if err != nil {
-					t.Fatalf("ошибка применения миграций: %v", err)
-				}
-			})
-
 			serviceBook := service.CreateBookService(repo)
 			serviceLoan := service.CreateLoanService(repo)
 
 			testutil.SeedBooks(t, pool)
 			testutil.SeedUsers(t, pool)
 			testutil.SeedLoans(t, pool)
+
+			t.Cleanup(func() {
+				ctx := context.Background()
+				_, err := testutil.ClearLoans(ctx, pool)
+				if err != nil {
+					t.Errorf("failed to clear loans %v", err)
+				}
+				_, err = testutil.ClearBooks(ctx, pool)
+				if err != nil {
+					t.Errorf("failed to clear books %v", err)
+				}
+				_, err = testutil.ClearUsers(ctx, pool)
+				if err != nil {
+					t.Errorf("failed to clear users %v", err)
+				}
+			})
 
 			mux := http.NewServeMux()
 			mux.HandleFunc("POST /loans/{bookId}/{userId}", handler.LoanBook(serviceLoan))

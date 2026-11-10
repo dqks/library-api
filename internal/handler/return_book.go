@@ -27,14 +27,10 @@ func ReturnBook(s LoanService) func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(apperrors.ErrDeadlineExceededCode)
 			}
 		default:
-			loanID, err := ValidatePathID(w, r.PathValue("loanId"))
+			loanID, err := GetPathID(w, r.PathValue("loanId"))
 
 			if err != nil {
 				return
-			}
-
-			if r.Body == nil {
-				fmt.Println("nil")
 			}
 
 			var body ReturnBookBody
