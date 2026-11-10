@@ -1,0 +1,54 @@
+# services:
+#   api:
+#   db:
+# Означает что compose должен управлять двумя сервисами и в результате мы получим два контейнера 
+services:
+  api:
+    build: .
+    ports:
+      # Тут формат HOST : CONTAINER
+      # Т.е. localhost:8080 из винды и из api container:8080
+      # Поэтому мы сможем обращаться по из браузера или тестера апи по http://localhost:8080/books
+
+      # Стоит обратить внимание, что для db ports не прописаны, поэтому мы не можем через винду
+      # образаться к БД, только если для db пропишем porst 5432:5432 то сможем подключиться 
+      - "8080:8080"
+
+    # Поскольку в Go коде мы сначала смотрим на глобальные переменные окружения
+    # То можно в докер контейнере использовать глобальные переменные сразу
+    environment:
+      # Тут мы пишем db:5432 вместо localhost потому что внутри контейнера api localhost обозначает самого себя, 
+      # т.е. сам контейнер api, но postgresql находится в контейнере db
+      # И поэтому compose автоматически создает сеть, в которой имя сервиса работает как hostname
+      DATABASE_URL: postgres://postgres:postgres@db:5432/library?sslmode=disable
+
+    # Это означает что мы пока не запускаем API, пока PostgreSQL не станет healthy
+    # Запуск контейнера != что PostgreSQL уже принимает соединения
+    # Т.е. в таком случае мы сначала ждем запуска PostgreSQL и если он запустился, то только тогда
+    # запускаем api
+    depends_on:
+      db:
+        condition: service_healthy
+      
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: library
+    
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d library"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+    # Контейнер сам по себе временный
+    # И если ты удалил контейнер то вместе с ним и удалил данные
+    # volume существует отдельно
+    # И поэтому если удалить контейнер и открыть заново то данные не сотрутся
+    volumes: 
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
+  
