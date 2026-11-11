@@ -31,7 +31,7 @@ func Get(prod bool) (*Config, error) {
 
 	var testDsn string
 	if !prod {
-		testDsn, err = GetEnvVar("../../.env", "DATABASE_TEST_URL")
+		testDsn, err = GetEnvVar(env, "DATABASE_TEST_URL")
 
 		if err != nil {
 			return nil, err

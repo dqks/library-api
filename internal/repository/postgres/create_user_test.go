@@ -76,7 +76,7 @@ func TestCreateUser(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			repo, pool := testutil.CreatePostgresTestRepo(t, envPath)
+			repo, pool := testutil.CreatePostgresTestRepo(t)
 			t.Cleanup(func() {
 				pool.Close()
 			})

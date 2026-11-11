@@ -11,7 +11,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func CreatePostgresTestRepo(t *testing.T, dsnPath string) (*postgres.BookRepository, *pgxpool.Pool) {
+func CreatePostgresTestRepo(t *testing.T) (*postgres.BookRepository, *pgxpool.Pool) {
 	config, err := config.Get(false)
 
 	if err != nil {

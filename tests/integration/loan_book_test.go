@@ -3,7 +3,6 @@ package integration
 import (
 	"context"
 	"encoding/json"
-	"library-api/config"
 	"library-api/internal/apperrors"
 	"library-api/internal/handler"
 	"library-api/internal/service"
@@ -181,13 +180,7 @@ func TestLoanBook(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			config, err := config.Get(false)
-
-			if err != nil {
-				t.Fatalf("ошибка загрузки dsn: %v", err)
-			}
-
-			repo, pool := testutil.CreatePostgresTestRepo(t, config.DSN)
+			repo, pool := testutil.CreatePostgresTestRepo(t)
 			t.Cleanup(func() {
 				pool.Close()
 			})
@@ -294,7 +287,7 @@ func TestLoanBook(t *testing.T) {
 				// Get Loan
 				var loanResponse handler.LoanBookResponse
 				decoder := json.NewDecoder(rrLoan.Body)
-				if err = decoder.Decode(&loanResponse); err != nil {
+				if err := decoder.Decode(&loanResponse); err != nil {
 					t.Fatalf("failed to decode loan book body %v", err)
 				}
 
