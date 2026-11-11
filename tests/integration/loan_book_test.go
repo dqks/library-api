@@ -3,8 +3,8 @@ package integration
 import (
 	"context"
 	"encoding/json"
+	"library-api/config"
 	"library-api/internal/apperrors"
-	"library-api/internal/database"
 	"library-api/internal/handler"
 	"library-api/internal/service"
 	"library-api/internal/testutil"
@@ -181,13 +181,13 @@ func TestLoanBook(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			dsn, err := database.GetDsn("../../.env", "DATABASE_TEST_URL")
+			config, err := config.Get(false)
 
 			if err != nil {
 				t.Fatalf("ошибка загрузки dsn: %v", err)
 			}
 
-			repo, pool := testutil.CreatePostgresTestRepo(t, dsn)
+			repo, pool := testutil.CreatePostgresTestRepo(t, config.DSN)
 			t.Cleanup(func() {
 				pool.Close()
 			})

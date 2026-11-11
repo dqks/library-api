@@ -4,6 +4,7 @@
 # Означает что compose должен управлять двумя сервисами и в результате мы получим два контейнера 
 services:
   api:
+    # Этой командой мы говорим api контейнеру взять image из этой папки Dockerfile 
     build: .
     ports:
       # Тут формат HOST : CONTAINER
@@ -11,7 +12,9 @@ services:
       # Поэтому мы сможем обращаться по из браузера или тестера апи по http://localhost:8080/books
 
       # Стоит обратить внимание, что для db ports не прописаны, поэтому мы не можем через винду
-      # образаться к БД, только если для db пропишем porst 5432:5432 то сможем подключиться 
+      # обращаться к БД, только если для db пропишем porst 5432:5432 то сможем подключиться 
+      # Это называется port mapping, слева 8080 - порт от рабочего компьютера
+      # Справа 8080 - порт контейнера
       - "8080:8080"
 
     # Поскольку в Go коде мы сначала смотрим на глобальные переменные окружения
@@ -27,8 +30,9 @@ services:
     # Т.е. в таком случае мы сначала ждем запуска PostgreSQL и если он запустился, то только тогда
     # запускаем api
     depends_on:
-      db:
-        condition: service_healthy
+      migrate:
+      # Запускаем если сервис migrate выполнился успешно
+        condition: service_completed_successfully
       
   db:
     image: postgres:17
@@ -49,6 +53,27 @@ services:
     volumes: 
       - postgres_data:/var/lib/postgresql/data
 
+  migrate:
+    image: migrate/migrate:latest
+    labels:
+      - "com.docker.compose.project=migration"
+    volumes: 
+      # Монтируем локальную папку с файлами миграций (.sql) в контейнер с атрибутом read only 
+      - ./migrations:/migrations:ro
+    # Мы не пишем тут migrate потому что в Image уже зашит ENNTYPOINT migrate
+    # И все команды уже начинаются с него 
+    command: 
+      - -path=./migrations 
+      - -database=postgres://postgres:postgres@db:5432/library?sslmode=disable
+      - up
+    depends_on:
+      db:
+        condition: service_healthy
 volumes:
   postgres_data:
+
+# Контейнеры api и db изолированы, но связаны Docker Network
+# Связаны они ею для общения между собой
+# DNS контейнеров становится их имя (именно поэтому в DSN указыватся db), а не localhost
+# Потому что внутри контейнера localhost это и есть сам контейнер
   

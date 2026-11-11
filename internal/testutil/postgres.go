@@ -2,6 +2,7 @@ package testutil
 
 import (
 	"context"
+	"library-api/config"
 	"library-api/internal/database"
 	"library-api/internal/repository/postgres"
 	"testing"
@@ -11,8 +12,7 @@ import (
 )
 
 func CreatePostgresTestRepo(t *testing.T, dsnPath string) (*postgres.BookRepository, *pgxpool.Pool) {
-	dsn, err := database.GetDsn(dsnPath, "DATABASE_TEST_URL")
-	// dsn, err := database.GetDsn("../../../../.env", "DATABASE_TEST_URL")
+	config, err := config.Get(false)
 
 	if err != nil {
 		t.Fatalf("failed to get dsn %v", err)
@@ -20,7 +20,7 @@ func CreatePostgresTestRepo(t *testing.T, dsnPath string) (*postgres.BookReposit
 
 	ctx := context.Background()
 
-	pool, err := database.CreatePool(ctx, dsn)
+	pool, err := database.CreatePool(ctx, config.DSN)
 
 	if err != nil {
 		t.Fatalf("failed to create repository %v", err)

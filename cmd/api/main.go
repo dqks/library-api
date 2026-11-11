@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"library-api/config"
 	"library-api/internal/database"
 	"library-api/internal/handler"
 	"library-api/internal/repository/postgres"
@@ -18,7 +19,7 @@ import (
 )
 
 func main() {
-	dsn, err := database.GetDsn("../../.env", "DATABASE_URL")
+	config, err := config.Get(true)
 
 	if err != nil {
 		log.Fatal(err)
@@ -26,7 +27,7 @@ func main() {
 
 	ctx := context.Background()
 
-	pool, err := database.CreatePool(ctx, dsn)
+	pool, err := database.CreatePool(ctx, config.DSN)
 
 	if err != nil {
 		log.Fatal(err)

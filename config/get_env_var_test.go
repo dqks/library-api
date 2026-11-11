@@ -1,9 +1,9 @@
-package database_test
+package config_test
 
 import (
 	"errors"
+	"library-api/config"
 	"library-api/internal/apperrors"
-	"library-api/internal/database"
 	"os"
 	"path/filepath"
 	"testing"
@@ -12,7 +12,7 @@ import (
 // в тестах мы не должны ссылаться на глобальный .env
 // а также при изменении переменных окружения должны возвращать их в
 // значение до тестов
-func TestGetDsn(t *testing.T) {
+func TestEnvVar(t *testing.T) {
 	envVar := "TEST_GET_DSN"
 	badEnvVar := "BAD_NAME"
 
@@ -122,7 +122,7 @@ func TestGetDsn(t *testing.T) {
 				envPath = ""
 			}
 
-			dsn, err := database.GetDsn(envPath, tt.envVar)
+			dsn, err := config.GetEnvVar(envPath, tt.envVar)
 			if !errors.Is(err, tt.wantErr) {
 				t.Errorf("expected err to be %v but got %v", tt.wantErr, err)
 			}
