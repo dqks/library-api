@@ -20,7 +20,7 @@ func CreatePostgresTestRepo(t *testing.T, dsnPath string) (*postgres.BookReposit
 
 	ctx := context.Background()
 
-	pool, err := database.CreatePool(ctx, config.DSN)
+	pool, err := database.CreatePool(ctx, config.TestDSN)
 
 	if err != nil {
 		t.Fatalf("failed to create repository %v", err)

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"library-api/internal/apperrors"
 	"os"
+	"path/filepath"
 
 	"github.com/joho/godotenv"
 )
@@ -15,7 +16,14 @@ type Config struct {
 }
 
 func Get(prod bool) (*Config, error) {
-	dsn, err := GetEnvVar("../../.env", "DATABASE_URL")
+	currentDir, err := os.Getwd()
+
+	if err != nil {
+		return nil, err
+	}
+
+	env := findDotEnv(currentDir)
+	dsn, err := GetEnvVar(env, "DATABASE_URL")
 
 	if err != nil {
 		return nil, err
@@ -67,4 +75,16 @@ func GetEnvVar(envPath, envVar string) (string, error) {
 	}
 
 	return "", apperrors.ErrBadEnvVariableName
+}
+func findDotEnv(dir string) string {
+	for {
+		if _, err := os.Stat(filepath.Join(dir, ".env")); err == nil {
+			return dir + "/.env"
+		}
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			return ""
+		}
+		dir = parent
+	}
 }
