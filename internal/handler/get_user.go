@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"library-api/internal/apperrors"
 	"library-api/internal/handler/dto"
+	"log/slog"
 	"net/http"
 )
 
@@ -34,6 +35,11 @@ func GetUser(s UserService) func(w http.ResponseWriter, r *http.Request) {
 					context.DeadlineExceeded,
 					apperrors.ErrNotFound,
 				}
+				slog.Error(
+					"get user error",
+					"user_id", id,
+					"err", err,
+				)
 				ProcessServiceErr(w, err, errors)
 				return
 			}

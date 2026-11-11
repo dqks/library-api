@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"library-api/internal/apperrors"
+	"log/slog"
 	"net/http"
 )
 
@@ -51,6 +52,13 @@ func ReturnBook(s LoanService) func(w http.ResponseWriter, r *http.Request) {
 			err = s.ReturnBook(r.Context(), loanID, body.ReturnDate)
 
 			if err != nil {
+
+				slog.Error(
+					"return book error",
+					"loan_id", loanID,
+					"body", body,
+					"err", err,
+				)
 				ProcessServiceErr(
 					w,
 					err,

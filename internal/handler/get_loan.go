@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"library-api/internal/apperrors"
 	"library-api/internal/handler/dto"
+	"log/slog"
 	"net/http"
 )
 
@@ -30,6 +31,11 @@ func GetLoan(s LoanService) func(w http.ResponseWriter, req *http.Request) {
 			loan, err := s.GetLoan(ctx, id)
 
 			if err != nil {
+				slog.Error(
+					"get loan error",
+					"loan_id", id,
+					"err", err,
+				)
 				ProcessServiceErr(
 					w,
 					err,

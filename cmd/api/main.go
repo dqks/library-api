@@ -3,12 +3,12 @@ package main
 import (
 	"context"
 	"errors"
-	"fmt"
 	"library-api/config"
 	"library-api/internal/database"
 	"library-api/internal/handler"
 	"library-api/internal/repository/postgres"
-	"log"
+	"log/slog"
+	"strconv"
 
 	"library-api/internal/service"
 	"net/http"
@@ -19,10 +19,20 @@ import (
 )
 
 func main() {
+	slogHandler := slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
+		Level: slog.LevelInfo,
+	})
+	logger := slog.New(slogHandler)
+	slog.SetDefault(logger)
+
 	config, err := config.Get(true)
 
 	if err != nil {
-		log.Fatal(err)
+		slog.Error(
+			"failed to get config",
+			"err", err,
+		)
+		return
 	}
 
 	ctx := context.Background()
@@ -30,7 +40,11 @@ func main() {
 	pool, err := database.CreatePool(ctx, config.DSN)
 
 	if err != nil {
-		log.Fatal(err)
+		slog.Error(
+			"failed to create pool",
+			"err", err,
+		)
+		return
 	}
 
 	pgRepo := postgres.Create(pool)
@@ -40,21 +54,27 @@ func main() {
 	bookService := service.CreateBookService(pgRepo)
 
 	if bookService == nil {
-		fmt.Println("произошла ошибка при запуске сервера - не получилось создать сервис")
+		slog.Error(
+			"failed to create book service",
+		)
 		return
 	}
 
 	userService := service.CreateUserService(pgRepo)
 
 	if userService == nil {
-		fmt.Println("произошла ошибка при запуске сервера - не получилось создать сервис")
+		slog.Error(
+			"failed to create user service",
+		)
 		return
 	}
 
 	loanService := service.CreateLoanService(pgRepo)
 
 	if loanService == nil {
-		fmt.Println("произошла ошибка при запуске сервера - не получилось создать сервис")
+		slog.Error(
+			"failed to create loan service",
+		)
 		return
 	}
 
@@ -71,25 +91,36 @@ func main() {
 	mux.HandleFunc("GET /users/{userId}/loans", handler.GetUserLoans(loanService))
 
 	server := &http.Server{
-		Addr:    ":8080",
+		Addr:    ":" + strconv.Itoa(config.Port),
 		Handler: mux,
 	}
 
 	shutDownSignal := make(chan os.Signal, 1)
 	signal.Notify(shutDownSignal, os.Interrupt, syscall.SIGTERM)
 	go func() {
-		fmt.Println("Сервер будет запущен на порту 8080")
+		slog.Info(
+			"server stared",
+			"port", strconv.Itoa(config.Port),
+		)
 		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			log.Fatal(err.Error())
+			slog.Info(
+				"server failed to start",
+				"err", err,
+			)
+			return
 		}
 	}()
-
 	<-shutDownSignal
-	fmt.Println("Сигнал закрытия сервера получен, выполняется закрытие")
+	slog.Info(
+		"server closing",
+	)
 	shutDownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	if err := server.Shutdown(shutDownCtx); err != nil {
-		fmt.Println("Произошла ошибка во время закрытия сервера")
+		slog.Info(
+			"server failed to close",
+			"err", err,
+		)
 	}
 }

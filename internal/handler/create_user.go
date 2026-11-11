@@ -8,6 +8,7 @@ import (
 	"library-api/internal/apperrors"
 	"library-api/internal/handler/dto"
 	"library-api/internal/service"
+	"log/slog"
 	"net/http"
 )
 
@@ -42,6 +43,13 @@ func CreateUser(s UserService) func(w http.ResponseWriter, req *http.Request) {
 					context.DeadlineExceeded,
 					apperrors.ErrInvalidValues,
 				}
+
+				slog.Error(
+					"create user error",
+					"body_name", *body.Name,
+					"err", err,
+				)
+
 				ProcessServiceErr(w, err, errors)
 				return
 			}

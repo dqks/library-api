@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"library-api/internal/apperrors"
+	"log/slog"
 	"net/http"
 	"strconv"
 )
@@ -43,6 +44,12 @@ func DeleteBookByID(s BookService) func(w http.ResponseWriter, r *http.Request) 
 					context.DeadlineExceeded,
 					context.Canceled,
 				}, err)
+
+				slog.Error(
+					"delete book error",
+					"book_id", id,
+					"err", err,
+				)
 
 				if code == -1 {
 					return

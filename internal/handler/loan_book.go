@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"library-api/internal/apperrors"
+	"log/slog"
 	"net/http"
 	"time"
 )
@@ -45,6 +46,12 @@ func LoanBook(s LoanService) func(w http.ResponseWriter, r *http.Request) {
 					apperrors.ErrUserLoanLimit,
 				}
 				ProcessServiceErr(w, err, errors)
+				slog.Error(
+					"loan book error",
+					"user_id", userID,
+					"bookID", bookID,
+					"err", err,
+				)
 				return
 			}
 

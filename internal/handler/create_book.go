@@ -8,6 +8,7 @@ import (
 	"library-api/internal/apperrors"
 	"library-api/internal/handler/dto"
 	"library-api/internal/service"
+	"log/slog"
 	"net/http"
 )
 
@@ -28,11 +29,11 @@ func CreateBook(s BookService) func(w http.ResponseWriter, r *http.Request) {
 			}
 			fmt.Println(ctx.Err().Error())
 		default:
-			var req CreateBookBody
+			var body CreateBookBody
 			decoder := json.NewDecoder(r.Body)
 			decoder.DisallowUnknownFields()
 
-			if err := decoder.Decode(&req); err != nil {
+			if err := decoder.Decode(&body); err != nil {
 				w.Header().Add("Content-Type", "application/json")
 				w.WriteHeader(apperrors.ErrInvalidValuesCode)
 				encoder := json.NewEncoder(w)
@@ -43,10 +44,10 @@ func CreateBook(s BookService) func(w http.ResponseWriter, r *http.Request) {
 			}
 
 			book, err := s.CreateBook(ctx, service.CreateBookInput{
-				Title:     req.Title,
-				Author:    req.Author,
-				Year:      req.Year,
-				Available: req.Available,
+				Title:     body.Title,
+				Author:    body.Author,
+				Year:      body.Year,
+				Available: body.Available,
 			})
 
 			if err != nil {
@@ -56,6 +57,15 @@ func CreateBook(s BookService) func(w http.ResponseWriter, r *http.Request) {
 					apperrors.ErrRequiredFields,
 					apperrors.ErrInvalidValues,
 				}, err)
+
+				slog.Error(
+					"create book error",
+					"body_title", *body.Title,
+					"body_author", *body.Author,
+					"body_year", *body.Year,
+					"body_available", *body.Available,
+					"err", err,
+				)
 
 				if code == -1 {
 					return

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"library-api/internal/apperrors"
 	"library-api/internal/handler/dto"
+	"log/slog"
 	"net/http"
 	"strconv"
 )
@@ -38,6 +39,12 @@ func GetBookByID(s BookService) func(w http.ResponseWriter, r *http.Request) {
 					context.DeadlineExceeded,
 					context.Canceled,
 				}, err)
+
+				slog.Error(
+					"get book error",
+					"book_id", id,
+					"err", err,
+				)
 
 				if code == -1 {
 					return

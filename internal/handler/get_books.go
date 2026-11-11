@@ -9,6 +9,7 @@ import (
 	"library-api/internal/handler/dto"
 	"library-api/internal/model"
 	"library-api/internal/service"
+	"log/slog"
 	"net/http"
 	"strconv"
 )
@@ -48,6 +49,12 @@ func GetBooks(s BookService) func(w http.ResponseWriter, r *http.Request) {
 					context.DeadlineExceeded,
 					context.Canceled,
 				}, err)
+
+				slog.Error(
+					"get books error",
+					"params", availParam,
+					"err", err,
+				)
 
 				if code == -1 {
 					return

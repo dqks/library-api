@@ -51,7 +51,7 @@ jobs:
                     --health-retries 15
         
         # Настройка переменной окружения для CI job
-        # чтобы Go мог получить через os.Getenv() значение перепменной
+        # чтобы Go мог получить через os.Getenv() значение переменной
         env: 
             DATABASE_TEST_URL:
                 postgres://postgres:postgres@localhost:5432/library-test?sslmode=disable    
