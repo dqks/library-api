@@ -103,7 +103,7 @@ jobs:
       needs: test
       # при условии что мы пушим в репозиторий в ветку master
       if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-      runs-on: ubuntu_latest
+      runs-on: ubuntu-latest
 
       # Права временного GITHUB_TOKEN внутри job
       permissions:
