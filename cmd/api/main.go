@@ -89,6 +89,8 @@ func main() {
 	mux.HandleFunc("PATCH /loans/{loanId}", handler.ReturnBook(loanService))
 	mux.HandleFunc("GET /loans/{id}", handler.GetLoan(loanService))
 	mux.HandleFunc("GET /users/{userId}/loans", handler.GetUserLoans(loanService))
+	mux.HandleFunc("GET /health", handler.Health)
+	mux.HandleFunc("GET /health/ready", handler.Ready(pool))
 
 	server := &http.Server{
 		Addr:    ":" + strconv.Itoa(config.Port),

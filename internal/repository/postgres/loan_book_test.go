@@ -57,17 +57,17 @@ func TestLoanBook(t *testing.T) {
 
 			t.Cleanup(func() {
 				ctx := context.Background()
-				_, err := testutil.ClearBooks(ctx, pool)
+				_, err := testutil.ClearLoans(ctx, pool)
+				if err != nil {
+					t.Errorf("failed to clear loans %v", err)
+				}
+				_, err = testutil.ClearBooks(ctx, pool)
 				if err != nil {
 					t.Errorf("failed to clear books %v", err)
 				}
 				_, err = testutil.ClearUsers(ctx, pool)
 				if err != nil {
 					t.Errorf("failed to clear users %v", err)
-				}
-				_, err = testutil.ClearLoans(ctx, pool)
-				if err != nil {
-					t.Errorf("failed to clear loans %v", err)
 				}
 			})
 

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"library-api/internal/apperrors"
 	"library-api/internal/handler"
 	"library-api/internal/model"
@@ -224,15 +225,22 @@ func TestCreateBook(t *testing.T) {
 				cancel()
 			}
 
+			fmt.Println("после if tt.cancel  ")
+
 			handler.CreateBook(&s)(rr, req)
+
+			fmt.Println("после handler.CreateBook(&s)(rr, req) ")
 
 			if ctx != s.ctx && tt.serviceCallCount >= 1 {
 				t.Fatalf("context passed to service is not equal to request's context")
 			}
 
+			fmt.Println("после ctx != s.ctx && tt.serviceCallCount >= 1 ")
+
 			if rr.Code != tt.wantCode {
 				t.Fatalf("expected code %d but got %d", tt.wantCode, rr.Code)
 			}
+			fmt.Println("после rr.Code != tt.wantCode ")
 
 			if !testutil.CompareHeaders(tt.wantHeader, rr.Header()) {
 				t.Fatalf(
@@ -242,6 +250,8 @@ func TestCreateBook(t *testing.T) {
 				)
 			}
 
+			fmt.Println("после !testutil.CompareHeaders(tt.wantHeader, rr.Header()) ")
+
 			if tt.serviceCallCount != s.callCount {
 				t.Fatalf(
 					"expected to call service %d times but got %d",
@@ -250,9 +260,12 @@ func TestCreateBook(t *testing.T) {
 				)
 			}
 
+			fmt.Println("после tt.serviceCallCount != s.callCount ")
+
 			if s.callCount >= 1 {
 				var expectedInput service.CreateBookInput
 				decoder := json.NewDecoder(strings.NewReader(tt.body))
+				decoder.DisallowUnknownFields()
 				err := decoder.Decode(&expectedInput)
 				if err != nil {
 					t.Fatal("failed to decode expected input")
@@ -265,6 +278,8 @@ func TestCreateBook(t *testing.T) {
 					)
 				}
 			}
+
+			fmt.Println("после чтения тела")
 
 			if strings.TrimSpace(tt.wantBody) != strings.TrimSpace(rr.Body.String()) {
 				t.Fatalf(

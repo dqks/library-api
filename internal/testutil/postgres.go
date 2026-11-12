@@ -2,6 +2,7 @@ package testutil
 
 import (
 	"context"
+	"fmt"
 	"library-api/config"
 	"library-api/internal/database"
 	"library-api/internal/repository/postgres"
@@ -45,6 +46,43 @@ func SeedBooks(t *testing.T, pool *pgxpool.Pool) {
 		t.Fatalf("failed to clear books %v", err)
 	}
 
+	rows, err := pool.Query(
+		ctx,
+		`
+		SELECT 
+			id, title, author, year, available 
+		FROM books;
+		`,
+	)
+	fmt.Printf("ЗАПРОС BOOKS ПОСЛЕ КЛИРА: %+v ", rows.RawValues())
+	for rows.Next() {
+		raw := rows.RawValues()
+
+		// Вариант 1: Вывод всей строки целиком (покажет текст в кавычках или "" для NULL)
+		fmt.Printf("Row: %q\n", raw)
+
+		// Вариант 2: Поколоночный вывод с проверкой на NULL
+		for i, val := range raw {
+			if val == nil {
+				fmt.Printf("Col %d: NULL\n", i)
+			} else {
+				fmt.Printf("Col %d: %s\n", i, string(val))
+			}
+		}
+	}
+	rows.Close()
+
+	_, err = pool.Exec(
+		ctx,
+		`
+		SELECT setval('books_id_seq', 1, false);
+		`,
+	)
+
+	if err != nil {
+		t.Fatalf("failed to set id counter %v", err)
+	}
+
 	_, err = pool.Exec(
 		ctx,
 		`
@@ -72,6 +110,17 @@ func SeedBooks(t *testing.T, pool *pgxpool.Pool) {
 	if err != nil {
 		t.Fatalf("failed to set id counter %v", err)
 	}
+
+	rows, err = pool.Query(
+		ctx,
+		`
+		SELECT 
+			id, title, author, year, available 
+		FROM books;
+		`,
+	)
+	fmt.Printf("ЗАПРОС BOOKS ПОСЛЕ ВСТАВКИ: %+v ", rows.RawValues())
+	rows.Close()
 }
 
 func ClearUsers(ctx context.Context, pool *pgxpool.Pool) (pgconn.CommandTag, error) {
@@ -88,6 +137,28 @@ func SeedUsers(t *testing.T, pool *pgxpool.Pool) {
 
 	if err != nil {
 		t.Fatalf("failed to clear users %v", err)
+	}
+
+	rows, err := pool.Query(
+		ctx,
+		`
+		SELECT 
+			id, title, author, year, available 
+		FROM books;
+		`,
+	)
+	fmt.Printf("ЗАПРОС USERS ПОСЛЕ КЛИРА: %+v ", rows.RawValues())
+	rows.Close()
+
+	_, err = pool.Exec(
+		ctx,
+		`
+		SELECT setval('users_id_seq', 1, false);
+		`,
+	)
+
+	if err != nil {
+		t.Fatalf("failed to set id counter %v", err)
 	}
 
 	_, err = pool.Exec(
@@ -117,6 +188,17 @@ func SeedUsers(t *testing.T, pool *pgxpool.Pool) {
 	if err != nil {
 		t.Fatalf("failed to set id counter %v", err)
 	}
+
+	rows, err = pool.Query(
+		ctx,
+		`
+		SELECT 
+			id, title, author, year, available 
+		FROM books;
+		`,
+	)
+	fmt.Printf("ЗАПРОС BOOKS ПОСЛЕ ВСТАВКИ: %+v ", rows.RawValues())
+	rows.Close()
 }
 
 func ClearLoans(ctx context.Context, pool *pgxpool.Pool) (pgconn.CommandTag, error) {
@@ -133,6 +215,28 @@ func SeedLoans(t *testing.T, pool *pgxpool.Pool) {
 
 	if err != nil {
 		t.Fatalf("failed to clear loans %v", err)
+	}
+
+	rows, err := pool.Query(
+		ctx,
+		`
+		SELECT 
+			id, title, author, year, available 
+		FROM books;
+		`,
+	)
+	fmt.Printf("ЗАПРОС LOANS ПОСЛЕ КЛИРА: %+v ", rows.RawValues())
+	rows.Close()
+
+	_, err = pool.Exec(
+		ctx,
+		`
+		SELECT setval('loans_id_seq', 1, false);
+		`,
+	)
+
+	if err != nil {
+		t.Fatalf("failed to set id counter %v", err)
 	}
 
 	_, err = pool.Exec(
@@ -159,4 +263,15 @@ func SeedLoans(t *testing.T, pool *pgxpool.Pool) {
 	if err != nil {
 		t.Fatalf("failed to set id counter %v", err)
 	}
+
+	rows, err = pool.Query(
+		ctx,
+		`
+		SELECT 
+			id, title, author, year, available 
+		FROM books;
+		`,
+	)
+	fmt.Printf("ЗАПРОС LOANS ПОСЛЕ ВСТАВКИ: %+v ", rows.RawValues())
+	rows.Close()
 }

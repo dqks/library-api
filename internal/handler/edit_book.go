@@ -69,10 +69,6 @@ func EditBookByID(s BookService) func(w http.ResponseWriter, r *http.Request) {
 
 				slog.Error(
 					"edit book error",
-					"body_title", *body.Title,
-					"body_author", *body.Author,
-					"body_year", *body.Year,
-					"body_available", *body.Available,
 					"book_id", id,
 					"err", err,
 				)

@@ -25,7 +25,7 @@ func Get(prod bool) (*Config, error) {
 	env := findDotEnv(currentDir)
 	dsn, err := GetEnvVar(env, "DATABASE_URL")
 
-	if err != nil {
+	if err != nil && prod {
 		return nil, err
 	}
 

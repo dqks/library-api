@@ -31,6 +31,9 @@ func CreateBook(s BookService) func(w http.ResponseWriter, r *http.Request) {
 		default:
 			var body CreateBookBody
 			decoder := json.NewDecoder(r.Body)
+
+			fmt.Println("после decoder := json.NewDecoder(r.Body)")
+
 			decoder.DisallowUnknownFields()
 
 			if err := decoder.Decode(&body); err != nil {
@@ -60,10 +63,6 @@ func CreateBook(s BookService) func(w http.ResponseWriter, r *http.Request) {
 
 				slog.Error(
 					"create book error",
-					"body_title", *body.Title,
-					"body_author", *body.Author,
-					"body_year", *body.Year,
-					"body_available", *body.Available,
 					"err", err,
 				)
 
