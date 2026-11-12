@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"library-api/internal/apperrors"
 	"log/slog"
 	"net/http"
 
@@ -17,6 +18,11 @@ func Ready(pool *pgxpool.Pool) func(w http.ResponseWriter, req *http.Request) {
 		ctx := req.Context()
 		w.Header().Add("Content-Type", "application/json")
 		err := pool.Ping(ctx)
+		if err != nil {
+			w.WriteHeader(apperrors.ErrInternalCode)
+		} else {
+			w.WriteHeader(200)
+		}
 		encoder := json.NewEncoder(w)
 		if err := encoder.Encode(readyResponse{Error: err}); err != nil {
 			slog.Error(

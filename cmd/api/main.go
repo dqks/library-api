@@ -46,6 +46,7 @@ func main() {
 		)
 		return
 	}
+	defer pool.Close()
 
 	pgRepo := postgres.Create(pool)
 
